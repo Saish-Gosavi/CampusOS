@@ -7,20 +7,22 @@
 ---
 
 ## 1. Vision Statement
-*For educational institutions that struggle with manual hostel operations, HostelHub is a centralized hostel management platform that simplifies student accommodation, room allocation, fee management, attendance, complaints, visitor management, and communication. Unlike traditional paper-based systems or disconnected software, HostelHub provides a secure, organized, and efficient digital solution for students, wardens, administrators, and hostel management.*
+
+For educational institutions that struggle with manual hostel operations, HostelHub is a centralized hostel management platform that simplifies student accommodation, room allocation, fee management, attendance, complaints, visitor management, and communication. Unlike traditional paper-based systems or disconnected software, HostelHub provides a secure, organized, and efficient digital solution for students, wardens, administrators, and hostel management.
 
 ---
 
 ## 2. Problem Statement
-*Many educational institutions still rely on manual registers, spreadsheets, or disconnected software to manage hostel operations. This results in inefficient room allocation, delayed complaint resolution, poor communication, inaccurate attendance records, and increased administrative workload.*
 
-*Who feels this pain most?*
+Many educational institutions still rely on manual registers, spreadsheets, or disconnected software to manage hostel operations. This results in inefficient room allocation, delayed complaint resolution, poor communication, inaccurate attendance records, and increased administrative workload.
+
+**Who feels this pain most?**
 -Hostel Administrators
 -Wardens
 -Students
 -Security Staff
 
-*Evidence / Proof Points*
+**Evidence / Proof Points**
 -Manual room allocation leads to allocation errors and occupancy confusion.
 -Complaint tracking is often done manually, causing delays in resolution.
 -Student entry/exit records are maintained in physical registers, making monitoring difficult.
@@ -29,20 +31,21 @@
 ---
 
 ## 3. Target User
-*Primary User*
+
+**Primary User:**
 Hostel Administrator
 
-*Their Context*
+**Their Context**
 
 Responsible for managing hostel operations, room allocation, student records, fees, complaints, and overall hostel administration.
 
-*Current Workaround / Competitor*
+**Current Workaround / Competitor**
 -Manual registers
 -Microsoft Excel
 -Existing Hostel ERP solutions
 -Paper-based attendance and visitor logs
 
-*Who we are NOT building for (yet)*
+**Who we are NOT building for (yet)**
 -PG Hostels
 -Hotels
 -Apartment Management
@@ -63,19 +66,20 @@ Responsible for managing hostel operations, room allocation, student records, fe
 ---
 
 ## 5. Differentiator
-*Existing Alternatives*
+
+**Existing Alternatives**
 -Manual hostel management
 -Excel sheets
 -Generic hostel management software
 
-*Why They Fall Short*
+**Why They Fall Short**
 -Limited transparency
 -Time-consuming processes
 -Poor communication
 -Difficult report generation
 -Lack of centralized data
 
-*Our Unique Advantage*
+**Our Unique Advantage**
 -Role-Based Management (Super Admin, Admin, Warden, Student, Security)
 -Centralized hostel operations
 -Digital In/Out Management
@@ -118,20 +122,20 @@ Responsible for managing hostel operations, room allocation, student records, fe
 
 ## 7. Feature Finalization
 
-*Core Features (MVP)*
+**Core Features (MVP)**
 
-*Authentication*
+**Authentication**
 _Login
 -Forgot Password
 -Change Password
 -Role-Based Access
 
-*Super Admin*
+**Super Admin**
 -Admin Management
 -Hostel Management
 -User Management
 
-*Admin*
+**Admin**
 -Student Management
 -Room Allocation
 -Staff Management
@@ -140,7 +144,7 @@ _Login
 -Notice Board
 -Reports & Analytics
 
-*Warden*
+**Warden**
 -Dashboard
 -Leave Approval
 -Room Inspection
@@ -154,7 +158,7 @@ _Login
 -Student Records
 -Emergency Contacts
 
-*Student*
+**Student**
 -Dashboard
 -Profile Management
 -Room Details
@@ -168,24 +172,24 @@ _Login
 -Room Change Request
 -Emergency Contacts
 
-*Security*
+**Security**
 -QR Code Scanner
 -In/Out Entry Management
 
-*Reports*
+**Reports**
 -Occupancy Report
 -Fee Report
 -Complaint Report
 -Attendance Report
 -Visitor Report
 
-*Notifications*
+**Notifications**
 -Fees
 -Complaints
 -Leave Approval
 -Visitor Approval
 
-*Notices*
+**Notices**
 -Room Changes
 Search & Filter
 -Search Students
@@ -197,12 +201,12 @@ Search & Filter
 
 ## 8. Phase Themes (Not a Detailed Roadmap)
 
-| Phase   | Days        | Theme                                                  |
-| ------- | ----------- | ------------------------------------------------------ |
-| Phase 1 | Day 1 – 7   | Research, Requirement Analysis & Database Design       |
-| Phase 2 | Day 8 – 15  | Authentication, Super Admin & Admin Module Development |
-| Phase 3 | Day 16 – 23 | Warden, Student & Security Module Development          |
-| Phase 4 | Day 24 – 30 | Testing, Reports, Documentation & Deployment           |
+| Phase   | Days                 | Theme                                                         |
+|---------|----------------------|---------------------------------------------------------------|
+| Phase 1 | 06 July – 12 July    | Research, Requirement Analysis, UI Planning & PVD Preparation |
+| Phase 2 | 13 July – 19 July    | UI/UX Design (Super Admin, Admin, Warden, Student & Security) |
+| Phase 3 | 20 July – 31 July    | Frontend, Backend & Database Development                      |
+| Phase 4 | 1 Aug – 6 Aug        | Testing, Documentation, Final Review & Deployment             |
 
 
 ---
@@ -223,7 +227,7 @@ Search & Filter
 
 ## 10. Research References (NEW)
 
-*Existing Products*
+Existing Products
 
 -HostelSnap
 -Smart School Hostel Management
@@ -231,7 +235,7 @@ Search & Filter
 -HostelMate
 -Hostel Management ERP Solutions
 
-*Research Sources*
+Research Sources
 
 -Official product websites
 -Educational institution hostel workflows
@@ -243,9 +247,9 @@ Search & Filter
 
 | Member  | Role                 | Responsibility                           |
 | ------- | -------------------- | ---------------------------------------- |
-| Pradnya | Full Stack Developer | Authentication, Student Module, Research |
-| Tarun   | Full Stack Developer | Admin Module & Database                  |
-| Nivita  | Full Stack Developer | Warden Module, Workflow Navigation       |
+| Pradnya | Full Stack Developer | Authentication, Admin Module, Research   |
+| Tarun   | Full Stack Developer | Student Module & Database                |
+| Nivita  | Full Stack Developer | Warden Module, UI Workflow Navigation    |
 | Saish   | Full Stack Developer | Security, Reports & Analytics            |
 | Aryan   | Full Stack Developer | Super Admin, Integration & Testing       |
 
