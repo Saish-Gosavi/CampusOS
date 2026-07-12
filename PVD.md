@@ -125,7 +125,7 @@ Responsible for managing hostel operations, room allocation, student records, fe
 **Core Features (MVP)**
 
 **Authentication**
-_Login
+-Login
 -Forgot Password
 -Change Password
 -Role-Based Access
