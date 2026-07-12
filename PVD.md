@@ -106,7 +106,7 @@ Responsible for managing hostel operations, room allocation, student records, fe
 
 - APIs / Third-party Services
   1. Email Api
-  2. QR Code Generator & Scanner\
+  2. QR Code Generator & Scanner
   3. Groq API
 
 - Hosting / Deployment
