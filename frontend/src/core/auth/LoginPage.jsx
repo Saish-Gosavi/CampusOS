@@ -42,31 +42,32 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-950 px-4 font-sans text-slate-100">
-      <div className="w-full max-w-md bg-slate-900/60 backdrop-blur-md p-8 rounded-2xl border border-slate-800 shadow-2xl">
+    <div className="flex items-center justify-center min-h-screen bg-brand-bg px-4 font-sans text-brand-text">
+      <div className="w-full max-w-md bg-brand-card p-8 rounded-2xl border border-slate-200 shadow-xl">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+          {/* Brand navigation start to end colors simulated on title */}
+          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-brand-nav-start to-brand-nav-end bg-clip-text text-transparent">
             College Portal
           </h2>
-          <p className="text-sm text-slate-400 mt-2">Single Sign-On Authentication Interface</p>
+          <p className="text-sm text-brand-muted mt-2">Single Sign-On Authentication Interface</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
               Select Simulated Identity
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
                 <Users size={18} />
               </span>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-slate-200 outline-none appearance-none transition-all cursor-pointer"
+                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-sm text-brand-text outline-none appearance-none transition-all cursor-pointer"
               >
                 {rolesList.map((r) => (
-                  <option key={r.value} value={r.value} className="bg-slate-900 text-slate-200">
+                  <option key={r.value} value={r.value} className="bg-white text-brand-text">
                     {r.label}
                   </option>
                 ))}
@@ -75,42 +76,42 @@ const LoginPage = () => {
           </div>
 
           <div className="relative opacity-60 pointer-events-none">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
               Email Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
                 <Mail size={18} />
               </span>
               <input
                 type="email"
                 disabled
                 placeholder={`${role}@college.edu`}
-                className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-400 outline-none"
+                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl text-sm text-brand-muted outline-none"
               />
             </div>
           </div>
 
           <div className="relative opacity-60 pointer-events-none">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
               Password
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
                 <Lock size={18} />
               </span>
               <input
                 type="password"
                 disabled
                 placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-400 outline-none"
+                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl text-sm text-brand-muted outline-none"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl shadow-lg shadow-blue-500/25 transition-all text-sm"
+            className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-medium rounded-xl shadow-lg shadow-brand-purple/20 transition-all text-sm cursor-pointer"
           >
             Authenticate Securely
           </button>
