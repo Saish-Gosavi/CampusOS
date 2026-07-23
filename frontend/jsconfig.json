@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@tanstack/react-router": ["./src/core/routing/compat.jsx"]
+    }
+  },
+  "include": ["src/**/*"]
+}

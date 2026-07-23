@@ -1,124 +1,165 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from './AuthContext';
-import { Lock, Mail, Users } from 'lucide-react';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { Mail, Lock, Users } from "lucide-react";
+import { toast } from "sonner";
+import { AuthLayout } from "@/components/auth/AuthLayout";
+import { TextField, PasswordField } from "@/components/auth/FormField";
+import { SubmitButton } from "@/components/auth/SubmitButton";
+import { authApi } from "@/lib/api";
+import { useAuth } from "./AuthContext";
 
-const LoginPage = () => {
-  const { login } = useAuth();
+export default function LoginPage() {
   const navigate = useNavigate();
-  const [role, setRole] = useState('superadmin');
+  const { login: setAuthUser } = useAuth();
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("superadmin");
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm({ defaultValues: { email: "", password: "", remember: true } });
 
   const rolesList = [
-    { value: 'superadmin', label: 'Super Admin (All Modules)' },
-    { value: 'warden', label: 'Warden (Hostel Module)' },
-    { value: 'librarian', label: 'Librarian (Library Module)' },
-    { value: 'store', label: 'Store Manager (Inventory Module)' },
-    { value: 'student', label: 'Student (Hostel & Library Modules)' },
+    { value: "superadmin", label: "Super Admin (All Modules)", email: "superadmin@college.edu" },
+    { value: "admin", label: "Admin", email: "admin@college.edu" },
+    { value: "warden", label: "Warden (Hostel)", email: "warden@college.edu" },
+    { value: "librarian", label: "Librarian (Library)", email: "librarian@college.edu" },
+    { value: "store", label: "Store Manager (Inventory)", email: "store@college.edu" },
+    { value: "student", label: "Student", email: "student@college.edu" },
   ];
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    
-    const mockUserData = {
-      id: 1,
-      name: role === 'superadmin' ? 'Super Admin User' : `${role.charAt(0).toUpperCase() + role.slice(1)} User`,
-      email: `${role}@college.edu`,
-      role: role
-    };
-    
-    const mockToken = 'mocked-jwt-token-string';
-    
-    login(mockUserData, mockToken);
-    
-    if (role === 'warden' || role === 'student') {
-      navigate('/hostel');
-    } else if (role === 'librarian') {
-      navigate('/library');
-    } else if (role === 'store') {
-      navigate('/inventory');
-    } else {
-      navigate('/hostel');
+  const handleRoleSelect = (roleVal) => {
+    setSelectedRole(roleVal);
+    const roleInfo = rolesList.find((r) => r.value === roleVal);
+    if (roleInfo) {
+      setValue("email", roleInfo.email);
+      setValue("password", "password");
+    }
+  };
+
+  const onSubmit = async (values) => {
+    setSubmitting(true);
+    try {
+      await authApi.login(values);
+      
+      // Determine user role based on email or the selected helper
+      let finalRole = selectedRole;
+      const lowerEmail = values.email.toLowerCase();
+      if (lowerEmail.includes("superadmin")) finalRole = "superadmin";
+      else if (lowerEmail.includes("warden")) finalRole = "warden";
+      else if (lowerEmail.includes("librarian")) finalRole = "librarian";
+      else if (lowerEmail.includes("store")) finalRole = "store";
+      else if (lowerEmail.includes("student")) finalRole = "student";
+      else if (lowerEmail.includes("admin")) finalRole = "admin";
+
+      const mockUserData = {
+        id: 1,
+        name: `${finalRole.charAt(0).toUpperCase() + finalRole.slice(1)} User`,
+        email: values.email,
+        role: finalRole,
+      };
+      
+      const mockToken = "mocked-jwt-token-string";
+      
+      setAuthUser(mockUserData, mockToken);
+      toast.success("Signed in successfully");
+
+      // Redirect based on role
+      if (finalRole === "librarian") {
+        navigate("/library");
+      } else if (finalRole === "store") {
+        navigate("/inventory");
+      } else {
+        navigate("/hostel");
+      }
+    } catch (err) {
+      toast.error("Unable to sign in. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-brand-bg px-4 font-sans text-brand-text">
-      <div className="w-full max-w-md bg-brand-card p-8 rounded-2xl border border-slate-200 shadow-xl">
-        <div className="text-center mb-8">
-          {/* Brand navigation start to end colors simulated on title */}
-          <h2 className="text-3xl font-extrabold bg-gradient-to-r from-brand-nav-start to-brand-nav-end bg-clip-text text-transparent">
-            College Portal
-          </h2>
-          <p className="text-sm text-brand-muted mt-2">Single Sign-On Authentication Interface</p>
+    <AuthLayout title="Sign in to your account" subtitle="Access your college portal with your credentials.">
+      {/* Dev helper to choose a role */}
+      <div className="mb-6 rounded-lg border border-border bg-muted/40 p-4">
+        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Simulate Role Login (Dev Helper)
+        </label>
+        <div className="relative">
+          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+            <Users className="h-4 w-4" />
+          </span>
+          <select
+            value={selectedRole}
+            onChange={(e) => handleRoleSelect(e.target.value)}
+            className="block w-full rounded-lg border border-input bg-background pl-10 pr-3 py-2 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary"
+          >
+            <option value="" disabled>Select a role...</option>
+            {rolesList.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <TextField
+          label="Email or College ID"
+          type="text"
+          autoComplete="username"
+          placeholder="name@college.edu"
+          leftIcon={<Mail className="h-4 w-4" />}
+          error={errors.email?.message}
+          {...register("email", {
+            required: "Email or College ID is required",
+            validate: (v) => {
+              if (!v.includes("@")) return true;
+              return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || "Enter a valid email address";
+            },
+          })}
+        />
+
+        <PasswordField
+          label="Password"
+          autoComplete="current-password"
+          placeholder="••••••••"
+          leftIcon={<Lock className="h-4 w-4" />}
+          error={errors.password?.message}
+          {...register("password", { required: "Password is required" })}
+        />
+
+        <div className="flex items-center justify-between">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-input text-primary focus:ring-primary/30"
+              {...register("remember")}
+            />
+            Remember me
+          </label>
+          <Link
+            to="/forgot-password"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
-              Select Simulated Identity
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
-                <Users size={18} />
-              </span>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl focus:border-brand-purple focus:ring-1 focus:ring-brand-purple text-sm text-brand-text outline-none appearance-none transition-all cursor-pointer"
-              >
-                {rolesList.map((r) => (
-                  <option key={r.value} value={r.value} className="bg-white text-brand-text">
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        <SubmitButton loading={submitting} type="submit">
+          {submitting ? "Signing in…" : "Sign in"}
+        </SubmitButton>
 
-          <div className="relative opacity-60 pointer-events-none">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
-              Email Address
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
-                <Mail size={18} />
-              </span>
-              <input
-                type="email"
-                disabled
-                placeholder={`${role}@college.edu`}
-                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl text-sm text-brand-muted outline-none"
-              />
-            </div>
-          </div>
-
-          <div className="relative opacity-60 pointer-events-none">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-brand-muted mb-2">
-              Password
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-brand-muted">
-                <Lock size={18} />
-              </span>
-              <input
-                type="password"
-                disabled
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-brand-bg border border-slate-200 rounded-xl text-sm text-brand-muted outline-none"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full py-3 bg-brand-purple hover:bg-brand-purple/90 text-white font-medium rounded-xl shadow-lg shadow-brand-purple/20 transition-all text-sm cursor-pointer"
-          >
-            Authenticate Securely
-          </button>
-        </form>
-      </div>
-    </div>
+        <p className="text-center text-xs text-muted-foreground">
+          Don&apos;t have access?{" "}
+          <span className="font-medium text-foreground">Contact Administrator.</span>
+        </p>
+      </form>
+    </AuthLayout>
   );
-};
-
-export default LoginPage;
+}
