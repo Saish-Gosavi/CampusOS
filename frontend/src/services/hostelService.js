@@ -1,0 +1,2 @@
+// hostelService.js
+export {};

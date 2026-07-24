@@ -1,0 +1,2 @@
+// inventoryService.js
+export {};

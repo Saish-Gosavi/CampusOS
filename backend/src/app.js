@@ -1,40 +1,71 @@
-const express = require('express');
-const cors = require('cors');
-const errorHandler = require('./middleware/errorHandler');
-const AppError = require('./utils/AppError');
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import path from "path";
 
-// Module Routes
-const hostelRouter = require('./modules/hostel/routes');
-const libraryRouter = require('./modules/library/routes');
-const inventoryRouter = require('./modules/inventory/routes');
+// Import Custom Middlewares
+import notFoundMiddleware from "./middleware/notFound.middleware.js";
+import errorMiddleware from "./middleware/error.middleware.js";
+
+// Import Routers
+import authRouter from "./modules/auth/routes/auth.routes.js";
+import usersRouter from "./modules/users/routes/users.routes.js";
+import rolesRouter from "./modules/roles/routes/roles.routes.js";
+import hostelRouter from "./modules/hostel/routes.js";
+import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
 
 const app = express();
 
-// Standard request parsers & security middlewares
-app.use(cors());
+// 1. Security Headers
+app.use(helmet());
+
+// 2. CORS configurations
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "*",
+  credentials: true,
+}));
+
+// 3. Logger configurations (Only log format in dev)
+if (process.env.NODE_ENV !== "production") {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined"));
+}
+
+// 4. Gzip Compression
+app.use(compression());
+
+// 5. Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Core Health Check
-app.get('/api/health', (req, res) => {
+// 6. Serve static files from uploads folder
+app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
   res.status(200).json({
-    status: 'success',
+    success: true,
     timestamp: new Date().toISOString(),
-    message: 'College Management Portal Backend is healthy.'
+    message: "CampusOS Portal Backend is healthy.",
   });
 });
 
-// Mount module routers
-app.use('/api/v1/hostel', hostelRouter);
-app.use('/api/v1/library', libraryRouter);
-app.use('/api/v1/inventory', inventoryRouter);
+// Register routers
+app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/roles", rolesRouter);
+app.use("/api/hostel", hostelRouter);
+app.use("/api/dashboard", dashboardRouter);
 
-// Undefined API handler
-app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
-});
+// 7. Undefined route handling (404)
+app.use(notFoundMiddleware);
 
-// Centralized error handler
-app.use(errorHandler);
+// 8. Global exception handling (500)
+app.use(errorMiddleware);
 
-module.exports = app;
+export default app;

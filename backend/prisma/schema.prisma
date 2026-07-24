@@ -9,8 +9,379 @@ datasource db {
   provider = "mysql"
 }
 
+// ==========================================
+// 1. Role-Based Access Control (RBAC)
+// ==========================================
+
+model Role {
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
+  description String?
+  users       User[]
+  permissions RolesOnPermissions[]
+}
+
+model Permission {
+  id          Int                 @id @default(autoincrement())
+  name        String              @unique
+  description String?
+  roles       RolesOnPermissions[]
+}
+
+model RolesOnPermissions {
+  roleId       Int
+  permissionId Int
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+// ==========================================
+// 2. User & Core Profile Accounts
+// ==========================================
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id                Int                @id @default(autoincrement())
+  email             String             @unique
+  password          String
+  name              String?
+  roleId            Int
+  role              Role               @relation(fields: [roleId], references: [id])
+  hostelId          Int?
+  hostel            Hostel?            @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  status            String             @default("active") // "active", "suspended"
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  // Profile extensions
+  studentProfile    Student?
+  wardenProfile     Warden?
+  securityProfile   SecurityStaff?
+  
+  // Audits & Utilities
+  notifications     Notification[]
+  auditLogs         AuditLog[]
+  inventoryRequests InventoryRequest[]
+
+  @@index([roleId])
+  @@index([hostelId])
+  @@index([resetToken])
+}
+
+// ==========================================
+// 3. Hostel Setup & Hierarchy
+// ==========================================
+
+model Hostel {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  city         String?
+  status       String   @default("Active") // "Active", "Pending", "Inactive"
+  address      String?
+  hasHostel    Boolean  @default(true)
+  hasLibrary   Boolean  @default(true)
+  hasInventory Boolean  @default(true)
+  users        User[]
+  blocks       Block[]
+  wardens      Warden[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+}
+
+model Block {
+  id       Int      @id @default(autoincrement())
+  name     String
+  hostelId Int
+  hostel   Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  floors   Floor[]
+
+  @@index([hostelId])
+}
+
+model Floor {
+  id      Int    @id @default(autoincrement())
+  number  Int
+  blockId Int
+  block   Block  @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  rooms   Room[]
+
+  @@index([blockId])
+}
+
+model Room {
+  id        Int         @id @default(autoincrement())
+  number    String
+  floorId   Int
+  floor     Floor       @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  capacity  Int
+  rent      Decimal     @db.Decimal(10, 2)
+  beds      Bed[]
+  furniture Furniture[]
+
+  @@index([floorId])
+}
+
+model Bed {
+  id          Int          @id @default(autoincrement())
+  number      String
+  roomId      Int
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  allocations Allocation[]
+
+  @@index([roomId])
+}
+
+// ==========================================
+// 4. Role Profiles
+// ==========================================
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @unique
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName    String
+  phone       String
+  collegeId   String       @unique
+  allocations Allocation[]
+  leaves      LeaveRequest[]
+  complaints  Complaint[]
+  visitors    Visitor[]
+  fees        Fee[]
+  bookIssues  BookIssue[]
+  reservations Reservation[]
+  attendance  Attendance[]
+
+  @@index([userId])
+}
+
+model Warden {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName String
+  phone    String
+  hostelId Int
+  hostel   Hostel @relation(fields: [hostelId], references: [id])
+
+  @@index([userId])
+  @@index([hostelId])
+}
+
+model SecurityStaff {
+  id       Int    @id @default(autoincrement())
+  userId   Int    @unique
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName String
+  phone    String
+
+  @@index([userId])
+}
+
+// ==========================================
+// 5. Hostel Actions & Operations
+// ==========================================
+
+model Allocation {
+  id        Int      @id @default(autoincrement())
+  bedId     Int
+  bed       Bed      @relation(fields: [bedId], references: [id], onDelete: Restrict)
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("active") // "active", "completed", "cancelled"
+
+  @@index([bedId])
+  @@index([studentId])
+}
+
+model LeaveRequest {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reason    String
+  startDate DateTime
+  endDate   DateTime
+  status    String   @default("pending") // "pending", "approved", "rejected"
+
+  @@index([studentId])
+}
+
+model Complaint {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  category    String
+  priority    String   @default("medium") // "low", "medium", "high"
+  status      String   @default("open") // "open", "assigned", "resolved", "closed"
+  createdAt   DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model Visitor {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  fullName     String
+  relationship String
+  checkIn      DateTime
+  checkOut     DateTime?
+  status       String   @default("pending") // "pending", "approved", "rejected", "checked-in", "checked-out"
+
+  @@index([studentId])
+}
+
+model Furniture {
+  id     Int    @id @default(autoincrement())
+  name   String
+  roomId Int
+  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  status String @default("good") // "good", "damaged", "under-maintenance"
+
+  @@index([roomId])
+}
+
+model Fee {
+  id          Int       @id @default(autoincrement())
+  studentId   Int
+  student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  amount      Decimal   @db.Decimal(10, 2)
+  dueDate     DateTime
+  status      String    @default("unpaid") // "unpaid", "paid", "overdue"
+  paymentDate DateTime?
+
+  @@index([studentId])
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      DateTime
+  present   Boolean
+  remarks   String?
+
+  @@index([studentId])
+}
+
+// ==========================================
+// 6. Library Management
+// ==========================================
+
+model Book {
+  id           Int           @id @default(autoincrement())
+  title        String
+  author       String
+  isbn         String        @unique
+  copiesCount  Int           @default(1)
+  issues       BookIssue[]
+  reservations Reservation[]
+}
+
+model BookIssue {
+  id         Int       @id @default(autoincrement())
+  bookId     Int
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  studentId  Int
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  issueDate  DateTime  @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  fineAmount Decimal   @default(0.00) @db.Decimal(10, 2)
+
+  @@index([bookId])
+  @@index([studentId])
+}
+
+model Reservation {
+  id              Int      @id @default(autoincrement())
+  bookId          Int
+  book            Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  studentId       Int
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reservationDate DateTime @default(now())
+  status          String   @default("pending") // "pending", "fulfilled", "expired"
+
+  @@index([bookId])
+  @@index([studentId])
+}
+
+// ==========================================
+// 7. Inventory Management
+// ==========================================
+
+model Supplier {
+  id          Int             @id @default(autoincrement())
+  name        String          @unique
+  contactInfo String?
+  items       InventoryItem[]
+}
+
+model Category {
+  id    Int             @id @default(autoincrement())
+  name  String          @unique
+  items InventoryItem[]
+}
+
+model InventoryItem {
+  id         Int                @id @default(autoincrement())
+  name       String
+  categoryId Int
+  category   Category           @relation(fields: [categoryId], references: [id])
+  supplierId Int
+  supplier   Supplier           @relation(fields: [supplierId], references: [id])
+  stockCount Int                @default(0)
+  requests   InventoryRequest[]
+
+  @@index([categoryId])
+  @@index([supplierId])
+}
+
+model InventoryRequest {
+  id          Int           @id @default(autoincrement())
+  itemId      Int
+  item        InventoryItem @relation(fields: [itemId], references: [id])
+  requestedById Int
+  requestedBy User          @relation(fields: [requestedById], references: [id])
+  quantity    Int
+  status      String        @default("pending") // "pending", "approved", "rejected"
+
+  @@index([itemId])
+  @@index([requestedById])
+}
+
+// ==========================================
+// 8. System Audits & Utilities
+// ==========================================
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

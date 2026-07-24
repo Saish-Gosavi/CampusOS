@@ -11,8 +11,13 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
+      '@/lib/utils': path.resolve(__dirname, './src/utils/cn.js'),
+      '@/components/auth/AuthLayout': path.resolve(__dirname, './src/layouts/AuthLayout.jsx'),
+      '@/components/auth/FormField': path.resolve(__dirname, './src/components/common/Input.jsx'),
+      '@/components/auth/SubmitButton': path.resolve(__dirname, './src/components/common/Button.jsx'),
+      '@/lib/api': path.resolve(__dirname, './src/services/api.js'),
+      '@tanstack/react-router': path.resolve(__dirname, './src/routes/compat.jsx'),
       '@': path.resolve(__dirname, './src'),
-      '@tanstack/react-router': path.resolve(__dirname, './src/core/routing/compat.jsx'),
     },
   },
 })

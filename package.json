@@ -1,0 +1,12 @@
+{
+  "name": "campusos-portal",
+  "version": "1.0.0",
+  "description": "CampusOS Portal - Hostel, Library and Inventory Management System",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install --prefix frontend && npm install --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "build:frontend": "npm run build --prefix frontend"
+  }
+}

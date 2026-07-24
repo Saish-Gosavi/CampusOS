@@ -1,0 +1,2 @@
+// studentService.js
+export {};

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Bell,
   Search,
@@ -24,11 +24,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+
 const notifications = [
-  { icon: CheckCircle2, tint: "#22C55E", title: "New college onboarded", meta: "VPPCOE \u2014 2 min ago" },
-  { icon: Megaphone, tint: "#EAB308", title: "Notice published", meta: "Semester update \u2014 1 hr ago" },
-  { icon: AlertCircle, tint: "#EF4444", title: "Storage nearing limit", meta: "Aurora Store \u2014 3 hr ago" }
+  { icon: CheckCircle2, tint: "#22C55E", title: "New college onboarded", meta: "VPPCOE — 2 min ago" },
+  { icon: Megaphone, tint: "#EAB308", title: "Notice published", meta: "Semester update — 1 hr ago" },
+  { icon: AlertCircle, tint: "#EF4444", title: "Storage nearing limit", meta: "Aurora Store — 3 hr ago" }
 ];
+
 function useDarkMode() {
   const [isDark, setIsDark] = useState(false);
   useEffect(() => {
@@ -47,35 +50,52 @@ function useDarkMode() {
   };
   return { isDark, toggle };
 }
+
 function AdminNavbar() {
   const { isDark, toggle } = useDarkMode();
-  return <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "SA";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  return (
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
       <SidebarTrigger className="text-muted-foreground" />
       <Separator orientation="vertical" className="mx-1 h-6" />
 
       <div className="relative hidden max-w-md flex-1 md:block">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-    placeholder="Search colleges, admins, activity..."
-    className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-[#2563EB]"
-  />
+          placeholder="Search colleges, admins, activity..."
+          className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-[#2563EB]"
+        />
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-1 md:flex-none">
         <button
-    onClick={toggle}
-    aria-label="Toggle theme"
-    className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-  >
+          onClick={toggle}
+          aria-label="Toggle theme"
+          className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-    aria-label="Notifications"
-    className="relative grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-  >
+              aria-label="Notifications"
+              className="relative grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
               <Bell className="h-4 w-4" />
               <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#EF4444] ring-2 ring-card" />
             </button>
@@ -88,18 +108,20 @@ function AdminNavbar() {
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {notifications.map((n) => <DropdownMenuItem key={n.title} className="gap-3 py-3">
+            {notifications.map((n) => (
+              <DropdownMenuItem key={n.title} className="gap-3 py-3">
                 <span
-    className="grid h-9 w-9 shrink-0 place-items-center rounded-lg"
-    style={{ backgroundColor: `${n.tint}1A`, color: n.tint }}
-  >
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg"
+                  style={{ backgroundColor: `${n.tint}1A`, color: n.tint }}
+                >
                   <n.icon className="h-4 w-4" />
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{n.title}</p>
                   <p className="truncate text-xs text-muted-foreground">{n.meta}</p>
                 </div>
-              </DropdownMenuItem>)}
+              </DropdownMenuItem>
+            ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="justify-center text-sm font-medium text-[#2563EB]">
               View all notifications
@@ -111,11 +133,11 @@ function AdminNavbar() {
           <DropdownMenuTrigger asChild>
             <button className="ml-1 flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition-colors hover:bg-muted">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#7B4CED] text-sm font-semibold text-white">
-                SA
+                {getInitials(user?.name)}
               </span>
               <span className="hidden text-left leading-tight sm:block">
-                <span className="block text-sm font-semibold text-foreground">Super Admin</span>
-                <span className="block text-xs text-muted-foreground">admin@vppcoe.edu</span>
+                <span className="block text-sm font-semibold text-foreground">{user?.name || "Super Admin"}</span>
+                <span className="block text-xs text-muted-foreground">{user?.email || "admin@campusos.com"}</span>
               </span>
               <ChevronDown className="hidden h-4 w-4 text-muted-foreground sm:block" />
             </button>
@@ -134,16 +156,14 @@ function AdminNavbar() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="text-[#EF4444] focus:text-[#EF4444]">
-              <Link to="/login">
-                <LogOut className="mr-2 h-4 w-4" /> Logout
-              </Link>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-[#EF4444] focus:text-[#EF4444]">
+              <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-    </header>;
+    </header>
+  );
 }
-export {
-  AdminNavbar
-};
+
+export { AdminNavbar };
