@@ -1,4 +1,4 @@
-# Admin - Fee Management
+# Admin - Room Management
 
 | Field | Value |
 |--------|--------|
@@ -8,11 +8,11 @@
 
 ## Cross-cutting
 
-Add, edit, delete, and manage Fee Management. This feature handles the core business logic for Fee Management within the Admin domain. It requires strict RBAC enforcement for the Admin role and audit logging of all significant actions.
+Add, edit, delete, and manage Room Management. This feature handles the core business logic for Room Management within the Admin domain. It requires strict RBAC enforcement for the Admin role and audit logging of all significant actions.
 
 ## Sub-modules & Goals
 
-1. **Primary Interface**: Provide UI/API for Fee Management.
+1. **Primary Interface**: Provide UI/API for Room Management.
 2. **Validation**: Ensure data integrity and business rules are met.
 3. **Logging**: Record actions for audit.
 
@@ -26,5 +26,5 @@ Add, edit, delete, and manage Fee Management. This feature handles the core busi
 
 ## API Checklist
 
-- [ ] GET /api/admin/fee-management
-- [ ] POST /api/admin/fee-management
+- [ ] GET /api/admin/room-management
+- [ ] POST /api/admin/room-management

@@ -1,14 +1,14 @@
-# Admin - Fee Management
+# Student - Fee Management
 
 | Field | Value |
 |--------|--------|
-| Role | Admin |
+| Role | Student |
 | Phase | TBD |
 | Depends on | Authentication_Role_Based_Access |
 
 ## Cross-cutting
 
-Add, edit, delete, and manage Fee Management. This feature handles the core business logic for Fee Management within the Admin domain. It requires strict RBAC enforcement for the Admin role and audit logging of all significant actions.
+Add, edit, delete, and manage Fee Management. This feature handles the core business logic for Fee Management within the Student domain. It requires strict RBAC enforcement for the Student role and audit logging of all significant actions.
 
 ## Sub-modules & Goals
 
@@ -26,5 +26,5 @@ Add, edit, delete, and manage Fee Management. This feature handles the core busi
 
 ## API Checklist
 
-- [ ] GET /api/admin/fee-management
-- [ ] POST /api/admin/fee-management
+- [ ] GET /api/student/fee-management
+- [ ] POST /api/student/fee-management
