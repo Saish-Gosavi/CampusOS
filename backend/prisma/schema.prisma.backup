@@ -1,0 +1,56 @@
+// Prisma Schema — CampusOS Hostel Management System
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─────────────────────────────────────────
+// HOSTEL DATABASE
+// ─────────────────────────────────────────
+
+model Hostel {
+  id        Int         @id @default(autoincrement())
+  name      String      @db.VarChar(100)
+  address   String?     @db.Text
+  type      HostelType
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  blocks    HostelBlock[]
+
+  @@map("hostels")
+}
+
+model HostelBlock {
+  id          Int              @id @default(autoincrement())
+  hostelId    Int              @map("hostel_id")
+  blockName   String           @db.VarChar(50) @map("block_name")
+  totalFloors Int              @default(1) @map("total_floors")
+
+  hostel      Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  capacities  HostelCapacity[]
+
+  @@map("hostel_blocks")
+}
+
+model HostelCapacity {
+  id              Int         @id @default(autoincrement())
+  blockId         Int         @map("block_id")
+  totalRooms      Int         @map("total_rooms")
+  capacityPerRoom Int         @map("capacity_per_room")
+
+  block           HostelBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+
+  @@map("hostel_capacities")
+}
+
+enum HostelType {
+  boys
+  girls
+  co_ed
+}

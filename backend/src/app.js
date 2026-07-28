@@ -59,6 +59,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/roles", rolesRouter);
+app.use("/api/super_admin", rolesRouter);
 app.use("/api/hostel", hostelRouter);
 app.use("/api/dashboard", dashboardRouter);
 

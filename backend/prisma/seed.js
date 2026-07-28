@@ -1,30 +1,22 @@
 import "dotenv/config";
-import mariadb from "mariadb";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-// Test raw connection first
-const conn = await mariadb.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "root",
-  database: "hostel_management",
-});
-console.log("✅ Raw connection works");
-await conn.end();
+function parseDatabaseUrl(url) {
+  const parsed = new URL(url);
+  return {
+    host: parsed.hostname || "localhost",
+    port: Number(parsed.port) || 3306,
+    user: decodeURIComponent(parsed.username) || "root",
+    password: decodeURIComponent(parsed.password) || "",
+    database: parsed.pathname.replace("/", "") || "campusos",
+    connectionLimit: 5,
+  };
+}
 
-// Setup Prisma with PrismaMariaDb adapter
-const adapter = new PrismaMariaDb({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "root",
-  database: "hostel_management",
-  connectionLimit: 5,
-});
-
+const dbConfig = parseDatabaseUrl(process.env.DATABASE_URL);
+const adapter = new PrismaMariaDb(dbConfig);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
@@ -114,7 +106,11 @@ async function main() {
 
   await prisma.user.upsert({
     where: { email: "admin@campusos.com" },
-    update: {},
+    update: {
+      password: hashedPassword,
+      roleId: superadminRole.id,
+      status: "active",
+    },
     create: {
       email: "admin@campusos.com",
       password: hashedPassword,
