@@ -7,6 +7,10 @@ export class RolesRepository {
     });
   }
 
+  static async findAllPermissions() {
+    return prisma.permission.findMany();
+  }
+
   static async findById(id) {
     return prisma.role.findUnique({
       where: { id: Number(id) },

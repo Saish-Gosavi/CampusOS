@@ -11,6 +11,15 @@ export class RolesController {
     }
   }
 
+  static async getAllPermissions(req, res, next) {
+    try {
+      const permissions = await RolesService.getAllPermissions();
+      return apiResponse.success(res, permissions, "Permissions list retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getRoleById(req, res, next) {
     try {
       const role = await RolesService.getRoleById(req.params.id);

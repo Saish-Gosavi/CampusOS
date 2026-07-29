@@ -6,6 +6,10 @@ export class RolesService {
     return RolesRepository.findAll();
   }
 
+  static async getAllPermissions() {
+    return RolesRepository.findAllPermissions();
+  }
+
   static async getRoleById(id) {
     const role = await RolesRepository.findById(id);
     if (!role) {

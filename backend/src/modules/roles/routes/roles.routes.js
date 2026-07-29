@@ -13,6 +13,10 @@ router
   .post(authenticate, authorize("superadmin"), validate(createRoleSchema), RolesController.createRole);
 
 router
+  .route("/permissions")
+  .get(authenticate, authorize("superadmin"), RolesController.getAllPermissions);
+
+router
   .route("/:id")
   .get(authenticate, authorize("superadmin"), RolesController.getRoleById)
   .put(authenticate, authorize("superadmin"), validate(updateRoleSchema), RolesController.updateRole)
