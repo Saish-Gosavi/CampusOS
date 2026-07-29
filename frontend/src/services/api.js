@@ -180,3 +180,25 @@ export const collegeApi = {
     return apiClient.delete(`/hostel/hostels/${collegeId}/admins/${userId}`);
   }
 };
+
+export const rolesApi = {
+  async getAll() {
+    return apiClient.get("/super_admin/roles-and-permissions");
+  },
+  async getPermissions() {
+    return apiClient.get("/super_admin/roles-and-permissions/permissions");
+  },
+  async getById(id) {
+    return apiClient.get(`/super_admin/roles-and-permissions/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/super_admin/roles-and-permissions", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/super_admin/roles-and-permissions/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/super_admin/roles-and-permissions/${id}`);
+  }
+};
+

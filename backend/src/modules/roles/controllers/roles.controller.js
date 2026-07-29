@@ -33,7 +33,7 @@ export class RolesController {
     try {
       const userContext = { id: req.user?.id, ipAddress: req.ip };
       const role = await RolesService.createRole(req.body, userContext);
-      return apiResponse.created(res, role, "Role created successfully");
+      return apiResponse.success(res, role, "Role created successfully", 201);
     } catch (error) {
       next(error);
     }
