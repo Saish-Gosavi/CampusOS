@@ -11,6 +11,15 @@ export class RolesController {
     }
   }
 
+  static async getRoleById(req, res, next) {
+    try {
+      const role = await RolesService.getRoleById(req.params.id);
+      return apiResponse.success(res, role, "Role retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async createRole(req, res, next) {
     try {
       const userContext = { id: req.user?.id, ipAddress: req.ip };

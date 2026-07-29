@@ -14,6 +14,20 @@ export class RolesRepository {
     });
   }
 
+  static async findByName(name) {
+    return prisma.role.findFirst({
+      where: { name: { equals: name } },
+    });
+  }
+
+  static async countPermissionsByIds(permissionIds) {
+    if (!permissionIds || permissionIds.length === 0) return 0;
+    const uniqueIds = [...new Set(permissionIds.map(Number))];
+    return prisma.permission.count({
+      where: { id: { in: uniqueIds } },
+    });
+  }
+
   static async createRoleWithPermissions({ name, description, permissionIds }, userId, ipAddress) {
     return prisma.$transaction(async (tx) => {
       const role = await tx.role.create({
