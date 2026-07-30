@@ -1,8 +1,11 @@
 import "dotenv/config";
 import mariadb from "mariadb";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "@prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb"; // Keep this as standard import
+import clientPkg from "@prisma/client";
+const { PrismaClient } = clientPkg; // Only this one needs the workaround
 import bcrypt from "bcryptjs";
+
+
 
 // Test raw connection first
 const conn = await mariadb.createConnection({
