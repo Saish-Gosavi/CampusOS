@@ -26,5 +26,10 @@ Add, edit, delete, and manage Roles And Permissions. This feature handles the co
 
 ## API Checklist
 
-- [ ] GET /api/super_admin/roles-and-permissions
-- [ ] POST /api/super_admin/roles-and-permissions
+- [x] GET /api/super_admin/roles-and-permissions
+- [x] POST /api/super_admin/roles-and-permissions
+- [x] GET /api/super_admin/roles-and-permissions/permissions
+- [x] GET /api/super_admin/roles-and-permissions/:id
+- [x] PUT /api/super_admin/roles-and-permissions/:id
+- [x] DELETE /api/super_admin/roles-and-permissions/:id
+
