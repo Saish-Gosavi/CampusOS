@@ -194,6 +194,7 @@ function HostelsPage() {
             No hostels match your filters.
           </div>}
       </div>
+        </>
       )}
     </div>;
 }
