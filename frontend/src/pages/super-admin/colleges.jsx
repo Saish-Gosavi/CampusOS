@@ -701,7 +701,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <tr>
                     <th className="px-4 py-2.5 font-medium">Name</th>
                     <th className="px-4 py-2.5 font-medium">Email</th>
-                    <th className="px-4 py-2.5 font-medium">Sector Role</th>
+                    <th className="px-4 py-2.5 font-medium">Role</th>
                     <th className="px-4 py-2.5 text-right font-medium">Action</th>
                   </tr>
                 </thead>
@@ -719,7 +719,13 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                         <td className="px-4 py-2.5 text-xs text-muted-foreground">{u.email}</td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 capitalize">
-                            {u.role?.name || "Admin"}
+                            {(() => {
+                              const rn = u.role?.name;
+                              if (rn === "admin") return "Hostel Admin";
+                              if (rn === "librarian") return "Library Admin";
+                              if (rn === "store") return "Inventory Admin";
+                              return rn || "Admin";
+                            })()}
                           </span>
                         </td>
                         <td className="px-4 py-2.5 text-right">
