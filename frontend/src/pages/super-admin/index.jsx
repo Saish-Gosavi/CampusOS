@@ -4,13 +4,9 @@ import {
   Building2,
   UserCog,
   ShieldCheck,
-  Megaphone,
-  DatabaseBackup,
-  ArrowRight,
-  Users,
   GraduationCap,
-  Activity as ActivityIcon,
-  ServerCog
+  Users,
+  Activity as ActivityIcon
 } from "lucide-react";
 import {
   Bar,
@@ -29,7 +25,6 @@ import {
 } from "recharts";
 import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
-import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
 import { useAuth } from "@/context/AuthContext";
@@ -48,14 +43,6 @@ const Route = createFileRoute("/super-admin/")({
 });
 
 const PIE_COLORS = ["#2563EB", "#7B4CED", "#3B82F6", "#22C55E", "#EAB308"];
-
-const quickActions = [
-  { title: "Create College", description: "Onboard a new institution", icon: Building2, tint: "#2563EB", to: "/super-admin/colleges" },
-  { title: "Create Admin", description: "Assign a module administrator", icon: UserCog, tint: "#7B4CED", to: "/super-admin/admins" },
-  { title: "Add Role", description: "Define permissions & scope", icon: ShieldCheck, tint: "#3B82F6", to: "/super-admin/roles" },
-  { title: "Global Notice", description: "Broadcast to all colleges", icon: Megaphone, tint: "#EAB308", to: "/super-admin/notices" },
-  { title: "System Backup", description: "Trigger platform backup", icon: DatabaseBackup, tint: "#22C55E", to: "/super-admin/system-health" }
-];
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -123,28 +110,6 @@ function DashboardPage() {
           <StatCard key={s.label} {...s} />
         ))}
       </div>
-
-      {/* Quick actions */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Quick Actions</h2>
-            <p className="text-xs text-muted-foreground">Platform-level tasks reserved for the Super Admin</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {quickActions.map((a) => (
-            <QuickActionCard
-              key={a.title}
-              title={a.title}
-              description={a.description}
-              icon={a.icon}
-              tint={a.tint}
-              onClick={() => navigate({ to: a.to })}
-            />
-          ))}
-        </div>
-      </section>
 
       {/* Charts row 1 */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
