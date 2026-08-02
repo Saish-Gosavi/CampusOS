@@ -24,6 +24,9 @@ import { Route as SuperAdminProfile } from "@/pages/super-admin/profile";
 import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 
+// College Admin Pages
+import { Route as CollegeAdminIndex } from "@/pages/admin/index";
+
 // Hostel Pages
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
@@ -138,7 +141,7 @@ const RootNavigator = () => {
   const role = user.role?.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
-  if (role === "admin") return <Navigate to="/hostel-admin" replace />;
+  if (role === "admin") return <Navigate to="/admin" replace />;
   if (role === "warden") return <Navigate to="/warden" replace />;
   if (role === "librarian") return <Navigate to="/library-admin" replace />;
   if (role === "store") return <Navigate to="/inventory-admin" replace />;
@@ -176,6 +179,18 @@ export default function AppRoutes() {
         <Route path="profile" element={<SuperAdminProfile.component />} />
         <Route path="audit-logs" element={<SuperAdminAuditLogs.component />} />
         <Route path="reports" element={<SuperAdminReports.component />} />
+      </Route>
+
+      {/* College Admin Dashboard Routes */}
+      <Route
+        path="/admin"
+        element={
+          <RoleRoute allowedRoles={["superadmin", "admin"]}>
+            <DashboardLayout />
+          </RoleRoute>
+        }
+      >
+        <Route index element={<CollegeAdminIndex.component />} />
       </Route>
 
       {/* Hostel Admin Dashboard Routes */}

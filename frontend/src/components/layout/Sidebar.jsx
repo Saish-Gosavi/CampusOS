@@ -1,6 +1,7 @@
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { CollegeAdminSidebar } from "@/components/admin/CollegeAdminSidebar";
 import { HostelSidebar } from "@/components/hostel/HostelSidebar";
 import { WardenSidebar } from "@/components/warden/WardenSidebar";
 import { StudentSidebar } from "@/components/student/StudentSidebar";
@@ -16,7 +17,7 @@ export function Sidebar() {
     case "superadmin":
       return <AdminSidebar />;
     case "admin":
-      return <HostelSidebar />;
+      return <CollegeAdminSidebar />;
     case "warden":
       return <WardenSidebar />;
     case "student":
