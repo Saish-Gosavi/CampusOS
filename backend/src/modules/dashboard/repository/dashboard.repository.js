@@ -80,20 +80,33 @@ export class DashboardRepository {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
       const monthName = monthStart.toLocaleString("default", { month: "short" });
 
-      const [hostelAllocations, hostelComplaints, hostelLeaves, libraryIssues, libraryReservations, auditLogsCount] = await Promise.all([
+      const [
+        hostelAllocations,
+        hostelComplaints,
+        hostelLeaves,
+        hostelAuditLogs,
+        libraryIssues,
+        libraryReservations,
+        libraryAuditLogs,
+        inventoryRequests,
+        inventoryAuditLogs
+      ] = await Promise.all([
         prisma.allocation.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
         prisma.complaint.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
         prisma.leaveRequest.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Hostel", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
         prisma.bookIssue.count({ where: { issueDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
         prisma.reservation.count({ where: { reservationDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
-        prisma.auditLog.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Library", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.inventoryRequest.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Inventory", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
       ]);
 
       monthlyUsage.push({
         month: monthName,
-        Hostel: hostelAllocations + hostelComplaints + hostelLeaves,
-        Library: libraryIssues + libraryReservations,
-        Inventory: auditLogsCount,
+        Hostel: hostelAllocations + hostelComplaints + hostelLeaves + hostelAuditLogs,
+        Library: libraryIssues + libraryReservations + libraryAuditLogs,
+        Inventory: inventoryRequests + inventoryAuditLogs,
       });
     }
 
