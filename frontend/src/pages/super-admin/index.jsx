@@ -178,31 +178,41 @@ function DashboardPage() {
 
         <ChartCard title="Admins by Module" description="Distribution of module administrators">
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statsData?.adminDistribution || adminDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={55}
-                  outerRadius={90}
-                  paddingAngle={3}
-                >
-                  {(statsData?.adminDistribution || adminDistribution).map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {statsData?.adminDistribution && statsData.adminDistribution.some((d) => d.value > 0) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statsData.adminDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={3}
+                  >
+                    {statsData.adminDistribution.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <Users className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Admins Assigned Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[210px]">
+                  Onboard staff members to view distribution across Hostel, Inventory & Library.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
       </div>
@@ -211,55 +221,75 @@ function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="Colleges by City" description="Institutional footprint">
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={statsData?.cityDistribution && statsData.cityDistribution.length > 0 ? statsData.cityDistribution : collegeDistribution}
-                layout="vertical"
-                margin={{ top: 5, right: 12, left: 8, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
-                <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={12} width={80} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Bar dataKey="value" fill="#7B4CED" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {statsData?.cityDistribution && statsData.cityDistribution.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={statsData.cityDistribution}
+                  layout="vertical"
+                  margin={{ top: 5, right: 12, left: 8, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} allowDecimals={false} />
+                  <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={12} width={90} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#7B4CED" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <Building2 className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Colleges Onboarded Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[220px]">
+                  Click + Create College above to onboard your first campus and see city insights.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
 
         <ChartCard title="Student Distribution" description="Enrolled students by year">
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statsData?.studentDistribution && statsData.studentDistribution.length > 0 ? statsData.studentDistribution : studentDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={90}
-                  paddingAngle={2}
-                >
-                  {(statsData?.studentDistribution && statsData.studentDistribution.length > 0 ? statsData.studentDistribution : studentDistribution).map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {statsData?.studentDistribution && statsData.studentDistribution.some((s) => s.value > 0) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statsData.studentDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
+                    {statsData.studentDistribution.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <GraduationCap className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Enrolled Students</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                  Enrolled student profiles will populate the academic year breakdown here.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
       </div>
