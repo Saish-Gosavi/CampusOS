@@ -34,8 +34,21 @@ export class UsersRepository {
   }
 
   static async delete(id) {
-    return prisma.user.delete({
-      where: { id: Number(id) },
-    });
+    const userId = Number(id);
+    if (!userId || isNaN(userId)) return null;
+
+    const existing = await prisma.user.findUnique({ where: { id: userId } });
+    if (!existing) return null;
+
+    await prisma.$transaction([
+      prisma.student.deleteMany({ where: { userId } }),
+      prisma.warden.deleteMany({ where: { userId } }),
+      prisma.securityStaff.deleteMany({ where: { userId } }),
+      prisma.notification.deleteMany({ where: { userId } }),
+      prisma.auditLog.deleteMany({ where: { userId } }),
+      prisma.user.delete({ where: { id: userId } }),
+    ]);
+
+    return existing;
   }
 }

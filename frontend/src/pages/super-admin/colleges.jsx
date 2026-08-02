@@ -67,6 +67,10 @@ function CollegesPage() {
           students: c.blocks ? c.blocks.length * 150 : 300,
         }));
         setColleges(formatted);
+        setSelectedCollegeForAdmins((prev) => {
+          if (!prev) return null;
+          return formatted.find((item) => item.id === prev.id) || null;
+        });
       }
     } catch (err) {
       toast.error("Failed to load colleges from database");

@@ -98,14 +98,32 @@ export class HostelRepository {
   }
 
   static async deleteAdminFromCollege(userId) {
-    return prisma.user.delete({
-      where: { id: Number(userId) },
-    });
+    const id = Number(userId);
+    if (!id || isNaN(id)) return null;
+
+    const existing = await prisma.user.findUnique({ where: { id } });
+    if (!existing) return null;
+
+    await prisma.$transaction([
+      prisma.student.deleteMany({ where: { userId: id } }),
+      prisma.warden.deleteMany({ where: { userId: id } }),
+      prisma.securityStaff.deleteMany({ where: { userId: id } }),
+      prisma.notification.deleteMany({ where: { userId: id } }),
+      prisma.auditLog.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } }),
+    ]);
+
+    return existing;
   }
 
   static async delete(id) {
+    const hostelId = Number(id);
+    await prisma.user.updateMany({
+      where: { hostelId },
+      data: { hostelId: null },
+    });
     return prisma.hostel.delete({
-      where: { id: Number(id) },
+      where: { id: hostelId },
     });
   }
 }
