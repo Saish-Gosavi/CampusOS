@@ -12,7 +12,8 @@ export class DashboardRepository {
       recentHostels,
       hostelAdminsCount,
       libraryAdminsCount,
-      inventoryAdminsCount
+      inventoryAdminsCount,
+      hostelsByCity
     ] = await Promise.all([
       prisma.hostel.count(),
       prisma.user.count({
@@ -28,18 +29,26 @@ export class DashboardRepository {
       prisma.auditLog.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
-        include: { user: true },
+        include: { user: { select: { id: true, name: true, email: true } } },
       }),
       prisma.hostel.findMany({
         take: 5,
+        orderBy: { createdAt: "desc" },
         include: { blocks: true },
       }),
       prisma.user.count({ where: { role: { name: { in: ["admin", "warden"] } } } }),
       prisma.user.count({ where: { role: { name: "librarian" } } }),
       prisma.user.count({ where: { role: { name: "store" } } }),
+      // Group hostels by city for the bar chart
+      prisma.hostel.groupBy({
+        by: ["city"],
+        _count: { id: true },
+        orderBy: { _count: { id: "desc" } },
+        take: 10,
+      }),
     ]);
 
-    // Calculate real monthly counts for the last 6 months from database timestamps
+    // Calculate real monthly counts from actual database records
     const now = new Date();
     const monthlyUsage = [];
 
@@ -48,22 +57,40 @@ export class DashboardRepository {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
       const monthName = monthStart.toLocaleString("default", { month: "short" });
 
-      const [hostelAllocations, hostelComplaints, hostelLeaves, libraryIssues, libraryReservations, auditLogsCount] = await Promise.all([
+      const [
+        hostelLogs,
+        hostelAllocations,
+        hostelComplaints,
+        hostelLeaves,
+        libraryLogs,
+        libraryIssues,
+        libraryReservations,
+        inventoryLogs,
+        inventoryRequests
+      ] = await Promise.all([
+        prisma.auditLog.count({ where: { module: "Hostel", createdAt: { gte: monthStart, lte: monthEnd } } }),
         prisma.allocation.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }),
         prisma.complaint.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
         prisma.leaveRequest.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }),
+        prisma.auditLog.count({ where: { module: "Library", createdAt: { gte: monthStart, lte: monthEnd } } }),
         prisma.bookIssue.count({ where: { issueDate: { gte: monthStart, lte: monthEnd } } }),
         prisma.reservation.count({ where: { reservationDate: { gte: monthStart, lte: monthEnd } } }),
-        prisma.auditLog.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
+        prisma.auditLog.count({ where: { module: "Inventory", createdAt: { gte: monthStart, lte: monthEnd } } }),
+        prisma.inventoryRequest.count({ where: { item: { id: { gt: 0 } } } }).catch(() => 0),
       ]);
 
       monthlyUsage.push({
         month: monthName,
-        Hostel: hostelAllocations + hostelComplaints + hostelLeaves,
-        Library: libraryIssues + libraryReservations,
-        Inventory: auditLogsCount,
+        Hostel: hostelLogs + hostelAllocations + hostelComplaints + hostelLeaves,
+        Library: libraryLogs + libraryIssues + libraryReservations,
+        Inventory: inventoryLogs + inventoryRequests,
       });
     }
+
+    // Build city distribution from real hostel data
+    const cityDistribution = hostelsByCity
+      .filter(h => h.city)
+      .map(h => ({ name: h.city, value: h._count.id }));
 
     return {
       hostelsCount,
@@ -78,6 +105,7 @@ export class DashboardRepository {
         { name: "Inventory", value: inventoryAdminsCount },
         { name: "Library", value: libraryAdminsCount }
       ],
+      cityDistribution,
       monthlyUsage
     };
   }

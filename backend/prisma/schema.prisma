@@ -376,12 +376,20 @@ model Notification {
 
 model AuditLog {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  module    String   @default("System") // "Hostel", "Library", "Inventory", "System"
   action    String
-  details   String?
+  description String?
+  status    String   @default("Success") // "Success", "Warning", "Failed", "Critical"
   ipAddress String?
+  userAgent String?
+  oldData   String?  // JSON string
+  newData   String?  // JSON string
   createdAt DateTime @default(now())
 
   @@index([userId])
+  @@index([module])
+  @@index([status])
+  @@index([createdAt])
 }

@@ -15,6 +15,7 @@ export class DashboardService {
       ],
       adminDistribution: rawData.adminDistribution,
       moduleUsage: rawData.monthlyUsage,
+      cityDistribution: rawData.cityDistribution,
       recentHostels: rawData.recentHostels,
       recentActivity: rawData.recentAuditLogs,
     };

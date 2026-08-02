@@ -26,7 +26,7 @@ function AuthLayout({ children, title, subtitle }) {
 
           <div className="relative z-10 space-y-6">
             <h2 className="text-4xl font-bold leading-tight">
-              Welcome back to your campus.
+              Welcome back to your campus
             </h2>
             <p className="max-w-md text-primary-foreground/80">
               A single sign-on for Hostel, Library, and Inventory management —

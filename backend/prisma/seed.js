@@ -6,22 +6,24 @@ import bcrypt from "bcryptjs";
 
 // Test raw connection first
 const conn = await mariadb.createConnection({
-  host: "localhost",
+  host: "127.0.0.1",
   port: 3306,
   user: "root",
   password: "root",
-  database: "hostel_management",
+  database: "campusos",
+  allowPublicKeyRetrieval: true,
 });
 console.log("✅ Raw connection works");
 await conn.end();
 
 // Setup Prisma with PrismaMariaDb adapter
 const adapter = new PrismaMariaDb({
-  host: "localhost",
+  host: "127.0.0.1",
   port: 3306,
   user: "root",
   password: "root",
-  database: "hostel_management",
+  database: "campusos",
+  allowPublicKeyRetrieval: true,
   connectionLimit: 5,
 });
 
@@ -108,9 +110,13 @@ async function main() {
   }
   console.log(`  ✅ All permissions assigned to superadmin\n`);
 
-  // 4. Create Superadmin User
+  // 4. Create Admin Users
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash("Admin@123", salt);
+
+  const wardenRole = await prisma.role.findUnique({ where: { name: "warden" } });
+  const librarianRole = await prisma.role.findUnique({ where: { name: "librarian" } });
+  const storeRole = await prisma.role.findUnique({ where: { name: "store" } });
 
   await prisma.user.upsert({
     where: { email: "admin@campusos.com" },
@@ -123,10 +129,50 @@ async function main() {
       status: "active",
     },
   });
-  console.log(`  ✅ Superadmin user created:`);
-  console.log(`     Email:    admin@campusos.com`);
-  console.log(`     Password: Admin@123`);
-  console.log(`     Role:     superadmin\n`);
+
+  if (wardenRole) {
+    await prisma.user.upsert({
+      where: { email: "warden@campusos.com" },
+      update: {},
+      create: {
+        email: "warden@campusos.com",
+        password: hashedPassword,
+        name: "Hostel Warden",
+        roleId: wardenRole.id,
+        status: "active",
+      },
+    });
+  }
+
+  if (librarianRole) {
+    await prisma.user.upsert({
+      where: { email: "librarian@campusos.com" },
+      update: {},
+      create: {
+        email: "librarian@campusos.com",
+        password: hashedPassword,
+        name: "Library Admin",
+        roleId: librarianRole.id,
+        status: "active",
+      },
+    });
+  }
+
+  if (storeRole) {
+    await prisma.user.upsert({
+      where: { email: "store@campusos.com" },
+      update: {},
+      create: {
+        email: "store@campusos.com",
+        password: hashedPassword,
+        name: "Inventory Manager",
+        roleId: storeRole.id,
+        status: "active",
+      },
+    });
+  }
+
+  console.log(`  ✅ Superadmin and Module Admins created successfully!\n`);
 
   console.log("🎉 Database seeding completed successfully!");
 }

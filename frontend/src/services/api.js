@@ -156,7 +156,7 @@ export const authApi = {
 
 export const dashboardApi = {
   async getSuperAdminStats() {
-    return apiClient.get("/dashboard/superadmin");
+    return apiClient.get(`/dashboard/superadmin?_t=${Date.now()}`);
   }
 };
 
@@ -178,5 +178,11 @@ export const collegeApi = {
   },
   async deleteAdmin(collegeId, userId) {
     return apiClient.delete(`/hostel/hostels/${collegeId}/admins/${userId}`);
+  }
+};
+
+export const auditLogApi = {
+  async getLogs(params) {
+    return apiClient.get("/audit-logs", { params });
   }
 };
