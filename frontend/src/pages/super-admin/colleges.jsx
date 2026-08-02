@@ -537,14 +537,14 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
   // Available Sector Roles based on Enabled Facilities
   const availableRoles = [];
   if (college.hasHostel) {
-    availableRoles.push({ name: "warden", label: "Hostel Admin (Warden)" });
+    availableRoles.push({ name: "warden", label: "Hostel Admin" });
     availableRoles.push({ name: "admin", label: "Hostel Administrator" });
   }
   if (college.hasLibrary) {
-    availableRoles.push({ name: "librarian", label: "Library Admin (Librarian)" });
+    availableRoles.push({ name: "librarian", label: "Library Admin" });
   }
   if (college.hasInventory) {
-    availableRoles.push({ name: "store", label: "Inventory Admin (Store Manager)" });
+    availableRoles.push({ name: "store", label: "Inventory Admin" });
   }
 
   async function handleCreateAdmin(e) {
