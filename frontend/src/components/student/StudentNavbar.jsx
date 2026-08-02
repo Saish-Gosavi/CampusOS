@@ -58,7 +58,7 @@ function StudentNavbar() {
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
     placeholder="Search books, notices, complaints..."
-    className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-[#2563EB]"
+    className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-primary"
   />
       </div>
 
@@ -84,7 +84,7 @@ function StudentNavbar() {
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="flex items-center justify-between">
               <span>Notifications</span>
-              <span className="rounded-full bg-[#2563EB]/10 px-2 py-0.5 text-xs font-medium text-[#2563EB]">3 new</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">3 new</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             {notifications.map((n) => <DropdownMenuItem key={n.title} className="gap-3 py-3">
@@ -100,7 +100,7 @@ function StudentNavbar() {
                 </div>
               </DropdownMenuItem>)}
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="justify-center text-sm font-medium text-[#2563EB]">
+            <DropdownMenuItem asChild className="justify-center text-sm font-medium text-primary">
               <Link to="/student/notifications">View all notifications</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -109,7 +109,7 @@ function StudentNavbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="ml-1 flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition-colors hover:bg-muted">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-[#2563EB] to-[#7B4CED] text-sm font-semibold text-white">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-sm font-semibold text-white">
                 {studentProfile.photo}
               </span>
               <span className="hidden text-left leading-tight sm:block">

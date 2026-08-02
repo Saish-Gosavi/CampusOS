@@ -74,7 +74,7 @@ function StudentSidebar() {
       asChild
       tooltip={item.title}
       className={cn(
-        "text-slate-300 hover:bg-white/10 hover:text-white data-[active=true]:bg-[#2563EB] data-[active=true]:text-white",
+        "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
         active && "bg-[#2563EB] text-white hover:bg-[#1d4fd8] hover:text-white"
       )}
     >
@@ -87,22 +87,22 @@ function StudentSidebar() {
   })}
     </SidebarMenu>;
   return <Sidebar collapsible="icon" className="border-r-0">
-      <div className="flex h-full flex-col bg-slate-900 text-slate-100">
+      <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-2 px-1 py-1.5">
             <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-gradient-to-br from-[#2563EB] to-[#7B4CED] text-white shadow-md">
               <GraduationCap className="h-5 w-5" />
             </div>
             {!collapsed && <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">CampusOS</p>
+                <p className="truncate text-sm font-semibold text-white">Edu360</p>
                 <p className="truncate text-xs text-slate-400">VPPCOE · Student Portal</p>
               </div>}
           </div>
         </SidebarHeader>
 
-        <SidebarContent className="px-1">
+        <SidebarContent className="px-3 py-4 space-y-4">
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-slate-500">Overview</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Overview</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(overviewItems)}</SidebarGroupContent>
           </SidebarGroup>
 
@@ -121,18 +121,18 @@ function StudentSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-slate-500">Account</SidebarGroupLabel>}
+            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-white/10">
+        <SidebarFooter className="border-t border-white/10 p-3">
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
     asChild
     tooltip="Logout"
-    className="text-slate-300 hover:bg-white/10 hover:text-white"
+    className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
   >
                 <Link to="/login">
                   <LogOut className="h-4 w-4" />

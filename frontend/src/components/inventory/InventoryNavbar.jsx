@@ -57,7 +57,7 @@ function InventoryNavbar() {
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
     placeholder="Search items, SKU, requests..."
-    className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-[#2563EB]"
+    className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-primary"
   />
       </div>
 
@@ -83,7 +83,7 @@ function InventoryNavbar() {
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel className="flex items-center justify-between">
               <span>Notifications</span>
-              <span className="rounded-full bg-[#2563EB]/10 px-2 py-0.5 text-xs font-medium text-[#2563EB]">
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                 3 new
               </span>
             </DropdownMenuLabel>
@@ -101,7 +101,7 @@ function InventoryNavbar() {
                 </div>
               </DropdownMenuItem>)}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-sm font-medium text-[#2563EB]">
+            <DropdownMenuItem className="justify-center text-sm font-medium text-primary">
               View all notifications
             </DropdownMenuItem>
           </DropdownMenuContent>
