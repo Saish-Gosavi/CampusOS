@@ -253,3 +253,14 @@ export const globalNoticeApi = {
   },
 };
 
+export const reportsApi = {
+  async getSummary(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async exportCsv(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  }
+};
+
