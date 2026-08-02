@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiClient as api } from '@/services/api';
 
 // --- QUERY KEYS ---
 export const HOSTEL_KEYS = {

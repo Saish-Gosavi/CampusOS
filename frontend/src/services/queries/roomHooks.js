@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { apiClient as api } from '@/services/api';
 
 export const ROOM_KEYS = {
   all: ['rooms'],
