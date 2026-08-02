@@ -293,8 +293,6 @@ function DashboardPage() {
           </div>
         </ChartCard>
       </div>
-
-      </div>
     </div>
   );
 }
