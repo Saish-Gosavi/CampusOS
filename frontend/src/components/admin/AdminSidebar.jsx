@@ -125,7 +125,7 @@ function AdminSidebar() {
               <SidebarMenuButton
                 onClick={handleLogout}
                 tooltip="Logout"
-                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>

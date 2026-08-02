@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Package,
@@ -27,6 +27,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
 const mainItems = [
   { title: "Dashboard", url: "/inventory-admin", icon: LayoutDashboard, exact: true },
   { title: "Inventory Items", url: "/inventory-admin/items", icon: Package },
@@ -46,6 +48,14 @@ const accountItems = [
   { title: "Settings", url: "/inventory-admin/settings", icon: Settings }
 ];
 function InventorySidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
+
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -110,14 +120,12 @@ function InventorySidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-    asChild
-    tooltip="Logout"
-    className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
-  >
-                <Link to="/login">
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </Link>
+                onClick={handleLogout}
+                tooltip="Logout"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

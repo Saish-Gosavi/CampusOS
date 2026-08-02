@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   DoorOpen,
@@ -44,6 +44,14 @@ const account = [
   { title: "Settings", url: "/security/settings", icon: Settings }
 ];
 function SecuritySidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
+
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -101,14 +109,12 @@ function SecuritySidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-    asChild
-    tooltip="Logout"
-    className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
-  >
-                <Link to="/login">
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </Link>
+                onClick={handleLogout}
+                tooltip="Logout"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

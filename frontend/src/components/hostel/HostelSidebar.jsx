@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -34,6 +34,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
   { title: "Hostel Management", url: "/hostel-admin/hostels", icon: Building2 },
@@ -60,6 +62,14 @@ const accountItems = [
   { title: "Settings", url: "/hostel-admin/settings", icon: Settings }
 ];
 function HostelSidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/login" });
+  };
+
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
@@ -119,14 +129,12 @@ function HostelSidebar() {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-    asChild
-    tooltip="Logout"
-    className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors border border-white/10"
-  >
-                <Link to="/login">
-                  <LogOut className="h-4 w-4" />
-                  <span>Logout</span>
-                </Link>
+                onClick={handleLogout}
+                tooltip="Logout"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
