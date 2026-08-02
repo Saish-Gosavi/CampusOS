@@ -202,3 +202,33 @@ export const rolesApi = {
   }
 };
 
+export const userApi = {
+  async getAll() {
+    return apiClient.get("/users");
+  },
+  async create(data) {
+    return apiClient.post("/users", data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/users/${id}`);
+  },
+  async getProfile() {
+    return apiClient.get("/users/profile");
+  },
+  async updateProfile(data) {
+    return apiClient.put("/users/profile", data);
+  }
+};
+
+export const settingsApi = {
+  async get() {
+    return apiClient.get("/settings");
+  },
+  async update(data) {
+    return apiClient.put("/settings", data);
+  },
+  async reset() {
+    return apiClient.post("/settings/reset");
+  }
+};
+

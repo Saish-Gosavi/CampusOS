@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const notifications = [
   { icon: CheckCircle2, tint: "#22C55E", title: "New college onboarded", meta: "VPPCOE — 2 min ago" },
@@ -32,27 +33,9 @@ const notifications = [
   { icon: AlertCircle, tint: "#EF4444", title: "Storage nearing limit", meta: "Aurora Store — 3 hr ago" }
 ];
 
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem("campusos-theme") : null;
-    const dark = stored ? stored === "dark" : false;
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-  }, []);
-  const toggle = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle("dark", next);
-      window.localStorage.setItem("campusos-theme", next ? "dark" : "light");
-      return next;
-    });
-  };
-  return { isDark, toggle };
-}
-
 function AdminNavbar() {
-  const { isDark, toggle } = useDarkMode();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -83,11 +66,11 @@ function AdminNavbar() {
 
       <div className="flex flex-1 items-center justify-end gap-1 md:flex-none">
         <button
-          onClick={toggle}
+          onClick={toggleTheme}
           aria-label="Toggle theme"
           className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
         </button>
 
         <DropdownMenu>
