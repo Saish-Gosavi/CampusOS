@@ -61,7 +61,7 @@ function HostelNavbar() {
   />
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-1 md:flex-none">
+      <div className="ml-auto flex flex-1 items-center justify-end gap-1 md:flex-none">
         <button
     onClick={toggle}
     aria-label="Toggle theme"
