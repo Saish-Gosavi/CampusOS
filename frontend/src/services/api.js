@@ -202,3 +202,12 @@ export const rolesApi = {
   }
 };
 
+export const reportsApi = {
+  async getSuperAdminStats(hostelId = "") {
+    return apiClient.get(hostelId ? `/super_admin/reports?hostelId=${hostelId}` : "/super_admin/reports");
+  },
+  async downloadSuperAdminReport(hostelId = "") {
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob" });
+  }
+};
+
