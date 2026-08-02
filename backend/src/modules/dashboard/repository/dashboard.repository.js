@@ -12,7 +12,10 @@ export class DashboardRepository {
       recentHostels,
       hostelAdminsCount,
       libraryAdminsCount,
-      inventoryAdminsCount
+      inventoryAdminsCount,
+      allHostels,
+      allColleges,
+      studentYearsGroup
     ] = await Promise.all([
       prisma.hostel.count(),
       prisma.user.count({
@@ -37,7 +40,34 @@ export class DashboardRepository {
       prisma.user.count({ where: { role: { name: { in: ["admin", "warden"] } } } }),
       prisma.user.count({ where: { role: { name: "librarian" } } }),
       prisma.user.count({ where: { role: { name: "store" } } }),
+      prisma.hostel.findMany({ select: { city: true } }),
+      prisma.college.findMany({ select: { city: true } }),
+      prisma.student.groupBy({
+        by: ["academicYear"],
+        _count: { id: true },
+      }).catch(() => [])
     ]);
+
+    // Calculate real Colleges by City distribution from database
+    const cityMap = {};
+    const allLocations = [...allHostels, ...allColleges];
+    allLocations.forEach((loc) => {
+      if (loc.city && loc.city.trim()) {
+        const cityName = loc.city.trim();
+        cityMap[cityName] = (cityMap[cityName] || 0) + 1;
+      }
+    });
+
+    const cityDistribution = Object.keys(cityMap).map((city) => ({
+      name: city,
+      value: cityMap[city],
+    })).sort((a, b) => b.value - a.value);
+
+    // Calculate real Student Distribution by Year
+    const studentDistribution = (studentYearsGroup || []).map((sg) => ({
+      name: sg.academicYear ? `Year ${sg.academicYear}` : "General",
+      value: sg._count?.id || 0,
+    }));
 
     // Calculate real monthly counts for the last 6 months from database timestamps
     const now = new Date();
@@ -78,7 +108,9 @@ export class DashboardRepository {
         { name: "Inventory", value: inventoryAdminsCount },
         { name: "Library", value: libraryAdminsCount }
       ],
-      monthlyUsage
+      monthlyUsage,
+      cityDistribution,
+      studentDistribution
     };
   }
 }

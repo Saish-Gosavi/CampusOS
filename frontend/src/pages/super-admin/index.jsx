@@ -212,7 +212,11 @@ function DashboardPage() {
         <ChartCard title="Colleges by City" description="Institutional footprint">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={collegeDistribution} layout="vertical" margin={{ top: 5, right: 12, left: 8, bottom: 0 }}>
+              <BarChart
+                data={statsData?.cityDistribution && statsData.cityDistribution.length > 0 ? statsData.cityDistribution : collegeDistribution}
+                layout="vertical"
+                margin={{ top: 5, right: 12, left: 8, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
                 <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} />
                 <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={12} width={80} />
@@ -235,13 +239,13 @@ function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={studentDistribution}
+                  data={statsData?.studentDistribution && statsData.studentDistribution.length > 0 ? statsData.studentDistribution : studentDistribution}
                   dataKey="value"
                   nameKey="name"
                   outerRadius={90}
                   paddingAngle={2}
                 >
-                  {studentDistribution.map((_, i) => (
+                  {(statsData?.studentDistribution && statsData.studentDistribution.length > 0 ? statsData.studentDistribution : studentDistribution).map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                   ))}
                 </Pie>
