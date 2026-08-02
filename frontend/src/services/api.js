@@ -238,3 +238,18 @@ export const auditLogApi = {
   }
 };
 
+export const globalNoticeApi = {
+  async getAll() {
+    return apiClient.get("/super_admin/global-notice");
+  },
+  async create(data) {
+    return apiClient.post("/super_admin/global-notice", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/super_admin/global-notice/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/super_admin/global-notice/${id}`);
+  },
+};
+

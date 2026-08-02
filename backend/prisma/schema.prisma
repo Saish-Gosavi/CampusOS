@@ -67,6 +67,7 @@ model User {
   notifications     Notification[]
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
+  notices           Notice[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -412,4 +413,23 @@ model AuditLog {
   @@index([module])
   @@index([status])
   @@index([createdAt])
+}
+
+// ==========================================
+// 9. Global Notices
+// ==========================================
+
+model Notice {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String?
+  isActive    Boolean   @default(true)
+  scheduledAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById Int
+  createdBy   User      @relation(fields: [createdById], references: [id])
+
+  @@index([createdById])
 }
