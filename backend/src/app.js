@@ -17,6 +17,7 @@ import rolesRouter from "./modules/roles/routes/roles.routes.js";
 import hostelRouter from "./modules/hostel/routes.js";
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
 import settingsRouter from "./modules/settings/routes/settings.routes.js";
+import auditRouter from "./modules/audit/audit.routes.js";
 
 const app = express();
 
@@ -63,6 +64,8 @@ app.use("/api/super_admin/roles-and-permissions", rolesRouter);
 app.use("/api/hostel", hostelRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/audit-logs", auditRouter);
+app.use("/api/super_admin/audit-logs", auditRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);

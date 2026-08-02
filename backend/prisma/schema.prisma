@@ -395,13 +395,21 @@ model Notification {
 }
 
 model AuditLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action    String
-  details   String?
-  ipAddress String?
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  module      String   @default("System")
+  action      String
+  description String?
+  status      String   @default("Success")
+  ipAddress   String?
+  userAgent   String?
+  oldData     String?
+  newData     String?
+  createdAt   DateTime @default(now())
 
   @@index([userId])
+  @@index([module])
+  @@index([status])
+  @@index([createdAt])
 }

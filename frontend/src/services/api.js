@@ -232,3 +232,9 @@ export const settingsApi = {
   }
 };
 
+export const auditLogApi = {
+  async getLogs(params) {
+    return apiClient.get("/audit-logs", { params });
+  }
+};
+
