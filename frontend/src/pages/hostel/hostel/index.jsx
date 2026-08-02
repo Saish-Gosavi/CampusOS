@@ -15,7 +15,7 @@ import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useHostels } from "@/services/api/hostelHooks";
+import { useHostels } from "@/services/queries/hostelHooks";
 const Route = createFileRoute("/hostel-admin/hostels/")({
   component: HostelsPage
 });
