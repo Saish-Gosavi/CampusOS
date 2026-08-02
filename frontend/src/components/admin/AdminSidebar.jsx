@@ -39,8 +39,7 @@ const mainItems = [
 const insightItems = [
   { title: "Reports", url: "/super-admin/reports", icon: BarChart3 },
   { title: "Global Notices", url: "/super-admin/notices", icon: Megaphone },
-  { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText },
-  { title: "System Health", url: "/super-admin/system-health", icon: Activity }
+  { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
 ];
 
 const accountItems = [
