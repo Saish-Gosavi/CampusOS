@@ -23,7 +23,6 @@ import {
   FileSpreadsheet,
   Upload
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { collegeApi } from "@/services/api";
 import { toast } from "sonner";
 
@@ -155,8 +154,7 @@ function CollegesPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "College Management" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}

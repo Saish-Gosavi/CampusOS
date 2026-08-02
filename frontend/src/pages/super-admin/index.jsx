@@ -23,7 +23,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
@@ -88,8 +87,7 @@ function DashboardPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back, {user?.name || "Super Admin"}
           </h1>
           <p className="text-sm text-muted-foreground">

@@ -13,7 +13,6 @@ import {
   UserCheck,
   Sparkles
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { useAuth } from "@/context/AuthContext";
 import { userApi, authApi } from "@/services/api";
 import { toast } from "sonner";
@@ -121,8 +120,7 @@ function ProfilePage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6 pb-12">
       {/* Header */}
       <div>
-        <Breadcrumbs items={[{ label: "Profile" }]} />
-        <div className="mt-3 flex items-center gap-3">
+                <div className="mt-3 flex items-center gap-3">
           <span
             className="grid h-11 w-11 place-items-center rounded-xl"
             style={{ backgroundColor: "#7B4CED1A", color: "#7B4CED" }}

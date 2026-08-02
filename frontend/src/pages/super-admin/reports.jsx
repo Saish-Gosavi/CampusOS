@@ -27,7 +27,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { reportsApi } from "@/services/api";
@@ -164,8 +163,7 @@ function ReportsPage() {
       {/* 1. Page Header (Matches Admin Management Style) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Reports & Analytics" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#3B82F61A", color: "#2563EB" }}

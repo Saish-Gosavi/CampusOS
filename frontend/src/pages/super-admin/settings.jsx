@@ -9,7 +9,6 @@ import {
   Save,
   RotateCcw
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { toast } from "sonner";
 import { settingsApi } from "@/services/api";
 
@@ -127,8 +126,7 @@ function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Settings" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}

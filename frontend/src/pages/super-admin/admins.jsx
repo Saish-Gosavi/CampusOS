@@ -15,7 +15,6 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { userApi } from "@/services/api";
 
 const Route = createFileRoute("/super-admin/admins")({
@@ -159,8 +158,7 @@ function AdminsPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Admin Management" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#EAB3081A", color: "#B45309" }}

@@ -27,7 +27,6 @@ import {
   Settings,
 } from "lucide-react";
 
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,8 +192,7 @@ function AuditLogsPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-4 md:p-6">
       {/* Page Header */}
       <div>
-        <Breadcrumbs items={[{ label: "Super Admin", href: "/super-admin" }, { label: "Audit Logs" }]} />
-        <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-center gap-3">
             <span
               className="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
