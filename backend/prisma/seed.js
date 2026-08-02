@@ -6,22 +6,22 @@ import bcrypt from "bcryptjs";
 
 // Test raw connection first
 const conn = await mariadb.createConnection({
-  host: "localhost",
+  host: process.env.DB_HOST || "localhost",
   port: 3306,
-  user: "root",
-  password: "root",
-  database: "hostel_management",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "campusos",
 });
 console.log("✅ Raw connection works");
 await conn.end();
 
 // Setup Prisma with PrismaMariaDb adapter
 const adapter = new PrismaMariaDb({
-  host: "localhost",
+  host: process.env.DB_HOST || "localhost",
   port: 3306,
-  user: "root",
-  password: "root",
-  database: "hostel_management",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "campusos",
   connectionLimit: 5,
 });
 

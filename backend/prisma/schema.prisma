@@ -74,6 +74,26 @@ model User {
 }
 
 // ==========================================
+// College Management
+// ==========================================
+
+model College {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  address      String?
+  city         String?
+  contactEmail String?
+  contactPhone String?
+  status       String   @default("active") // "active", "inactive"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // If a college can have multiple hostels, you might want to link them later:
+  // hostels   Hostel[]
+}
+
+
+// ==========================================
 // 3. Hostel Setup & Hierarchy
 // ==========================================
 
