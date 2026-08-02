@@ -13,10 +13,10 @@ import errorMiddleware from "./middleware/error.middleware.js";
 // Import Routers
 import authRouter from "./modules/auth/routes/auth.routes.js";
 import usersRouter from "./modules/users/routes/users.routes.js";
-import rolesRouter from "./modules/roles/routes/roles.routes.js";
 import hostelRouter from "./modules/hostel/routes.js";
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
 import settingsRouter from "./modules/settings/routes/settings.routes.js";
+import noticeRouter from "./modules/notice/routes/notice.routes.js";
 
 const app = express();
 
@@ -59,10 +59,10 @@ app.get("/api/health", (req, res) => {
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/super_admin/roles-and-permissions", rolesRouter);
 app.use("/api/hostel", hostelRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/super_admin/global-notice", noticeRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);

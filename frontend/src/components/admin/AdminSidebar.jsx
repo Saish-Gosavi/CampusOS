@@ -32,8 +32,7 @@ import { useAuth } from "@/context/AuthContext";
 const mainItems = [
   { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
   { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
-  { title: "Admins", url: "/super-admin/admins", icon: Users },
-  { title: "Roles & Permissions", url: "/super-admin/roles", icon: ShieldCheck }
+  { title: "Admins", url: "/super-admin/admins", icon: Users }
 ];
 
 const insightItems = [
