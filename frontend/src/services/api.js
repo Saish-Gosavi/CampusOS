@@ -181,25 +181,19 @@ export const collegeApi = {
   }
 };
 
-export const rolesApi = {
+export const globalNoticeApi = {
   async getAll() {
-    return apiClient.get("/super_admin/roles-and-permissions");
-  },
-  async getPermissions() {
-    return apiClient.get("/super_admin/roles-and-permissions/permissions");
-  },
-  async getById(id) {
-    return apiClient.get(`/super_admin/roles-and-permissions/${id}`);
+    return apiClient.get("/super_admin/global-notice");
   },
   async create(data) {
-    return apiClient.post("/super_admin/roles-and-permissions", data);
+    return apiClient.post("/super_admin/global-notice", data);
   },
   async update(id, data) {
-    return apiClient.put(`/super_admin/roles-and-permissions/${id}`, data);
+    return apiClient.put(`/super_admin/global-notice/${id}`, data);
   },
   async delete(id) {
-    return apiClient.delete(`/super_admin/roles-and-permissions/${id}`);
-  }
+    return apiClient.delete(`/super_admin/global-notice/${id}`);
+  },
 };
 
 export const userApi = {
@@ -236,21 +230,6 @@ export const auditLogApi = {
   async getLogs(params) {
     return apiClient.get("/audit-logs", { params });
   }
-};
-
-export const globalNoticeApi = {
-  async getAll() {
-    return apiClient.get("/super_admin/global-notice");
-  },
-  async create(data) {
-    return apiClient.post("/super_admin/global-notice", data);
-  },
-  async update(id, data) {
-    return apiClient.put(`/super_admin/global-notice/${id}`, data);
-  },
-  async delete(id) {
-    return apiClient.delete(`/super_admin/global-notice/${id}`);
-  },
 };
 
 export const reportsApi = {
