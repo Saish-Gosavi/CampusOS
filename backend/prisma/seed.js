@@ -4,7 +4,6 @@ import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-// Test raw connection first
 const conn = await mariadb.createConnection({
   host: process.env.DB_HOST || "localhost",
   port: 3306,
@@ -15,7 +14,6 @@ const conn = await mariadb.createConnection({
 console.log("✅ Raw connection works");
 await conn.end();
 
-// Setup Prisma with PrismaMariaDb adapter
 const adapter = new PrismaMariaDb({
   host: process.env.DB_HOST || "localhost",
   port: 3306,
@@ -41,94 +39,128 @@ async function main() {
     { name: "store", description: "Inventory/Store Manager" },
   ];
 
+  const roleMap = {};
   for (const role of roles) {
-    await prisma.role.upsert({
+    const r = await prisma.role.upsert({
       where: { name: role.name },
       update: {},
       create: role,
     });
+    roleMap[role.name] = r.id;
     console.log(`  ✅ Role: ${role.name}`);
   }
 
-  // 2. Create Permissions
-  const permissions = [
-    { name: "users:read", description: "View users" },
-    { name: "users:write", description: "Create/update users" },
-    { name: "users:delete", description: "Delete users" },
-    { name: "hostels:read", description: "View hostels" },
-    { name: "hostels:write", description: "Create/update hostels" },
-    { name: "hostels:delete", description: "Delete hostels" },
-    { name: "rooms:read", description: "View rooms" },
-    { name: "rooms:write", description: "Create/update rooms" },
-    { name: "allocations:read", description: "View allocations" },
-    { name: "allocations:write", description: "Create/update allocations" },
-    { name: "complaints:read", description: "View complaints" },
-    { name: "complaints:write", description: "Create/update complaints" },
-    { name: "leaves:read", description: "View leave requests" },
-    { name: "leaves:write", description: "Create/update leave requests" },
-    { name: "visitors:read", description: "View visitors" },
-    { name: "visitors:write", description: "Create/update visitors" },
-    { name: "fees:read", description: "View fees" },
-    { name: "fees:write", description: "Manage fees" },
-    { name: "library:read", description: "View library" },
-    { name: "library:write", description: "Manage library" },
-    { name: "inventory:read", description: "View inventory" },
-    { name: "inventory:write", description: "Manage inventory" },
-    { name: "reports:read", description: "View reports" },
-    { name: "dashboard:read", description: "View dashboard" },
+  // 2. Create Hostels / Colleges
+  const hostelsData = [
+    { name: "VPPCOE Campus", city: "Mumbai", address: "Sion, Mumbai, Maharashtra", status: "Active" },
+    { name: "Nova Institute of Technology", city: "Pune", address: "Hinjawadi, Pune, Maharashtra", status: "Active" },
+    { name: "Meridian College", city: "Delhi", address: "Dwarka, New Delhi", status: "Active" },
+    { name: "Aurora Tech Institute", city: "Bengaluru", address: "Electronic City, Bengaluru", status: "Active" },
+    { name: "Zenith University", city: "Hyderabad", address: "Gachibowli, Hyderabad", status: "Active" }
   ];
 
-  for (const perm of permissions) {
-    await prisma.permission.upsert({
-      where: { name: perm.name },
-      update: {},
-      create: perm,
+  const hostelMap = {};
+  for (const h of hostelsData) {
+    const hostel = await prisma.hostel.upsert({
+      where: { name: h.name },
+      update: { city: h.city, address: h.address },
+      create: h,
     });
+    hostelMap[h.name] = hostel.id;
+    console.log(`  ✅ Hostel/College: ${h.name} (${h.city})`);
   }
-  console.log(`  ✅ Permissions: ${permissions.length} created\n`);
 
-  // 3. Assign all permissions to superadmin role
-  const superadminRole = await prisma.role.findUnique({ where: { name: "superadmin" } });
-  const allPermissions = await prisma.permission.findMany();
-
-  for (const perm of allPermissions) {
-    await prisma.rolesOnPermissions.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: superadminRole.id,
-          permissionId: perm.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: superadminRole.id,
-        permissionId: perm.id,
-      },
-    });
-  }
-  console.log(`  ✅ All permissions assigned to superadmin\n`);
-
-  // 4. Create Superadmin User
+  // 3. Create Superadmin User
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash("Admin@123", salt);
 
-  await prisma.user.upsert({
+  const superAdminUser = await prisma.user.upsert({
     where: { email: "admin@campusos.com" },
-    update: {},
+    update: { password: hashedPassword },
     create: {
       email: "admin@campusos.com",
       password: hashedPassword,
       name: "Super Admin",
-      roleId: superadminRole.id,
+      roleId: roleMap["superadmin"],
       status: "active",
     },
   });
-  console.log(`  ✅ Superadmin user created:`);
-  console.log(`     Email:    admin@campusos.com`);
-  console.log(`     Password: Admin@123`);
-  console.log(`     Role:     superadmin\n`);
+  console.log(`  ✅ Superadmin created: admin@campusos.com`);
 
-  console.log("🎉 Database seeding completed successfully!");
+  // 4. Create Staff / Admins / Wardens
+  const adminsData = [
+    { name: "Rahul Sharma", email: "rahul.sharma@vppcoe.edu.in", role: "admin", hostel: "VPPCOE Campus" },
+    { name: "Priya Menon", email: "priya.menon@vppcoe.edu.in", role: "librarian", hostel: "VPPCOE Campus" },
+    { name: "Arjun Iyer", email: "arjun.iyer@nova.edu.in", role: "store", hostel: "Nova Institute of Technology" },
+    { name: "Neha Kulkarni", email: "neha.k@meridian.edu.in", role: "warden", hostel: "Meridian College" },
+    { name: "Vikram Shetty", email: "vikram.s@aurora.edu.in", role: "librarian", hostel: "Aurora Tech Institute" },
+    { name: "Sanya Kapoor", email: "sanya.k@vppcoe.edu.in", role: "store", hostel: "VPPCOE Campus" }
+  ];
+
+  for (const a of adminsData) {
+    await prisma.user.upsert({
+      where: { email: a.email },
+      update: { name: a.name, roleId: roleMap[a.role], hostelId: hostelMap[a.hostel] },
+      create: {
+        email: a.email,
+        password: hashedPassword,
+        name: a.name,
+        roleId: roleMap[a.role],
+        hostelId: hostelMap[a.hostel],
+        status: "active",
+      },
+    });
+    console.log(`  ✅ Admin/Staff created: ${a.name} (${a.role})`);
+  }
+
+  // 5. Create Students
+  const studentsData = [
+    { name: "Aarav Patel", email: "aarav.p@vppcoe.edu.in", rollNumber: "STU001", academicYear: "1st Year", hostel: "VPPCOE Campus" },
+    { name: "Ananya Deshmukh", email: "ananya.d@vppcoe.edu.in", rollNumber: "STU002", academicYear: "2nd Year", hostel: "VPPCOE Campus" },
+    { name: "Rohan Mehta", email: "rohan.m@nova.edu.in", rollNumber: "STU003", academicYear: "3rd Year", hostel: "Nova Institute of Technology" },
+    { name: "Diya Sharma", email: "diya.s@meridian.edu.in", rollNumber: "STU004", academicYear: "4th Year", hostel: "Meridian College" },
+    { name: "Kabir Verma", email: "kabir.v@aurora.edu.in", rollNumber: "STU005", academicYear: "1st Year", hostel: "Aurora Tech Institute" },
+    { name: "Isha Nair", email: "isha.n@zenith.edu.in", rollNumber: "STU006", academicYear: "2nd Year", hostel: "Zenith University" }
+  ];
+
+  for (const s of studentsData) {
+    const studentUser = await prisma.user.upsert({
+      where: { email: s.email },
+      update: { name: s.name, roleId: roleMap["student"], hostelId: hostelMap[s.hostel] },
+      create: {
+        email: s.email,
+        password: hashedPassword,
+        name: s.name,
+        roleId: roleMap["student"],
+        hostelId: hostelMap[s.hostel],
+        status: "active",
+      },
+    });
+
+    await prisma.student.upsert({
+      where: { userId: studentUser.id },
+      update: { fullName: s.name, phone: "+91 98765 43210", collegeId: s.rollNumber },
+      create: {
+        userId: studentUser.id,
+        fullName: s.name,
+        phone: "+91 98765 43210",
+        collegeId: s.rollNumber,
+      },
+    });
+    console.log(`  ✅ Student created: ${s.name} (${s.academicYear})`);
+  }
+
+  // 6. Create Audit Logs
+  await prisma.auditLog.createMany({
+    data: [
+      { userId: superAdminUser.id, action: "SYSTEM_BOOT", details: "System initialized and database seeded" },
+      { userId: superAdminUser.id, action: "ONBOARD_HOSTEL", details: "Onboarded VPPCOE Campus Mumbai" },
+      { userId: superAdminUser.id, action: "USER_CREATE", details: "Created admin Rahul Sharma" },
+      { userId: superAdminUser.id, action: "USER_CREATE", details: "Created warden Neha Kulkarni" },
+    ]
+  }).catch(() => {});
+
+  console.log("\n🎉 Database seeding completed successfully!");
 }
 
 main()
