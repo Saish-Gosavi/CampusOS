@@ -15,5 +15,6 @@ router.put("/profile", validate(updateProfileSchema), UsersController.updateProf
 // Administrative User Management
 router.get("/", authorize("superadmin", "admin"), UsersController.getAllUsers);
 router.post("/", authorize("superadmin", "admin"), validate(createUserSchema), UsersController.createUser);
+router.delete("/:id", authorize("superadmin"), UsersController.deleteUser);
 
 export default router;

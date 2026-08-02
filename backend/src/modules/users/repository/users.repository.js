@@ -32,4 +32,10 @@ export class UsersRepository {
       include: { role: true },
     });
   }
+
+  static async delete(id) {
+    return prisma.user.delete({
+      where: { id: Number(id) },
+    });
+  }
 }
