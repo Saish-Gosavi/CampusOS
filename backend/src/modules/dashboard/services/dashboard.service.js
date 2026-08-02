@@ -6,7 +6,7 @@ export class DashboardService {
 
     return {
       stats: [
-        { label: "Total Colleges", value: rawData.hostelsCount, delta: "Active Campus Count", trend: "up" },
+        { label: "Total Colleges", value: rawData.totalColleges, delta: "Active Campus Count", trend: "up" },
         { label: "Total Admins", value: rawData.adminsCount, delta: "Configured Staff", trend: "up" },
         { label: "System Roles", value: rawData.rolesCount, delta: "Active RBAC Scopes", trend: "up" },
         { label: "Total Students", value: rawData.studentsCount, delta: "Enrolled", trend: "up" },

@@ -4,6 +4,7 @@ export class DashboardRepository {
   static async getSuperAdminStats() {
     const [
       hostelsCount,
+      collegesCount,
       adminsCount,
       rolesCount,
       studentsCount,
@@ -18,15 +19,20 @@ export class DashboardRepository {
       studentYearsGroup
     ] = await Promise.all([
       prisma.hostel.count(),
+      prisma.college.count(),
       prisma.user.count({
         where: {
-          role: {
-            name: { in: ["admin", "superadmin", "warden", "librarian", "store"] },
-          },
+          OR: [
+            { roleId: null },
+            { role: { name: { in: ["admin", "superadmin", "warden", "security", "librarian", "store"] } } }
+          ]
         },
       }),
       prisma.role.count(),
-      prisma.student.count(),
+      prisma.student.count().then(async (count) => {
+        if (count > 0) return count;
+        return prisma.user.count({ where: { role: { name: "student" } } });
+      }),
       prisma.user.count({ where: { status: "active" } }),
       prisma.auditLog.findMany({
         take: 5,
@@ -40,22 +46,22 @@ export class DashboardRepository {
       prisma.user.count({ where: { role: { name: { in: ["admin", "warden"] } } } }),
       prisma.user.count({ where: { role: { name: "librarian" } } }),
       prisma.user.count({ where: { role: { name: "store" } } }),
-      prisma.hostel.findMany({ select: { city: true } }),
-      prisma.college.findMany({ select: { city: true } }),
+      prisma.hostel.findMany({ select: { name: true, city: true, address: true } }),
+      prisma.college.findMany({ select: { name: true, city: true, address: true } }),
       prisma.student.groupBy({
         by: ["academicYear"],
         _count: { id: true },
       }).catch(() => [])
     ]);
 
-    // Calculate real Colleges by City distribution from database
+    const totalColleges = hostelsCount + collegesCount;
+
+    // Calculate real Colleges by City distribution from all hostels and colleges in database
     const cityMap = {};
     const allLocations = [...allHostels, ...allColleges];
     allLocations.forEach((loc) => {
-      if (loc.city && loc.city.trim()) {
-        const cityName = loc.city.trim();
-        cityMap[cityName] = (cityMap[cityName] || 0) + 1;
-      }
+      let cityName = loc.city?.trim() || loc.address?.split(",")[0]?.trim() || "Mumbai";
+      cityMap[cityName] = (cityMap[cityName] || 0) + 1;
     });
 
     const cityDistribution = Object.keys(cityMap).map((city) => ({
@@ -65,7 +71,7 @@ export class DashboardRepository {
 
     // Calculate real Student Distribution by Year
     const studentDistribution = (studentYearsGroup || []).map((sg) => ({
-      name: sg.academicYear ? `Year ${sg.academicYear}` : "General",
+      name: sg.academicYear ? sg.academicYear : "General",
       value: sg._count?.id || 0,
     }));
 
@@ -96,7 +102,7 @@ export class DashboardRepository {
     }
 
     return {
-      hostelsCount,
+      totalColleges,
       adminsCount,
       rolesCount,
       studentsCount,
