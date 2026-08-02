@@ -258,7 +258,15 @@ export const reportsApi = {
     const params = hostelId ? { hostelId } : {};
     return apiClient.get("/super_admin/reports", { params });
   },
+  async getSuperAdminStats(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
   async exportCsv(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  },
+  async downloadSuperAdminReport(hostelId = null) {
     const params = hostelId ? { hostelId } : {};
     return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
   }

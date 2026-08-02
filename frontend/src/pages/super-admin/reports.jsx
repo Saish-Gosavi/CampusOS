@@ -56,15 +56,16 @@ function ReportsPage() {
     async function loadStats() {
       try {
         const res = await reportsApi.getSuperAdminStats();
-        if (res.success && res.data) {
-          setStats(res.data);
-          setColleges(res.data.colleges || []);
+        const data = res?.data || res;
+        if (data) {
+          setStats(data);
+          setColleges(data.colleges || []);
         } else {
-          setError(res.message || "Failed to load reports");
+          setError(res?.message || "Failed to load reports");
         }
       } catch (err) {
         console.error("Error fetching reports", err);
-        setError("Failed to connect to backend server. Make sure the backend is running on port 5000.");
+        setError(err?.message || "Failed to load reports from server.");
       } finally {
         setLoading(false);
       }
@@ -78,8 +79,9 @@ function ReportsPage() {
     setFilterLoading(true);
     try {
       const res = await reportsApi.getSuperAdminStats(collegeId);
-      if (res.success && res.data) {
-        setStats(res.data);
+      const data = res?.data || res;
+      if (data) {
+        setStats(data);
       }
     } catch (err) {
       console.error("Filter failed", err);
