@@ -19,7 +19,7 @@ export const useHostels = (filters = {}) => {
     queryKey: HOSTEL_KEYS.list(filters),
     queryFn: async () => {
       const { data } = await api.get('/hostel/hostels', { params: filters });
-      return data.data; // Assuming your API returns { status: "success", data: [...] }
+      return data; // Assuming your API returns { status: "success", data: [...] }
     },
   });
 };
@@ -30,7 +30,7 @@ export const useHostel = (id) => {
     queryKey: HOSTEL_KEYS.detail(id),
     queryFn: async () => {
       const { data } = await api.get(`/hostel/hostels/${id}`);
-      return data.data;
+      return data;
     },
     enabled: !!id,
   });
@@ -43,7 +43,7 @@ export const useCreateHostel = () => {
   return useMutation({
     mutationFn: async (newHostel) => {
       const { data } = await api.post('/hostel/hostels', newHostel);
-      return data.data;
+      return data;
     },
     onSuccess: () => {
       // Invalidate and refetch
@@ -59,7 +59,7 @@ export const useUpdateHostel = () => {
   return useMutation({
     mutationFn: async ({ id, ...updateData }) => {
       const { data } = await api.patch(`/hostel/hostels/${id}`, updateData);
-      return data.data;
+      return data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: HOSTEL_KEYS.lists() });
@@ -75,7 +75,7 @@ export const useDeleteHostel = () => {
   return useMutation({
     mutationFn: async (id) => {
       const { data } = await api.delete(`/hostel/hostels/${id}`);
-      return data.data;
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: HOSTEL_KEYS.lists() });
