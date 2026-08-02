@@ -75,7 +75,7 @@ function StudentSidebar() {
       tooltip={item.title}
       className={cn(
         "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
-        active && "bg-[#2563EB] text-white hover:bg-[#1d4fd8] hover:text-white"
+        active && "bg-primary text-white hover:bg-primary/90 hover:text-white"
       )}
     >
               <Link to={item.url}>

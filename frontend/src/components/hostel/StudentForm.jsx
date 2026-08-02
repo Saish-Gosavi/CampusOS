@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 function Section({ title, icon, children }) {
   return <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">{icon}</span>
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">{icon}</span>
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">{children}</div>
@@ -134,7 +134,7 @@ function StudentForm({ initial, mode }) {
         <Button asChild variant="outline" type="button">
           <Link to="/hostel-admin/students"><X className="mr-1.5 h-4 w-4" /> Cancel</Link>
         </Button>
-        <Button type="submit" className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+        <Button type="submit" className="bg-primary hover:bg-primary/90">
           <Save className="mr-1.5 h-4 w-4" /> {mode === "add" ? "Save Student" : "Update Student"}
         </Button>
       </div>

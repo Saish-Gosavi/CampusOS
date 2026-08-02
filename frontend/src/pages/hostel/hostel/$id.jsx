@@ -56,7 +56,7 @@ function HostelDetailPage() {
             <Button asChild variant="outline">
               <Link to="/hostel-admin/hostels"><ArrowLeft className="mr-1.5 h-4 w-4" /> Back</Link>
             </Button>
-            <Button asChild className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+            <Button asChild className="bg-primary hover:bg-primary/90">
               <Link to="/hostel-admin/hostels/$id/edit" params={{ id: h.id }}>
                 <Pencil className="mr-1.5 h-4 w-4" /> Edit
               </Link>
@@ -125,7 +125,7 @@ function HostelDetailPage() {
                     <span className="text-muted-foreground">{occ}/{per}</span>
                   </div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                    <div className="h-full rounded-full bg-[#2563EB]" style={{ width: `${p}%` }} />
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${p}%` }} />
                   </div>
                 </div>;
   })}

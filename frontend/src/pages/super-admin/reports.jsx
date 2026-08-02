@@ -184,7 +184,7 @@ function ReportsPage() {
         <button
           onClick={handleDownloadReport}
           disabled={exporting}
-          className="inline-flex items-center gap-2 self-start rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:opacity-50"
+          className="inline-flex items-center gap-2 self-start rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 disabled:opacity-50"
         >
           {exporting ? (
             <>
@@ -215,14 +215,14 @@ function ReportsPage() {
               value={campusSearch}
               onChange={(e) => setCampusSearch(e.target.value)}
               placeholder="Search campuses..."
-              className="w-full rounded-lg border border-border bg-muted py-1.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-400 transition focus:border-[#2563EB] focus:bg-card"
+              className="w-full rounded-lg border border-border bg-muted py-1.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-400 transition focus:border-primary focus:bg-card"
             />
           </div>
 
           <select
             value={selectedCollege}
             onChange={handleCollegeChange}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#2563EB] min-w-[200px]"
+            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary min-w-[200px]"
           >
             <option value="">All Campuses ({colleges.length})</option>
             {filteredCampuses.map((col) => (
@@ -348,7 +348,7 @@ function ReportsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by college name..."
-            className="w-full rounded-lg border border-border bg-muted py-2.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-450 transition focus:border-[#2563EB] focus:bg-card"
+            className="w-full rounded-lg border border-border bg-muted py-2.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-450 transition focus:border-primary focus:bg-card"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">

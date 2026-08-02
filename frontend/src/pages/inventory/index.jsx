@@ -164,7 +164,7 @@ function InventoryDashboard() {
       <ChartCard
     title="Recent Activity"
     description="Latest procurement and stock events"
-    action={<button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
             View all <ArrowRight className="h-3.5 w-3.5" />
           </button>}
   >

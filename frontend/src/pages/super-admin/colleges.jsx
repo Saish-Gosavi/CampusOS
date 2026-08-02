@@ -176,11 +176,11 @@ function CollegesPage() {
             onClick={() => setImportModalOpen(true)}
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-muted"
           >
-            <FileSpreadsheet className="h-4 w-4 text-[#2563EB]" /> Import (Excel / PDF)
+            <FileSpreadsheet className="h-4 w-4 text-primary" /> Import (Excel / PDF)
           </button>
           <button
             onClick={openCreate}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8]"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90"
           >
             <Plus className="h-4 w-4" /> Add College
           </button>
@@ -218,7 +218,7 @@ function CollegesPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or city…"
-            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
         <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
@@ -227,7 +227,7 @@ function CollegesPage() {
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                statusFilter === s ? "bg-[#2563EB] text-white" : "text-muted-foreground hover:bg-muted"
+                statusFilter === s ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"
               }`}
             >
               {s}
@@ -308,7 +308,7 @@ function CollegesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-foreground">
-                          <ShieldCheck className="h-3.5 w-3.5 text-[#2563EB]" />
+                          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                           <span>{c.users.length} Admin(s)</span>
                         </span>
                       </td>
@@ -325,14 +325,14 @@ function CollegesPage() {
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => openManageAdmins(c)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-[#2563EB]/10 hover:text-[#2563EB]"
+                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                             title="Manage Admins & Credentials"
                           >
                             <UserPlus className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openEdit(c)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-[#2563EB]/10 hover:text-[#2563EB]"
+                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                             title="Edit College"
                           >
                             <Pencil className="h-4 w-4" />
@@ -441,7 +441,7 @@ function CollegeModal({ initial, onClose, onSave }) {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
               placeholder="e.g. VPPCOE"
             />
           </Field>
@@ -450,7 +450,7 @@ function CollegeModal({ initial, onClose, onSave }) {
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
               placeholder="e.g. Mumbai"
             />
           </Field>
@@ -458,7 +458,7 @@ function CollegeModal({ initial, onClose, onSave }) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -473,7 +473,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasHostel}
                 onChange={(e) => setHasHostel(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <Home className="h-4 w-4 text-purple-500" />
               <span>Hostel Management System</span>
@@ -483,7 +483,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasLibrary}
                 onChange={(e) => setHasLibrary(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <BookOpen className="h-4 w-4 text-blue-500" />
               <span>Library Management System</span>
@@ -493,7 +493,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasInventory}
                 onChange={(e) => setHasInventory(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <Package className="h-4 w-4 text-emerald-500" />
               <span>Inventory Management System</span>
@@ -511,7 +511,7 @@ function CollegeModal({ initial, onClose, onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
             >
               {submitting ? "Saving..." : initial ? "Save Changes" : "Create College"}
             </button>
@@ -599,7 +599,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
         <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-[#2563EB]" />
+              <Building2 className="h-5 w-5 text-primary" />
               Manage Sector Admins for {college.name}
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -618,7 +618,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
           {/* Section 1: Create New Sector Admin Credentials */}
           <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <UserPlus className="h-4 w-4 text-[#2563EB]" />
+              <UserPlus className="h-4 w-4 text-primary" />
               Create Sector Admin Credentials
             </h3>
 
@@ -635,7 +635,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -646,7 +646,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     placeholder="e.g. warden.vppcoe@campusos.com"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -657,7 +657,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="Set initial password"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -665,7 +665,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <select
                     value={sectorRole}
                     onChange={(e) => setSectorRole(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   >
                     {availableRoles.map((r) => (
                       <option key={r.name} value={r.name}>
@@ -678,7 +678,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
                   >
                     <KeyRound className="h-4 w-4" />
                     {submitting ? "Creating..." : "Create Admin Credentials"}
@@ -691,7 +691,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
           {/* Section 2: Active Admins for this College */}
           <div>
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
+              <ShieldCheck className="h-4 w-4 text-primary" />
               Assigned Administrators ({college.users?.length || 0})
             </h3>
 
@@ -818,7 +818,7 @@ function ImportPdfModal({ onClose, onRefresh }) {
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
           <div className="flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
               <FileSpreadsheet className="h-4 w-4" />
             </span>
             <div>
@@ -834,7 +834,7 @@ function ImportPdfModal({ onClose, onRefresh }) {
         <div className="p-5 flex flex-col gap-4">
           {!file ? (
             <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/20 p-8 text-center cursor-pointer hover:bg-muted/40 transition-colors">
-              <Upload className="h-8 w-8 text-[#2563EB]" />
+              <Upload className="h-8 w-8 text-primary" />
               <div>
                 <p className="text-sm font-medium text-foreground">Click to upload or drag & drop Excel / PDF</p>
                 <p className="text-xs text-muted-foreground mt-0.5">Supports PDF (.pdf), Excel (.xlsx, .xls), and CSV (.csv) files</p>
@@ -868,7 +868,7 @@ function ImportPdfModal({ onClose, onRefresh }) {
 
           {parsing && (
             <div className="py-6 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#2563EB] border-t-transparent" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               Parsing PDF document contents...
             </div>
           )}
@@ -916,7 +916,7 @@ function ImportPdfModal({ onClose, onRefresh }) {
               type="button"
               disabled={!file || parsing || extractedColleges.length === 0 || submitting}
               onClick={handleImportAll}
-              className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
             >
               {submitting ? "Importing..." : `Import ${extractedColleges.length} Colleges`}
             </button>

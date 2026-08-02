@@ -254,7 +254,7 @@ function AllocateWizardPage() {
       )}
     >
                     <div className="flex items-center gap-2">
-                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                      <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                         <BlocksIcon className="h-4 w-4" />
                       </span>
                       <div>

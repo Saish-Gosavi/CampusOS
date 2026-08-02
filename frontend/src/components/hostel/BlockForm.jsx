@@ -58,7 +58,7 @@ function BlockForm({ mode, block }) {
         <Button asChild variant="outline">
           <Link to="/hostel-admin/blocks"><X className="mr-1.5 h-4 w-4" /> Cancel</Link>
         </Button>
-        <Button type="submit" className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+        <Button type="submit" className="bg-primary hover:bg-primary/90">
           <Save className="mr-1.5 h-4 w-4" /> {mode === "add" ? "Create Block" : "Save Changes"}
         </Button>
       </div>

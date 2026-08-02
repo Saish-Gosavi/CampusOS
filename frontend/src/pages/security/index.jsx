@@ -115,7 +115,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Today's Entries"
     description="Recent students returning to campus"
-    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -136,7 +136,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Today's Exits"
     description="Students currently outside campus"
-    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -159,7 +159,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Recent Visitors"
     description="Latest visitor activity"
-    action={<Link to="/security/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
