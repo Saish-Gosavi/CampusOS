@@ -1,4 +1,4 @@
-import { createFileRoute, useSearch, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Users,
@@ -13,13 +13,13 @@ import {
   XCircle,
   UserCog,
   Shield,
-  Loader2
+  Loader2,
+  UserPlus
 } from "lucide-react";
 import { userApi, rolesApi } from "@/services/api";
 
 const Route = createFileRoute("/senior-admin/admins")({
-  component: AdminsPage,
-  validateSearch: (search) => ({ create: search.create }),
+  component: AdminsPage
 });
 
 const CAMPUSES = [
@@ -54,19 +54,6 @@ function AdminsPage() {
   const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-
-  const search = useSearch({ strict: false });
-  const navigate = useNavigate();
-
-  // Auto-open create modal when sidebar button passes ?create=true
-  useEffect(() => {
-    if (search?.create === "true") {
-      setEditing(null);
-      setModalOpen(true);
-      // Clear the param without adding to history
-      navigate({ to: "/senior-admin/admins", replace: true });
-    }
-  }, [search?.create]);
 
   const fetchAdmins = async () => {
     try {
@@ -201,6 +188,18 @@ function AdminsPage() {
               </p>
             </div>
           </div>
+        </div>
+        {/* Add Admin button — upper right corner */}
+        <div className="mt-3 flex items-center">
+          <button
+            onClick={() => { setEditing(null); setModalOpen(true); }}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #7B4CED, #2563EB)" }}
+            title="Add Sector Admin"
+          >
+            <UserPlus className="h-4 w-4" />
+            Add Admin
+          </button>
         </div>
       </div>
 
