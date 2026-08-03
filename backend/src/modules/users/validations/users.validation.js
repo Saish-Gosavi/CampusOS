@@ -9,5 +9,4 @@ export const createUserSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   roleId: z.number().int("Role ID must be an integer"),
   name: z.string().optional(),
-  hostelId: z.number().int().optional(),
 });

@@ -4,14 +4,14 @@ export class AuthRepository {
   static async findUserByEmail(email) {
     return prisma.user.findUnique({
       where: { email },
-      include: { role: true, hostel: true },
+      include: { role: true },
     });
   }
 
   static async findUserById(id) {
     return prisma.user.findUnique({
       where: { id },
-      include: { role: true, hostel: true },
+      include: { role: true },
     });
   }
 

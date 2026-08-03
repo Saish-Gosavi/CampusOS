@@ -15,7 +15,7 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import { userApi, rolesApi, collegeApi } from "@/services/api";
+import { userApi, rolesApi } from "@/services/api";
 
 const Route = createFileRoute("/super-admin/admins")({
   component: AdminsPage
@@ -47,7 +47,6 @@ function AdminsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
-  const [collegesList, setCollegesList] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -70,7 +69,7 @@ function AdminsPage() {
           name: u.name || u.email?.split("@")[0] || "User",
           email: u.email || "",
           module: formattedRole,
-          campus: u.hostel?.name || u.campus || "VPPCOE — Mumbai",
+          campus: u.campus || "VPPCOE — Mumbai",
           status: formattedStatus,
           raw: u,
         };
@@ -85,17 +84,16 @@ function AdminsPage() {
     }
   };
 
-    async function loadColleges() {
+  useEffect(() => {
+    async function loadRoles() {
       try {
-        const res = await collegeApi.getAll();
-        if (res.success && Array.isArray(res.data)) {
-          setCollegesList(res.data);
-        }
+        const res = await rolesApi.getAll();
+        const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        setRolesList(list);
       } catch (err) {
-        console.error("Failed to load colleges:", err);
+        console.error("Failed to load roles:", err);
       }
     }
-    loadColleges();
     loadRoles();
     fetchAdmins();
   }, []);
@@ -145,7 +143,6 @@ function AdminsPage() {
           password: data.password || "Password@123",
           roleId,
           status: "active",
-          hostelId: data.hostelId,
         });
         const created = res.data || res;
         setAdmins((prev) => [{
@@ -301,7 +298,6 @@ function AdminsPage() {
 
       {modalOpen && (
         <AdminModal
-          colleges={collegesList}
           initial={editing}
           onClose={() => setModalOpen(false)}
           onSave={save}
@@ -328,11 +324,11 @@ function KPI({ label, value, icon: Icon, tint }) {
   );
 }
 
-function AdminModal({ colleges = [], initial, onClose, onSave }) {
+function AdminModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [password, setPassword] = useState("");
-  const [collegeId, setCollegeId] = useState(initial?.raw?.hostelId || colleges[0]?.id || "");
+  const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
 
   function submit(e) {
     e.preventDefault();
@@ -341,15 +337,7 @@ function AdminModal({ colleges = [], initial, onClose, onSave }) {
       alert("Password is required to create a new Senior Admin");
       return;
     }
-    const matchedCollege = colleges.find((c) => c.id === Number(collegeId));
-    onSave({
-      name: name.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      hostelId: Number(collegeId),
-      campus: matchedCollege ? matchedCollege.name : "",
-      status: "Active"
-    });
+    onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "Active" });
   }
 
   return (
@@ -399,12 +387,12 @@ function AdminModal({ colleges = [], initial, onClose, onSave }) {
           )}
           <Field label="Campus">
             <select
-              value={collegeId}
-              onChange={(e) => setCollegeId(Number(e.target.value))}
+              value={campus}
+              onChange={(e) => setCampus(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
             >
-              {colleges.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+              {CAMPUSES.map((c) => (
+                <option key={c}>{c}</option>
               ))}
             </select>
           </Field>

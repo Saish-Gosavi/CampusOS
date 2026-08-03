@@ -197,7 +197,6 @@ export default function AppRoutes() {
       >
         <Route index element={<SeniorAdminIndex.component />} />
         <Route path="admins" element={<SeniorAdminAdmins.component />} />
-        <Route path="colleges" element={<SeniorAdminColleges.component />} />
         <Route path="settings" element={<SeniorAdminSettings.component />} />
         <Route path="profile" element={<SeniorAdminProfile.component />} />
       </Route>

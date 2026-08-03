@@ -22,7 +22,7 @@ export class UsersRepository {
 
   static async findAll() {
     return prisma.user.findMany({
-      include: { role: true, hostel: true },
+      include: { role: true },
     });
   }
 

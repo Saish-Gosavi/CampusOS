@@ -4,8 +4,8 @@ import { apiResponse } from "../../../helpers/response.helper.js";
 export class DashboardController {
   static async getSuperAdminStats(req, res, next) {
     try {
-      const data = await DashboardService.getSuperAdminDashboard(req.user);
-      return apiResponse.success(res, data, "Dashboard statistics retrieved");
+      const data = await DashboardService.getSuperAdminDashboard();
+      return apiResponse.success(res, data, "Super Admin dashboard statistics retrieved");
     } catch (error) {
       next(error);
     }
