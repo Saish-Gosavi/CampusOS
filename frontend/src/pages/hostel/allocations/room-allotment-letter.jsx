@@ -124,8 +124,8 @@ function HostelRoomAllotmentLetterPage() {
       toast.error("Only PDF or DOCX files are allowed for the template.");
       return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error("Template file must be under 100 MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Template file must be under 10 MB.");
       return;
     }
     setTemplateFile(file);
@@ -138,8 +138,8 @@ function HostelRoomAllotmentLetterPage() {
       toast.error("Only PDF or DOCX files are allowed.");
       return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      toast.error("Template file must be under 100 MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Template file must be under 10 MB.");
       return;
     }
     setTemplateFile(file);
@@ -481,7 +481,7 @@ function HostelRoomAllotmentLetterPage() {
                   Drag & drop here, or{" "}
                   <span className="text-primary underline underline-offset-2">browse</span>
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">PDF or DOCX · Max 100 MB</p>
+                <p className="text-xs text-muted-foreground mt-1">PDF or DOCX · Max 10 MB</p>
               </div>
             </div>
           )}
