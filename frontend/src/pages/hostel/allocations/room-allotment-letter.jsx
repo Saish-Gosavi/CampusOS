@@ -6,7 +6,6 @@ import {
   Trash2,
   Printer,
   Upload,
-  ImagePlus,
   X,
   Building,
   User,
@@ -16,13 +15,12 @@ import {
   FileCheck,
   RefreshCw,
   Download,
-  Eye,
 } from "lucide-react";
 import { allotmentLetterApi, allotmentTemplateApi } from "@/services/api";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import {
   Dialog,
   DialogContent,
@@ -57,7 +55,6 @@ const ALLOWED_TEMPLATE = [
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/msword",
 ];
-const ALLOWED_IMAGE = ["image/png", "image/jpeg", "image/jpg"];
 
 /* ─────────────────────────── component ─────────────────────────── */
 function HostelRoomAllotmentLetterPage() {
@@ -73,16 +70,11 @@ function HostelRoomAllotmentLetterPage() {
   const [selectedLetter, setSelectedLetter] = useState(null);
 
   // Upload form state
-  const [templateName, setTemplateName] = useState("");
-  const [templateDesc, setTemplateDesc] = useState("");
   const [templateFile, setTemplateFile] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
   const [dragOver, setDragOver] = useState(false);
-  const [imageDragOver, setImageDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const fileInputRef = useRef(null);
-  const imageInputRef = useRef(null);
 
   /* ── fetch ── */
   const fetchData = useCallback(async () => {
@@ -138,27 +130,11 @@ function HostelRoomAllotmentLetterPage() {
     setTemplateFile(file);
   };
 
-  const onImageDrop = (e) => {
-    e.preventDefault();
-    setImageDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_IMAGE.includes(file.type)) {
-      toast.error("Only PNG or JPG images are allowed.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5 MB.");
-      return;
-    }
-    setImageFile(file);
-  };
-
   const onTemplateFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ALLOWED_TEMPLATE.includes(file.type)) {
-      toast.error("Only PDF or DOCX files are allowed for the template.");
+      toast.error("Only PDF or DOCX files are allowed.");
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -168,37 +144,15 @@ function HostelRoomAllotmentLetterPage() {
     setTemplateFile(file);
   };
 
-  const onImageFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_IMAGE.includes(file.type)) {
-      toast.error("Only PNG or JPG images are allowed.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image must be under 5 MB.");
-      return;
-    }
-    setImageFile(file);
-  };
-
   /* ── reset form ── */
   const resetForm = () => {
-    setTemplateName("");
-    setTemplateDesc("");
     setTemplateFile(null);
-    setImageFile(null);
     setShowReplaceConfirm(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
-    if (imageInputRef.current) imageInputRef.current.value = "";
   };
 
   /* ── submit upload ── */
   const handleUpload = async (replaceExisting = false) => {
-    if (!templateName.trim()) {
-      toast.error("Template name is required.");
-      return;
-    }
     if (!templateFile) {
       toast.error("Please upload a PDF or DOCX template file.");
       return;
@@ -213,10 +167,10 @@ function HostelRoomAllotmentLetterPage() {
     setUploading(true);
     try {
       const fd = new FormData();
-      fd.append("name", templateName.trim());
-      if (templateDesc.trim()) fd.append("description", templateDesc.trim());
+      // Auto-generate name from filename (strip extension)
+      const autoName = templateFile.name.replace(/\.[^.]+$/, "") || "Allotment Format";
+      fd.append("name", autoName);
       fd.append("templateFile", templateFile);
-      if (imageFile) fd.append("templateImage", imageFile);
       fd.append("replaceExisting", String(replaceExisting));
 
       const res = await allotmentTemplateApi.upload(fd);
@@ -458,260 +412,153 @@ function HostelRoomAllotmentLetterPage() {
         </div>
       )}
 
-      {/* ───────── Upload Allotment Format Modal ───────── */}
+      {/* ───────── Upload Format Modal ───────── */}
       <Dialog
         open={isUploadOpen}
         onOpenChange={(open) => {
-          if (!open) {
-            resetForm();
-          }
+          if (!open) resetForm();
           setIsUploadOpen(open);
         }}
       >
-        <DialogContent className="sm:max-w-[580px] max-h-[92vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Upload Allotment Format</DialogTitle>
-            <DialogDescription>
-              Upload an official PDF or DOCX template. Only one template is active at a time.
-            </DialogDescription>
+            <DialogTitle className="text-xl font-bold">Upload Format</DialogTitle>
           </DialogHeader>
 
           {/* Replace warning */}
-          {activeTemplate && (
+          {activeTemplate && !showReplaceConfirm && (
             <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
               <span>
-                An active template <strong>"{activeTemplate.name}"</strong> already exists.
-                Uploading a new one will replace it after confirmation.
+                An active format <strong>"{activeTemplate.name}"</strong> already exists.
+                Uploading a new one will replace it.
               </span>
             </div>
           )}
 
-          <div className="space-y-5 pt-1">
-            {/* Template Name */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" htmlFor="tpl-name">
-                Template Name <span className="text-rose-500">*</span>
-              </label>
-              <Input
-                id="tpl-name"
-                placeholder="e.g. Boys Hostel Allotment Letter 2025-26"
-                value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
-              />
+          {/* Drag & Drop zone or file preview */}
+          {templateFile ? (
+            <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-4">
+              <FileCheck className="h-9 w-9 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm truncate">{templateFile.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {fileTypeLabel(templateFile.type)} · {formatBytes(templateFile.size)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setTemplateFile(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="rounded-md p-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Remove file"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
-
-            {/* Description */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold" htmlFor="tpl-desc">
-                Description{" "}
-                <span className="text-muted-foreground font-normal">(optional)</span>
-              </label>
-              <textarea
-                id="tpl-desc"
-                placeholder="Brief description of this template..."
-                value={templateDesc}
-                onChange={(e) => setTemplateDesc(e.target.value)}
-                rows={2}
-                maxLength={500}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
+          ) : (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={onTemplateDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-14 cursor-pointer transition-colors ${
+                dragOver
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
+              }`}
+            >
+              <Upload
+                className={`h-9 w-9 transition-colors ${
+                  dragOver ? "text-primary" : "text-muted-foreground"
+                }`}
               />
-              <p className="text-xs text-muted-foreground text-right">
-                {templateDesc.length}/500
-              </p>
+              <div className="text-center">
+                <p className="text-sm font-medium">
+                  Drag & drop here, or{" "}
+                  <span className="text-primary underline underline-offset-2">browse</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">PDF or DOCX · Max 10 MB</p>
+              </div>
             </div>
+          )}
 
-            {/* Template file drag & drop */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold">
-                Template File <span className="text-rose-500">*</span>
-                <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                  (PDF or DOCX — max 10 MB)
-                </span>
-              </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            className="hidden"
+            onChange={onTemplateFileChange}
+          />
 
-              {templateFile ? (
-                <div className="flex items-center gap-3 rounded-lg border border-primary/40 bg-primary/5 px-4 py-3">
-                  <FileCheck className="h-8 w-8 text-primary shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{templateFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {fileTypeLabel(templateFile.type)} · {formatBytes(templateFile.size)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTemplateFile(null);
-                      if (fileInputRef.current) fileInputRef.current.value = "";
-                    }}
-                    className="rounded-md p-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Remove file"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={onTemplateDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-10 cursor-pointer transition-colors ${
-                    dragOver
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
-                  }`}
-                >
-                  <Upload
-                    className={`h-8 w-8 transition-colors ${
-                      dragOver ? "text-primary" : "text-muted-foreground"
-                    }`}
-                  />
-                  <p className="text-sm font-medium">
-                    Drag & drop here, or{" "}
-                    <span className="text-primary underline underline-offset-2">browse</span>
+          {/* Replace confirmation */}
+          {showReplaceConfirm && (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 space-y-3">
+              <div className="flex items-start gap-2.5 text-sm text-rose-800">
+                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-rose-600" />
+                <div>
+                  <p className="font-semibold">Replace existing format?</p>
+                  <p className="text-xs mt-0.5">
+                    The current format <strong>"{activeTemplate?.name}"</strong> will be permanently
+                    removed. This cannot be undone.
                   </p>
-                  <p className="text-xs text-muted-foreground">PDF or DOCX · Max 10 MB</p>
-                </div>
-              )}
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                className="hidden"
-                onChange={onTemplateFileChange}
-              />
-            </div>
-
-            {/* Optional image upload */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold">
-                Header / Letterhead Image{" "}
-                <span className="text-muted-foreground font-normal">(optional · PNG or JPG · max 5 MB)</span>
-              </label>
-
-              {imageFile ? (
-                <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3">
-                  <ImagePlus className="h-7 w-7 text-blue-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{imageFile.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {fileTypeLabel(imageFile.type)} · {formatBytes(imageFile.size)}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setImageFile(null);
-                      if (imageInputRef.current) imageInputRef.current.value = "";
-                    }}
-                    className="rounded-md p-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Remove image"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setImageDragOver(true); }}
-                  onDragLeave={() => setImageDragOver(false)}
-                  onDrop={onImageDrop}
-                  onClick={() => imageInputRef.current?.click()}
-                  className={`flex items-center gap-3 rounded-lg border border-dashed px-4 py-4 cursor-pointer transition-colors ${
-                    imageDragOver
-                      ? "border-primary bg-primary/5"
-                      : "border-border bg-muted/10 hover:border-primary/40 hover:bg-muted/20"
-                  }`}
-                >
-                  <ImagePlus className="h-6 w-6 text-muted-foreground shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Drop an image or{" "}
-                      <span className="text-primary underline underline-offset-2">browse</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">PNG · JPG · max 5 MB</p>
-                  </div>
-                </div>
-              )}
-
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
-                className="hidden"
-                onChange={onImageFileChange}
-              />
-            </div>
-
-            {/* Replace confirmation inline */}
-            {showReplaceConfirm && (
-              <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 space-y-3">
-                <div className="flex items-start gap-2.5 text-sm text-rose-800">
-                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-rose-600" />
-                  <div>
-                    <p className="font-semibold">Replace existing template?</p>
-                    <p className="text-xs mt-0.5">
-                      The current template <strong>"{activeTemplate?.name}"</strong> will be
-                      permanently deactivated and its file deleted. This action cannot be undone.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => setShowReplaceConfirm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
-                    disabled={uploading}
-                    onClick={() => handleUpload(true)}
-                  >
-                    {uploading ? "Uploading..." : "Yes, Replace & Save"}
-                  </Button>
                 </div>
               </div>
-            )}
-
-            {/* Action buttons */}
-            {!showReplaceConfirm && (
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <div className="flex gap-2">
                 <Button
-                  type="button"
+                  size="sm"
                   variant="outline"
-                  onClick={() => {
-                    resetForm();
-                    setIsUploadOpen(false);
-                  }}
+                  className="flex-1"
+                  onClick={() => setShowReplaceConfirm(false)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  onClick={() => handleUpload(false)}
-                  disabled={uploading || !templateFile || !templateName.trim()}
-                  className="gap-2"
+                  size="sm"
+                  className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
+                  disabled={uploading}
+                  onClick={() => handleUpload(true)}
                 >
-                  {uploading ? (
-                    <>
-                      <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4" />
-                      Save Template
-                    </>
-                  )}
+                  {uploading ? "Uploading..." : "Yes, Replace & Save"}
                 </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          {!showReplaceConfirm && (
+            <div className="flex justify-end gap-2 pt-1 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  resetForm();
+                  setIsUploadOpen(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleUpload(false)}
+                disabled={uploading || !templateFile}
+                className="gap-2"
+              >
+                {uploading ? (
+                  <>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Save
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
