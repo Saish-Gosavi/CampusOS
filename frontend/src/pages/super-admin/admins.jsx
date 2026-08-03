@@ -145,9 +145,9 @@ function AdminsPage() {
         const res = await userApi.create({
           name: data.name,
           email: data.email,
-          password: "Password@123",
+          password: data.password || "Password@123",
           roleId,
-          status: data.status.toLowerCase(),
+          status: "active",
         });
         const created = res.data || res;
         setAdmins((prev) => [{
@@ -356,13 +356,17 @@ function KPI({ label, value, icon: Icon, tint }) {
 function AdminModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
+  const [password, setPassword] = useState("");
   const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
-  const [status, setStatus] = useState(initial?.status ?? "Pending");
 
   function submit(e) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
-    onSave({ name: name.trim(), email: email.trim(), campus, status });
+    if (!initial && !password.trim()) {
+      alert("Password is required to create a new Senior Admin");
+      return;
+    }
+    onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "Active" });
   }
 
   return (
@@ -398,26 +402,18 @@ function AdminModal({ initial, onClose, onSave }) {
               required
             />
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Role">
+          {!initial && (
+            <Field label="Password">
               <input
-                value="Senioradmin"
-                disabled
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none cursor-not-allowed"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Set login password"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+                required
               />
             </Field>
-            <Field label="Status">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
-              >
-                <option>Active</option>
-                <option>Pending</option>
-                <option>Inactive</option>
-              </select>
-            </Field>
-          </div>
+          )}
           <Field label="Campus">
             <select
               value={campus}
