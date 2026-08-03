@@ -47,7 +47,7 @@ function AdminSidebar() {
     : [
         { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
         { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
-        { title: "Admins", url: "/super-admin/admins", icon: Users }
+        { title: "Senior Admin", url: "/super-admin/admins", icon: Users }
       ];
 
   const insightItems = isSeniorAdmin
