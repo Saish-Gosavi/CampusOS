@@ -42,6 +42,7 @@ import { Route as HostelBeds } from "@/pages/hostel/beds/index";
 import { Route as HostelBedAdd } from "@/pages/hostel/beds/add";
 import { Route as HostelBedEdit } from "@/pages/hostel/beds/$id.edit";
 import { Route as HostelAllocations } from "@/pages/hostel/allocations/index";
+import { Route as HostelRoomAllotmentLetter } from "@/pages/hostel/allocations/room-allotment-letter";
 import { Route as HostelAllocationNew } from "@/pages/hostel/allocations/new";
 import { Route as HostelAllocationChange } from "@/pages/hostel/allocations/change";
 import { Route as HostelAllocationHistory } from "@/pages/hostel/allocations/history";
@@ -194,6 +195,7 @@ export default function AppRoutes() {
         <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
         <Route path="rooms/add" element={<HostelRoomAdd.component />} />
         <Route path="allocation" element={<HostelAllocations.component />} />
+        <Route path="allocation/allotment-letter" element={<HostelRoomAllotmentLetter.component />} />
         <Route path="allocation/new" element={<HostelAllocationNew.component />} />
         <Route path="allocation/change" element={<HostelAllocationChange.component />} />
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />

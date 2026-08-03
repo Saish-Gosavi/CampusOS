@@ -272,3 +272,40 @@ export const reportsApi = {
   }
 };
 
+export const allotmentLetterApi = {
+  async getAll() {
+    return apiClient.get("/hostel/room-allotment-letters");
+  },
+  async getById(id) {
+    return apiClient.get(`/hostel/room-allotment-letters/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/hostel/room-allotment-letters", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/room-allotment-letters/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/room-allotment-letters/${id}`);
+  }
+};
+
+export const allotmentTemplateApi = {
+  async getActive() {
+    return apiClient.get("/hostel/allotment-template/active");
+  },
+  async getAll() {
+    return apiClient.get("/hostel/allotment-template");
+  },
+  async upload(formData) {
+    return apiClient.post("/hostel/allotment-template/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 30000,
+    });
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/allotment-template/${id}`);
+  },
+};
+
+

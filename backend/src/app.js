@@ -49,6 +49,7 @@ app.use(cookieParser());
 
 // 6. Serve static files from uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

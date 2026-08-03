@@ -68,6 +68,7 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
+  allotmentTemplates AllotmentTemplate[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -208,17 +209,32 @@ model SecurityStaff {
 // ==========================================
 
 model Allocation {
-  id        Int      @id @default(autoincrement())
-  bedId     Int
-  bed       Bed      @relation(fields: [bedId], references: [id], onDelete: Restrict)
-  studentId Int
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Restrict)
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("active") // "active", "completed", "cancelled"
+  id              Int                  @id @default(autoincrement())
+  bedId           Int
+  bed             Bed                  @relation(fields: [bedId], references: [id], onDelete: Restrict)
+  studentId       Int
+  student         Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  startDate       DateTime
+  endDate         DateTime
+  status          String               @default("active") // "active", "completed", "cancelled"
+  allotmentLetter RoomAllotmentLetter?
 
   @@index([bedId])
   @@index([studentId])
+}
+
+model RoomAllotmentLetter {
+  id           Int        @id @default(autoincrement())
+  allocationId Int        @unique
+  allocation   Allocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  referenceNo  String     @unique
+  issuedDate   DateTime   @default(now())
+  terms        String?    @db.Text
+  signedBy     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([allocationId])
 }
 
 model LeaveRequest {
@@ -432,4 +448,26 @@ model Notice {
   createdBy   User      @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
+}
+
+// ==========================================
+// Allotment Template Upload
+// ==========================================
+
+model AllotmentTemplate {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?  @db.Text
+  filePath      String
+  fileName      String
+  fileType      String   // "pdf" or "docx"
+  imagePath     String?
+  imageFileName String?
+  isActive      Boolean  @default(true)
+  uploadedBy    Int?
+  user          User?    @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([uploadedBy])
 }

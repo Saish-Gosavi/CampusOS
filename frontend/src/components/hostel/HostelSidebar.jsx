@@ -18,7 +18,8 @@ import {
   CalendarDays,
   UserRoundCheck,
   DoorOpen,
-  Armchair
+  Armchair,
+  FileText
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,6 +46,7 @@ const mainItems = [
   { title: "Room Management", url: "/hostel-admin/rooms", icon: DoorClosed },
   { title: "Bed Management", url: "/hostel-admin/beds", icon: BedDouble },
   { title: "Room Allocation", url: "/hostel-admin/allocation", icon: BedDouble },
+  { title: "Allotment Letters", url: "/hostel-admin/allocation/allotment-letter", icon: FileText },
   { title: "Staff Management", url: "/hostel-admin/staff", icon: UserCog }
 ];
 const opsItems = [
