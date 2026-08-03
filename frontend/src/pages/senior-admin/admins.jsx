@@ -100,7 +100,7 @@ function AdminsPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return admins.filter((a) => {
-      const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.campus.toLowerCase().includes(q);
+      const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
       const mM = moduleFilter === "All" || a.module.toLowerCase() === moduleFilter.toLowerCase();
       return mQ && mM;
     });
@@ -178,7 +178,7 @@ function AdminsPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, email or campus..."
+            placeholder="Search by name or email..."
             className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
@@ -204,14 +204,13 @@ function AdminsPage() {
               <tr>
                 <th className="px-4 py-3 font-medium">Admin</th>
                 <th className="px-4 py-3 font-medium">Module / Role</th>
-                <th className="px-4 py-3 font-medium">Campus</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-foreground">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={3} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading live data...
@@ -220,7 +219,7 @@ function AdminsPage() {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={3} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     {error || "No admins match your filters."}
                   </td>
                 </tr>
@@ -252,12 +251,6 @@ function AdminsPage() {
                         >
                           {m.label}
                         </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 text-foreground">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          {a.campus}
-                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
