@@ -1,4 +1,5 @@
 import React from "react";
+import { Building2 } from "lucide-react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
@@ -248,28 +249,18 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<HostelIndex.component />} />
-        <Route path="hostels" element={<HostelIndex.component />} />
+        <Route path="hostels" element={<GenericModuleShell title="Hostel" description="Manage hostel buildings, blocks, floors and rooms." />} />
         <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
         <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
-        <Route path="students" element={<HostelIndex.component />} />
-        <Route path="staff" element={<HostelIndex.component />} />
-        <Route path="fees" element={<HostelFees.component />} />
-        <Route path="leaves" element={<HostelLeaves.component />} />
-        <Route path="visitors" element={<HostelVisitors.component />} />
-        <Route path="in-out" element={<HostelIndex.component />} />
-        <Route path="complaints" element={<HostelComplaints.component />} />
-        <Route path="notices" element={<HostelIndex.component />} />
-        <Route path="reports" element={<GenericModuleShell title="Reports & Analytics" description="View system metrics and download hostel reports." />} />
-        
-        {/* Sub-routes */}
-        <Route path="rooms" element={<HostelRooms.component />} />
-        <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
-        <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
-        <Route path="rooms/add" element={<HostelRoomAdd.component />} />
-        <Route path="allocation" element={<HostelAllocations.component />} />
-        <Route path="allocation/new" element={<HostelAllocationNew.component />} />
-        <Route path="allocation/change" element={<HostelAllocationChange.component />} />
-        <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
+        <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
+        <Route path="staff" element={<GenericModuleShell title="Staff Management" description="Manage hostel staff members, roles and schedules." />} />
+        <Route path="fees" element={<GenericModuleShell title="Fees Management" description="Track and manage hostel fee collection and dues." />} />
+        <Route path="leaves" element={<GenericModuleShell title="Leave Management" description="Review and approve student and staff leave requests." />} />
+        <Route path="visitors" element={<GenericModuleShell title="Visitor Management" description="Register and track all hostel visitor entries." />} />
+        <Route path="in-out" element={<GenericModuleShell title="In Out Register" description="Monitor student and staff entry and exit logs." />} />
+        <Route path="complaints" element={<GenericModuleShell title="Complaints" description="Receive and resolve hostel complaints and grievances." />} />
+        <Route path="notices" element={<GenericModuleShell title="Notice Board" description="Post and manage official hostel notices and announcements." />} />
+        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 
       {/* Warden Dashboard Routes */}
