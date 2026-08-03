@@ -8,7 +8,8 @@ async function audit(userId, action, details) {
       data: {
         userId: Number(userId),
         action,
-        details: typeof details === "string" ? details : JSON.stringify(details),
+        module: "Global Notice",
+        description: typeof details === "string" ? details : JSON.stringify(details),
       },
     });
   } catch (err) {

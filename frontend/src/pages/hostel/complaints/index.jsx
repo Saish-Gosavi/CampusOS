@@ -312,7 +312,7 @@ function ComplaintsPage() {
                         </button>
                         {c.status !== "Resolved" && c.status !== "Closed" && <button
       onClick={() => openAssign(c)}
-      className="flex-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-[#3B82F6] hover:bg-[#3B82F6]/10"
+      className="flex-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-[#3B82F6] hover:bg-primary/80/10"
     >
                             Assign
                           </button>}
@@ -398,7 +398,7 @@ function ComplaintsPage() {
                           <button
     onClick={() => openAssign(c)}
     title="Assign"
-    className="grid h-8 w-8 place-items-center rounded-lg text-[#3B82F6] hover:bg-[#3B82F6]/10"
+    className="grid h-8 w-8 place-items-center rounded-lg text-[#3B82F6] hover:bg-primary/80/10"
   >
                             <UserCog className="h-4 w-4" />
                           </button>
@@ -555,7 +555,7 @@ function ComplaintsPage() {
                 <Button variant="outline" onClick={() => setAssigning(null)}>
                   Cancel
                 </Button>
-                <Button onClick={submitAssign} disabled={!assignee} className="bg-[#3B82F6] hover:bg-[#2563EB]">
+                <Button onClick={submitAssign} disabled={!assignee} className="bg-primary/80 hover:bg-primary">
                   Assign
                 </Button>
               </DialogFooter>

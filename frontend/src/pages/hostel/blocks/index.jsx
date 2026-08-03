@@ -40,7 +40,7 @@ function BlocksPage() {
     icon={Blocks}
     tint="#2563EB"
     breadcrumbs={[{ label: "Block Management" }]}
-    action={<Button asChild className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+    action={<Button asChild className="bg-primary hover:bg-primary/90">
             <Link to="/hostel-admin/blocks/add">
               <Plus className="mr-1.5 h-4 w-4" /> Add Block
             </Link>
@@ -113,7 +113,7 @@ function BlocksPage() {
     return <tr key={b.id} className="border-t border-border transition-colors hover:bg-muted/30">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                           <Blocks className="h-4 w-4" />
                         </span>
                         <span className="font-medium text-foreground">{b.name}</span>
@@ -164,7 +164,7 @@ function BlocksPage() {
     return <div key={b.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                     <Blocks className="h-4 w-4" />
                   </span>
                   <div>

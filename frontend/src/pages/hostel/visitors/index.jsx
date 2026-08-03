@@ -278,7 +278,7 @@ function VisitorsPage() {
                       {r.status === "Approved" && <button
     onClick={() => setStatus(r, "Checked-In", `${r.visitorName} checked in`)}
     title="Check-In"
-    className="grid h-8 w-8 place-items-center rounded-lg text-[#1D4ED8] hover:bg-[#3B82F6]/10"
+    className="grid h-8 w-8 place-items-center rounded-lg text-[#1D4ED8] hover:bg-primary/80/10"
   >
                           <LogIn className="h-4 w-4" />
                         </button>}

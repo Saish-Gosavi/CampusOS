@@ -9,7 +9,6 @@ import {
   Save,
   RotateCcw
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { toast } from "sonner";
 import { settingsApi } from "@/services/api";
 
@@ -127,8 +126,7 @@ function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Settings" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}
@@ -156,7 +154,7 @@ function SettingsPage() {
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 disabled:opacity-50"
           >
             <Save className="h-4 w-4" />
             {isSaving ? "Saving..." : "Save Settings"}
@@ -177,7 +175,7 @@ function SettingsPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   isActive
-                    ? "bg-[#2563EB] text-white shadow-sm"
+                    ? "bg-primary text-white shadow-sm"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
@@ -436,7 +434,7 @@ function SettingsPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-6 py-2 text-sm font-medium text-white transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-medium text-white transition hover:bg-primary/90 disabled:opacity-50"
               >
                 <Save className="h-4 w-4" />
                 {isSaving ? "Saving..." : "Save Settings"}
@@ -502,7 +500,7 @@ function ToggleOption({ title, description, checked, onChange }) {
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-          checked ? "bg-[#2563EB]" : "bg-slate-200"
+          checked ? "bg-primary" : "bg-slate-200"
         }`}
       >
         <span

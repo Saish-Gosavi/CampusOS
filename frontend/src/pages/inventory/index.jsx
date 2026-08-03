@@ -26,7 +26,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { InventoryBreadcrumbs } from "@/components/inventory/InventoryBreadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
@@ -60,8 +59,7 @@ function InventoryDashboard() {
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <InventoryBreadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back, Inventory Admin
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -164,7 +162,7 @@ function InventoryDashboard() {
       <ChartCard
     title="Recent Activity"
     description="Latest procurement and stock events"
-    action={<button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
             View all <ArrowRight className="h-3.5 w-3.5" />
           </button>}
   >

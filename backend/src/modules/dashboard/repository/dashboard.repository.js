@@ -18,36 +18,32 @@ export class DashboardRepository {
       allColleges,
       studentYearsGroup
     ] = await Promise.all([
-      prisma.hostel.count(),
-      prisma.college.count(),
+      prisma.hostel.count().catch(() => 0),
+      prisma.college.count().catch(() => 0),
       prisma.user.count({
         where: {
-          OR: [
-            { roleId: null },
-            { role: { name: { in: ["admin", "superadmin", "warden", "security", "librarian", "store"] } } }
-          ]
+          role: {
+            name: { in: ["admin", "superadmin", "warden", "security", "librarian", "store"] },
+          },
         },
-      }),
-      prisma.role.count(),
-      prisma.student.count().then(async (count) => {
-        if (count > 0) return count;
-        return prisma.user.count({ where: { role: { name: "student" } } });
-      }),
-      prisma.user.count({ where: { status: "active" } }),
+      }).catch(() => 0),
+      prisma.role.count().catch(() => 0),
+      prisma.student.count().catch(() => 0),
+      prisma.user.count({ where: { status: "active" } }).catch(() => 0),
       prisma.auditLog.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
         include: { user: true },
-      }),
+      }).catch(() => []),
       prisma.hostel.findMany({
         take: 5,
         include: { blocks: true },
-      }),
-      prisma.user.count({ where: { role: { name: { in: ["admin", "warden"] } } } }),
-      prisma.user.count({ where: { role: { name: "librarian" } } }),
-      prisma.user.count({ where: { role: { name: "store" } } }),
-      prisma.hostel.findMany({ select: { name: true, city: true, address: true } }),
-      prisma.college.findMany({ select: { name: true, city: true, address: true } }),
+      }).catch(() => []),
+      prisma.user.count({ where: { role: { name: { in: ["admin", "warden"] } } } }).catch(() => 0),
+      prisma.user.count({ where: { role: { name: "librarian" } } }).catch(() => 0),
+      prisma.user.count({ where: { role: { name: "store" } } }).catch(() => 0),
+      prisma.hostel.findMany({ select: { name: true, city: true, address: true } }).catch(() => []),
+      prisma.college.findMany({ select: { name: true, city: true, address: true } }).catch(() => []),
       prisma.student.groupBy({
         by: ["academicYear"],
         _count: { id: true },
@@ -60,7 +56,7 @@ export class DashboardRepository {
     const cityMap = {};
     const allLocations = [...allHostels, ...allColleges];
     allLocations.forEach((loc) => {
-      let cityName = loc.city?.trim() || loc.address?.split(",")[0]?.trim() || "Mumbai";
+      let cityName = loc.city?.trim() || loc.address?.split(",")[0]?.trim() || "Campus Main";
       cityMap[cityName] = (cityMap[cityName] || 0) + 1;
     });
 
@@ -84,20 +80,33 @@ export class DashboardRepository {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 0, 23, 59, 59, 999);
       const monthName = monthStart.toLocaleString("default", { month: "short" });
 
-      const [hostelAllocations, hostelComplaints, hostelLeaves, libraryIssues, libraryReservations, auditLogsCount] = await Promise.all([
-        prisma.allocation.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }),
-        prisma.complaint.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
-        prisma.leaveRequest.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }),
-        prisma.bookIssue.count({ where: { issueDate: { gte: monthStart, lte: monthEnd } } }),
-        prisma.reservation.count({ where: { reservationDate: { gte: monthStart, lte: monthEnd } } }),
-        prisma.auditLog.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
+      const [
+        hostelAllocations,
+        hostelComplaints,
+        hostelLeaves,
+        hostelAuditLogs,
+        libraryIssues,
+        libraryReservations,
+        libraryAuditLogs,
+        inventoryRequests,
+        inventoryAuditLogs
+      ] = await Promise.all([
+        prisma.allocation.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.complaint.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.leaveRequest.count({ where: { startDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Hostel", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.bookIssue.count({ where: { issueDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.reservation.count({ where: { reservationDate: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Library", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.inventoryRequest.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
+        prisma.auditLog.count({ where: { module: "Inventory", createdAt: { gte: monthStart, lte: monthEnd } } }).catch(() => 0),
       ]);
 
       monthlyUsage.push({
         month: monthName,
-        Hostel: hostelAllocations + hostelComplaints + hostelLeaves,
-        Library: libraryIssues + libraryReservations,
-        Inventory: auditLogsCount,
+        Hostel: hostelAllocations + hostelComplaints + hostelLeaves + hostelAuditLogs,
+        Library: libraryIssues + libraryReservations + libraryAuditLogs,
+        Inventory: inventoryRequests + inventoryAuditLogs,
       });
     }
 

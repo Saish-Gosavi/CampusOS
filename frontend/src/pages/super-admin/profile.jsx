@@ -13,7 +13,6 @@ import {
   UserCheck,
   Sparkles
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { useAuth } from "@/context/AuthContext";
 import { userApi, authApi } from "@/services/api";
 import { toast } from "sonner";
@@ -121,8 +120,7 @@ function ProfilePage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6 pb-12">
       {/* Header */}
       <div>
-        <Breadcrumbs items={[{ label: "Profile" }]} />
-        <div className="mt-3 flex items-center gap-3">
+                <div className="mt-3 flex items-center gap-3">
           <span
             className="grid h-11 w-11 place-items-center rounded-xl"
             style={{ backgroundColor: "#7B4CED1A", color: "#7B4CED" }}
@@ -199,7 +197,7 @@ function ProfilePage() {
           {/* Profile Details Form */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
             <div className="mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
-              <User className="h-5 w-5 text-[#2563EB]" />
+              <User className="h-5 w-5 text-primary" />
               <h3 className="text-lg font-semibold text-slate-900">Personal Details</h3>
             </div>
 
@@ -260,7 +258,7 @@ function ProfilePage() {
                 <button
                   type="submit"
                   disabled={isSavingProfile}
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 disabled:opacity-50"
                 >
                   <Save className="h-4 w-4" />
                   {isSavingProfile ? "Saving..." : "Update Profile"}

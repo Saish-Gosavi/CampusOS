@@ -29,7 +29,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { WardenBreadcrumbs } from "@/components/warden/WardenBreadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
@@ -70,8 +69,7 @@ function WardenDashboard() {
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <WardenBreadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back, Warden
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -151,7 +149,7 @@ function WardenDashboard() {
     className="lg:col-span-2"
     title="Recent Leave Requests"
     description="Latest applications awaiting your review"
-    action={<Link to="/warden/leaves" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/warden/leaves" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -183,7 +181,7 @@ function WardenDashboard() {
         <ChartCard
     title="Recent Complaints"
     description="Latest tickets from residents"
-    action={<Link to="/warden/complaints" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/warden/complaints" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -206,7 +204,7 @@ function WardenDashboard() {
         <ChartCard
     title="Recent Visitors"
     description="Latest visitor requests"
-    action={<Link to="/warden/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/warden/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >

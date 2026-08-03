@@ -25,6 +25,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role.name,
+      hostelId: user.hostelId,
     });
     const refreshToken = jwtConfig.generateRefreshToken({ id: user.id });
 
@@ -34,6 +35,7 @@ export class AuthService {
         email: user.email,
         name: user.name,
         role: user.role.name,
+        hostelId: user.hostelId,
       },
       tokens: {
         accessToken,
@@ -64,6 +66,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       role: user.role.name,
+      hostelId: user.hostelId,
     });
 
     return { accessToken: newAccessToken };
@@ -144,6 +147,7 @@ export class AuthService {
       email: user.email,
       name: user.name,
       role: user.role.name,
+      hostelId: user.hostelId,
       status: user.status,
       createdAt: user.createdAt,
     };

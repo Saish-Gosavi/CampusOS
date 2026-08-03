@@ -20,7 +20,6 @@ import { Route as SuperAdminAdmins } from "@/pages/super-admin/admins";
 import { Route as SuperAdminColleges } from "@/pages/super-admin/colleges";
 import { Route as SuperAdminNotices } from "@/pages/super-admin/notices";
 import { Route as SuperAdminSettings } from "@/pages/super-admin/settings";
-import { Route as SuperAdminSystemHealth } from "@/pages/super-admin/system-health";
 import { Route as SuperAdminProfile } from "@/pages/super-admin/profile";
 import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
@@ -174,7 +173,6 @@ export default function AppRoutes() {
         <Route path="colleges" element={<SuperAdminColleges.component />} />
         <Route path="notices" element={<SuperAdminNotices.component />} />
         <Route path="settings" element={<SuperAdminSettings.component />} />
-        <Route path="system-health" element={<SuperAdminSystemHealth.component />} />
         <Route path="profile" element={<SuperAdminProfile.component />} />
         <Route path="audit-logs" element={<SuperAdminAuditLogs.component />} />
         <Route path="reports" element={<SuperAdminReports.component />} />

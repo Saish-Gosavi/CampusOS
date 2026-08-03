@@ -15,7 +15,6 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { userApi } from "@/services/api";
 
 const Route = createFileRoute("/super-admin/admins")({
@@ -159,8 +158,7 @@ function AdminsPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Admin Management" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#EAB3081A", color: "#B45309" }}
@@ -193,14 +191,14 @@ function AdminsPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, email or campus..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-[#2563EB] focus:bg-white"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:bg-white"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={moduleFilter}
             onChange={(e) => setModuleFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#2563EB]"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-primary"
           >
             <option value="All">All Modules</option>
             <option value="Hostel">Hostel</option>
@@ -241,7 +239,7 @@ function AdminsPage() {
                 <tr>
                   <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
                     <div className="flex items-center justify-center gap-2">
-                      <Loader2 className="h-5 w-5 animate-spin text-[#2563EB]" />
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading live data...
                     </div>
                   </td>
@@ -386,7 +384,7 @@ function AdminModal({ initial, onClose, onSave }) {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
               required
             />
           </Field>
@@ -395,7 +393,7 @@ function AdminModal({ initial, onClose, onSave }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
               required
             />
           </Field>
@@ -404,7 +402,7 @@ function AdminModal({ initial, onClose, onSave }) {
               <select
                 value={module}
                 onChange={(e) => setModule(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
               >
                 <option>Hostel</option>
                 <option>Library</option>
@@ -416,7 +414,7 @@ function AdminModal({ initial, onClose, onSave }) {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
               >
                 <option>Active</option>
                 <option>Pending</option>
@@ -428,7 +426,7 @@ function AdminModal({ initial, onClose, onSave }) {
             <select
               value={campus}
               onChange={(e) => setCampus(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
             >
               {CAMPUSES.map((c) => (
                 <option key={c}>{c}</option>
@@ -446,7 +444,7 @@ function AdminModal({ initial, onClose, onSave }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white hover:bg-[#1D4ED8]"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
             {initial ? "Save Changes" : "Create Admin"}
           </button>
