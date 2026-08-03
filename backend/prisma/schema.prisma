@@ -67,11 +67,32 @@ model User {
   notifications     Notification[]
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
+  notices           Notice[]
 
   @@index([roleId])
   @@index([hostelId])
   @@index([resetToken])
 }
+
+// ==========================================
+// College Management
+// ==========================================
+
+model College {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  address      String?
+  city         String?
+  contactEmail String?
+  contactPhone String?
+  status       String   @default("active") // "active", "inactive"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // If a college can have multiple hostels, you might want to link them later:
+  // hostels   Hostel[]
+}
+
 
 // ==========================================
 // 3. Hostel Setup & Hierarchy
@@ -375,13 +396,40 @@ model Notification {
 }
 
 model AuditLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  action    String
-  details   String?
-  ipAddress String?
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  module      String   @default("System")
+  action      String
+  description String?
+  status      String   @default("Success")
+  ipAddress   String?
+  userAgent   String?
+  oldData     String?
+  newData     String?
+  createdAt   DateTime @default(now())
 
   @@index([userId])
+  @@index([module])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// ==========================================
+// 9. Global Notices
+// ==========================================
+
+model Notice {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String?
+  isActive    Boolean   @default(true)
+  scheduledAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById Int
+  createdBy   User      @relation(fields: [createdById], references: [id])
+
+  @@index([createdById])
 }

@@ -15,7 +15,7 @@ import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { hostels } from "@/lib/hostel-data";
+import { useHostels } from "@/services/queries/hostelHooks";
 const Route = createFileRoute("/hostel-admin/hostels/")({
   component: HostelsPage
 });
@@ -23,6 +23,8 @@ function HostelsPage() {
   const [q, setQ] = useState("");
   const [type, setType] = useState("All");
   const [status, setStatus] = useState("All");
+
+  const { data: hostels = [], isLoading, isError } = useHostels();
   const filtered = useMemo(() => {
     const query = q.toLowerCase();
     return hostels.filter((h) => {
@@ -50,12 +52,27 @@ function HostelsPage() {
     icon={Building2}
     tint="#2563EB"
     breadcrumbs={[{ label: "Hostel Management" }]}
-    action={<Button asChild className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+    action={<Button asChild className="bg-primary hover:bg-primary/90">
             <Link to="/hostel-admin/hostels/add">
               <Plus className="mr-1.5 h-4 w-4" /> Add Hostel
             </Link>
           </Button>}
   />
+
+      {isLoading && (
+        <div className="flex h-40 items-center justify-center rounded-xl border border-border bg-card">
+          <div className="text-muted-foreground">Loading hostels...</div>
+        </div>
+      )}
+
+      {isError && (
+        <div className="flex h-40 items-center justify-center rounded-xl border border-[#EF4444]/20 bg-[#EF4444]/10">
+          <div className="text-[#EF4444]">Failed to load hostels. Please try again.</div>
+        </div>
+      )}
+
+      {!isLoading && !isError && (
+        <>
 
       {
     /* Stats */
@@ -177,6 +194,8 @@ function HostelsPage() {
             No hostels match your filters.
           </div>}
       </div>
+        </>
+      )}
     </div>;
 }
 export {

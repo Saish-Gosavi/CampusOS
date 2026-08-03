@@ -75,7 +75,7 @@ function BedsPage() {
     icon={BedDouble}
     tint="#2563EB"
     breadcrumbs={[{ label: "Bed Management" }]}
-    action={<Button asChild className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+    action={<Button asChild className="bg-primary hover:bg-primary/90">
             <Link to="/hostel-admin/beds/add">
               <Plus className="mr-1.5 h-4 w-4" /> Add Bed
             </Link>
@@ -187,7 +187,7 @@ function BedsPage() {
     >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                        <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                           <BedDouble className="h-4 w-4" />
                         </span>
                         <span className="font-medium text-foreground">{b.number}</span>
@@ -257,7 +257,7 @@ function BedsPage() {
     >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
                     <BedDouble className="h-4 w-4" />
                   </span>
                   <div>

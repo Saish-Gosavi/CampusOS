@@ -27,4 +27,8 @@ export class UsersService {
       password: hashedPassword,
     });
   }
+
+  static async deleteUser(id) {
+    return UsersRepository.delete(id);
+  }
 }

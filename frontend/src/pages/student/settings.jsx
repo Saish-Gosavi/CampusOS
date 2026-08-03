@@ -68,7 +68,7 @@ function SettingsPage() {
             </div>)}
         </div>
         <div className="mt-4 flex justify-end">
-          <Button className="bg-[#2563EB] hover:bg-[#1d4fd8]">Save preferences</Button>
+          <Button className="bg-primary hover:bg-primary/90">Save preferences</Button>
         </div>
       </div>
     </div>;

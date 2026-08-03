@@ -14,10 +14,11 @@ export class ReportsController {
         data: {
           userId: req.user.id,
           action: "VIEW_REPORTS",
-          details: `Super Admin viewed summary reports. Filter: ${hostelId ? 'Hostel ID ' + hostelId : 'All'}`,
+          module: "Reports",
+          description: `Super Admin viewed summary reports. Filter: ${hostelId ? 'Hostel ID ' + hostelId : 'All'}`,
           ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
         }
-      });
+      }).catch(() => {});
 
       return apiResponse.success(res, data, "Summary reports fetched successfully");
     } catch (error) {
@@ -36,10 +37,11 @@ export class ReportsController {
         data: {
           userId: req.user.id,
           action: "GENERATE_REPORT",
-          details: `Super Admin exported system summary report as CSV. Filter: ${hostelId ? 'Hostel ID ' + hostelId : 'All'}`,
+          module: "Reports",
+          description: `Super Admin exported system summary report as CSV. Filter: ${hostelId ? 'Hostel ID ' + hostelId : 'All'}`,
           ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
         }
-      });
+      }).catch(() => {});
 
       res.setHeader("Content-Type", "text/csv");
       res.setHeader("Content-Disposition", `attachment; filename=system_report_${Date.now()}.csv`);

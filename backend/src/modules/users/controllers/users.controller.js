@@ -37,4 +37,13 @@ export class UsersController {
       next(error);
     }
   }
+
+  static async deleteUser(req, res, next) {
+    try {
+      await UsersService.deleteUser(req.params.id);
+      return apiResponse.success(res, null, "User deleted successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

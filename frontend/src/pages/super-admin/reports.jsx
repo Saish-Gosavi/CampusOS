@@ -27,7 +27,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { reportsApi } from "@/services/api";
@@ -56,15 +55,16 @@ function ReportsPage() {
     async function loadStats() {
       try {
         const res = await reportsApi.getSuperAdminStats();
-        if (res.success && res.data) {
-          setStats(res.data);
-          setColleges(res.data.colleges || []);
+        const data = res?.data || res;
+        if (data) {
+          setStats(data);
+          setColleges(data.colleges || []);
         } else {
-          setError(res.message || "Failed to load reports");
+          setError(res?.message || "Failed to load reports");
         }
       } catch (err) {
         console.error("Error fetching reports", err);
-        setError("Failed to connect to backend server. Make sure the backend is running on port 5000.");
+        setError(err?.message || "Failed to load reports from server.");
       } finally {
         setLoading(false);
       }
@@ -78,8 +78,9 @@ function ReportsPage() {
     setFilterLoading(true);
     try {
       const res = await reportsApi.getSuperAdminStats(collegeId);
-      if (res.success && res.data) {
-        setStats(res.data);
+      const data = res?.data || res;
+      if (data) {
+        setStats(data);
       }
     } catch (err) {
       console.error("Filter failed", err);
@@ -162,7 +163,6 @@ function ReportsPage() {
       {/* 1. Page Header (Matches Admin Management Style) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Reports & Analytics" }]} />
           <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
@@ -182,7 +182,7 @@ function ReportsPage() {
         <button
           onClick={handleDownloadReport}
           disabled={exporting}
-          className="inline-flex items-center gap-2 self-start rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:opacity-50"
+          className="inline-flex items-center gap-2 self-start rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-primary/90 disabled:opacity-50"
         >
           {exporting ? (
             <>
@@ -213,14 +213,14 @@ function ReportsPage() {
               value={campusSearch}
               onChange={(e) => setCampusSearch(e.target.value)}
               placeholder="Search campuses..."
-              className="w-full rounded-lg border border-border bg-muted py-1.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-400 transition focus:border-[#2563EB] focus:bg-card"
+              className="w-full rounded-lg border border-border bg-muted py-1.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-400 transition focus:border-primary focus:bg-card"
             />
           </div>
 
           <select
             value={selectedCollege}
             onChange={handleCollegeChange}
-            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-[#2563EB] min-w-[200px]"
+            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary min-w-[200px]"
           >
             <option value="">All Campuses ({colleges.length})</option>
             {filteredCampuses.map((col) => (
@@ -346,7 +346,7 @@ function ReportsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search by college name..."
-            className="w-full rounded-lg border border-border bg-muted py-2.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-450 transition focus:border-[#2563EB] focus:bg-card"
+            className="w-full rounded-lg border border-border bg-muted py-2.5 pl-9 pr-3 text-sm outline-none text-foreground placeholder-slate-450 transition focus:border-primary focus:bg-card"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">

@@ -202,12 +202,72 @@ export const rolesApi = {
   }
 };
 
-export const reportsApi = {
-  async getSuperAdminStats(hostelId = "") {
-    return apiClient.get(hostelId ? `/super_admin/reports?hostelId=${hostelId}` : "/super_admin/reports");
+export const userApi = {
+  async getAll() {
+    return apiClient.get("/users");
   },
-  async downloadSuperAdminReport(hostelId = "") {
-    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob" });
+  async create(data) {
+    return apiClient.post("/users", data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/users/${id}`);
+  },
+  async getProfile() {
+    return apiClient.get("/users/profile");
+  },
+  async updateProfile(data) {
+    return apiClient.put("/users/profile", data);
   }
 };
 
+export const settingsApi = {
+  async get() {
+    return apiClient.get("/settings");
+  },
+  async update(data) {
+    return apiClient.put("/settings", data);
+  },
+  async reset() {
+    return apiClient.post("/settings/reset");
+  }
+};
+
+export const auditLogApi = {
+  async getLogs(params) {
+    return apiClient.get("/audit-logs", { params });
+  }
+};
+
+export const globalNoticeApi = {
+  async getAll() {
+    return apiClient.get("/super_admin/global-notice");
+  },
+  async create(data) {
+    return apiClient.post("/super_admin/global-notice", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/super_admin/global-notice/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/super_admin/global-notice/${id}`);
+  },
+};
+
+export const reportsApi = {
+  async getSummary(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async getSuperAdminStats(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async exportCsv(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  },
+  async downloadSuperAdminReport(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  }
+};

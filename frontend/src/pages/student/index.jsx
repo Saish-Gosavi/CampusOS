@@ -24,7 +24,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { StudentBreadcrumbs } from "@/components/student/StudentBreadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
@@ -72,8 +71,7 @@ function StudentDashboard() {
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <StudentBreadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back, {studentProfile.name.split(" ")[0]} 👋
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -146,7 +144,7 @@ function StudentDashboard() {
         <ChartCard
     title="My borrowed books"
     description="Return before due date"
-    action={<Link to="/student/borrowed" className="text-xs font-medium text-[#2563EB] hover:underline">
+    action={<Link to="/student/borrowed" className="text-xs font-medium text-primary hover:underline">
               View all
             </Link>}
   >
@@ -167,7 +165,7 @@ function StudentDashboard() {
         <ChartCard
     title="Complaint status"
     description="Latest tickets you raised"
-    action={<Link to="/student/complaints" className="text-xs font-medium text-[#2563EB] hover:underline">
+    action={<Link to="/student/complaints" className="text-xs font-medium text-primary hover:underline">
               View all
             </Link>}
   >
@@ -186,7 +184,7 @@ function StudentDashboard() {
         <ChartCard
     title="Leave status"
     description="Recent applications"
-    action={<Link to="/student/leaves" className="text-xs font-medium text-[#2563EB] hover:underline">
+    action={<Link to="/student/leaves" className="text-xs font-medium text-primary hover:underline">
               View all
             </Link>}
   >
@@ -210,14 +208,14 @@ function StudentDashboard() {
     title="Hostel notice board"
     description="Latest from your warden"
     className="lg:col-span-1"
-    action={<Link to="/student/hostel-notices" className="inline-flex items-center gap-1 text-xs font-medium text-[#2563EB] hover:underline">
+    action={<Link to="/student/hostel-notices" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
               All <ArrowRight className="h-3 w-3" />
             </Link>}
   >
           <ul className="space-y-3">
             {hostelNoticesFeed.slice(0, 3).map((n) => <li key={n.id} className="rounded-lg border border-border p-3">
                 <div className="flex items-center gap-2">
-                  <Megaphone className="h-3.5 w-3.5 text-[#2563EB]" />
+                  <Megaphone className="h-3.5 w-3.5 text-primary" />
                   <p className="truncate text-sm font-semibold text-foreground">{n.title}</p>
                 </div>
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{n.body}</p>
@@ -230,7 +228,7 @@ function StudentDashboard() {
     title="Library notice board"
     description="Announcements from library"
     className="lg:col-span-1"
-    action={<Link to="/student/library-notices" className="inline-flex items-center gap-1 text-xs font-medium text-[#2563EB] hover:underline">
+    action={<Link to="/student/library-notices" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
               All <ArrowRight className="h-3 w-3" />
             </Link>}
   >

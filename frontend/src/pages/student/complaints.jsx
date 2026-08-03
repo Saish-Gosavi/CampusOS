@@ -20,7 +20,7 @@ function ComplaintsPage() {
     icon={MessageSquareWarning}
     tint="#EF4444"
     breadcrumbs={[{ label: "Hostel", to: "/student/room" }, { label: "Complaints" }]}
-    action={<Button onClick={() => setOpen((v) => !v)} className="bg-[#2563EB] hover:bg-[#1d4fd8]">
+    action={<Button onClick={() => setOpen((v) => !v)} className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" /> {open ? "Close form" : "Raise complaint"}
           </Button>}
   />
@@ -62,7 +62,7 @@ function ComplaintsPage() {
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" className="bg-[#2563EB] hover:bg-[#1d4fd8]">Submit complaint</Button>
+            <Button type="submit" className="bg-primary hover:bg-primary/90">Submit complaint</Button>
           </div>
         </form>}
 

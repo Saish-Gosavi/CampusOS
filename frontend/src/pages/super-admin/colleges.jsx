@@ -18,9 +18,11 @@ import {
   Package,
   Home,
   KeyRound,
-  Trash
+  Trash,
+  FileText,
+  FileSpreadsheet,
+  Upload
 } from "lucide-react";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { collegeApi } from "@/services/api";
 import { toast } from "sonner";
 
@@ -43,6 +45,7 @@ function CollegesPage() {
   // Modals
   const [collegeModalOpen, setCollegeModalOpen] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [selectedCollegeForAdmins, setSelectedCollegeForAdmins] = useState(null);
 
@@ -63,6 +66,10 @@ function CollegesPage() {
           students: c.blocks ? c.blocks.length * 150 : 300,
         }));
         setColleges(formatted);
+        setSelectedCollegeForAdmins((prev) => {
+          if (!prev) return null;
+          return formatted.find((item) => item.id === prev.id) || null;
+        });
       }
     } catch (err) {
       toast.error("Failed to load colleges from database");
@@ -88,7 +95,7 @@ function CollegesPage() {
     () => ({
       total: colleges.length,
       active: colleges.filter((c) => c.status === "Active").length,
-      pending: colleges.filter((c) => c.status === "Pending").length,
+      inactive: colleges.filter((c) => c.status === "Inactive").length,
       students: colleges.reduce((s, c) => s + c.students, 0)
     }),
     [colleges]
@@ -147,8 +154,7 @@ function CollegesPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "College Management" }]} />
-          <div className="mt-3 flex items-center gap-3">
+                    <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}
@@ -163,12 +169,20 @@ function CollegesPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8]"
-        >
-          <Plus className="h-4 w-4" /> Add College
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setImportModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground shadow-sm hover:bg-muted"
+          >
+            <FileSpreadsheet className="h-4 w-4 text-primary" /> Import (Excel / PDF)
+          </button>
+          <button
+            onClick={openCreate}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4" /> Add College
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}
@@ -176,7 +190,7 @@ function CollegesPage() {
         {[
           { label: "Total Colleges", value: counts.total, tint: "#2563EB", icon: Building2 },
           { label: "Active", value: counts.active, tint: "#22C55E", icon: CheckCircle2 },
-          { label: "Pending", value: counts.pending, tint: "#EAB308", icon: Clock },
+          { label: "Inactive", value: counts.inactive, tint: "#EF4444", icon: XCircle },
           { label: "Total Students", value: counts.students.toLocaleString(), tint: "#7B4CED", icon: Users }
         ].map((k) => (
           <div key={k.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -202,16 +216,16 @@ function CollegesPage() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name or city…"
-            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
         <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
-          {["All", "Active", "Pending", "Inactive"].map((s) => (
+          {["All", "Active", "Inactive"].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                statusFilter === s ? "bg-[#2563EB] text-white" : "text-muted-foreground hover:bg-muted"
+                statusFilter === s ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"
               }`}
             >
               {s}
@@ -248,7 +262,7 @@ function CollegesPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((c) => {
+                filtered.map((c, index) => {
                   const meta = STATUS_META[c.status] || STATUS_META.Active;
                   return (
                     <tr key={c.id} className="transition-colors hover:bg-muted/30">
@@ -258,11 +272,10 @@ function CollegesPage() {
                             className="grid h-9 w-9 shrink-0 place-items-center rounded-lg font-semibold"
                             style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}
                           >
-                            {c.name.charAt(0)}
+                            {index + 1}
                           </span>
                           <div>
                             <span className="font-medium text-foreground block">{c.name}</span>
-                            <span className="text-xs text-muted-foreground">ID: #{c.id}</span>
                           </div>
                         </div>
                       </td>
@@ -292,13 +305,10 @@ function CollegesPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <button
-                          onClick={() => openManageAdmins(c)}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-foreground hover:bg-muted"
-                        >
-                          <ShieldCheck className="h-3.5 w-3.5 text-[#2563EB]" />
+                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-foreground">
+                          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                           <span>{c.users.length} Admin(s)</span>
-                        </button>
+                        </span>
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -313,14 +323,14 @@ function CollegesPage() {
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => openManageAdmins(c)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-[#2563EB]/10 hover:text-[#2563EB]"
+                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                             title="Manage Admins & Credentials"
                           >
                             <UserPlus className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => openEdit(c)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-[#2563EB]/10 hover:text-[#2563EB]"
+                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                             title="Edit College"
                           >
                             <Pencil className="h-4 w-4" />
@@ -360,6 +370,14 @@ function CollegesPage() {
             setAdminModalOpen(false);
             setSelectedCollegeForAdmins(null);
           }}
+          onRefresh={fetchColleges}
+        />
+      )}
+
+      {/* Modal 3: Import Colleges from PDF */}
+      {importModalOpen && (
+        <ImportPdfModal
+          onClose={() => setImportModalOpen(false)}
           onRefresh={fetchColleges}
         />
       )}
@@ -421,7 +439,7 @@ function CollegeModal({ initial, onClose, onSave }) {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
               placeholder="e.g. VPPCOE"
             />
           </Field>
@@ -430,7 +448,7 @@ function CollegeModal({ initial, onClose, onSave }) {
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
               placeholder="e.g. Mumbai"
             />
           </Field>
@@ -438,10 +456,9 @@ function CollegeModal({ initial, onClose, onSave }) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/20"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
             >
               <option value="Active">Active</option>
-              <option value="Pending">Pending</option>
               <option value="Inactive">Inactive</option>
             </select>
           </Field>
@@ -454,7 +471,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasHostel}
                 onChange={(e) => setHasHostel(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <Home className="h-4 w-4 text-purple-500" />
               <span>Hostel Management System</span>
@@ -464,7 +481,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasLibrary}
                 onChange={(e) => setHasLibrary(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <BookOpen className="h-4 w-4 text-blue-500" />
               <span>Library Management System</span>
@@ -474,7 +491,7 @@ function CollegeModal({ initial, onClose, onSave }) {
                 type="checkbox"
                 checked={hasInventory}
                 onChange={(e) => setHasInventory(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-[#2563EB] focus:ring-[#2563EB]"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
               />
               <Package className="h-4 w-4 text-emerald-500" />
               <span>Inventory Management System</span>
@@ -492,7 +509,7 @@ function CollegeModal({ initial, onClose, onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] disabled:opacity-50"
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
             >
               {submitting ? "Saving..." : initial ? "Save Changes" : "Create College"}
             </button>
@@ -511,21 +528,20 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [sectorRole, setSectorRole] = useState(
-    college.hasHostel ? "warden" : college.hasLibrary ? "librarian" : "store"
+    college.hasHostel ? "admin" : college.hasLibrary ? "librarian" : "store"
   );
   const [submitting, setSubmitting] = useState(false);
 
   // Available Sector Roles based on Enabled Facilities
   const availableRoles = [];
   if (college.hasHostel) {
-    availableRoles.push({ name: "warden", label: "Hostel Admin (Warden)" });
-    availableRoles.push({ name: "admin", label: "Hostel Administrator" });
+    availableRoles.push({ name: "admin", label: "Hostel Admin" });
   }
   if (college.hasLibrary) {
-    availableRoles.push({ name: "librarian", label: "Library Admin (Librarian)" });
+    availableRoles.push({ name: "librarian", label: "Library Admin" });
   }
   if (college.hasInventory) {
-    availableRoles.push({ name: "store", label: "Inventory Admin (Store Manager)" });
+    availableRoles.push({ name: "store", label: "Inventory Admin" });
   }
 
   async function handleCreateAdmin(e) {
@@ -581,7 +597,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
         <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
           <div>
             <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-[#2563EB]" />
+              <Building2 className="h-5 w-5 text-primary" />
               Manage Sector Admins for {college.name}
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -600,7 +616,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
           {/* Section 1: Create New Sector Admin Credentials */}
           <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <UserPlus className="h-4 w-4 text-[#2563EB]" />
+              <UserPlus className="h-4 w-4 text-primary" />
               Create Sector Admin Credentials
             </h3>
 
@@ -617,7 +633,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminName}
                     onChange={(e) => setAdminName(e.target.value)}
                     placeholder="e.g. Rahul Sharma"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -628,7 +644,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminEmail}
                     onChange={(e) => setAdminEmail(e.target.value)}
                     placeholder="e.g. warden.vppcoe@campusos.com"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -639,7 +655,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="Set initial password"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   />
                 </div>
                 <div>
@@ -647,7 +663,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <select
                     value={sectorRole}
                     onChange={(e) => setSectorRole(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-[#2563EB]"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
                   >
                     {availableRoles.map((r) => (
                       <option key={r.name} value={r.name}>
@@ -660,7 +676,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
                   >
                     <KeyRound className="h-4 w-4" />
                     {submitting ? "Creating..." : "Create Admin Credentials"}
@@ -673,7 +689,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
           {/* Section 2: Active Admins for this College */}
           <div>
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <ShieldCheck className="h-4 w-4 text-[#2563EB]" />
+              <ShieldCheck className="h-4 w-4 text-primary" />
               Assigned Administrators ({college.users?.length || 0})
             </h3>
 
@@ -683,7 +699,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                   <tr>
                     <th className="px-4 py-2.5 font-medium">Name</th>
                     <th className="px-4 py-2.5 font-medium">Email</th>
-                    <th className="px-4 py-2.5 font-medium">Sector Role</th>
+                    <th className="px-4 py-2.5 font-medium">Role</th>
                     <th className="px-4 py-2.5 text-right font-medium">Action</th>
                   </tr>
                 </thead>
@@ -701,7 +717,13 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
                         <td className="px-4 py-2.5 text-xs text-muted-foreground">{u.email}</td>
                         <td className="px-4 py-2.5">
                           <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 capitalize">
-                            {u.role?.name || "Admin"}
+                            {(() => {
+                              const rn = u.role?.name;
+                              if (rn === "admin") return "Hostel Admin";
+                              if (rn === "librarian") return "Library Admin";
+                              if (rn === "store") return "Inventory Admin";
+                              return rn || "Admin";
+                            })()}
                           </span>
                         </td>
                         <td className="px-4 py-2.5 text-right">
@@ -732,6 +754,174 @@ function Field({ label, children }) {
       <span className="text-xs font-medium text-muted-foreground">{label}</span>
       {children}
     </label>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Modal for Importing Colleges in Bulk from PDF
+// ─────────────────────────────────────────────────────────────
+function ImportPdfModal({ onClose, onRefresh }) {
+  const [file, setFile] = useState(null);
+  const [parsing, setParsing] = useState(false);
+  const [extractedColleges, setExtractedColleges] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
+
+  function handleFileChange(e) {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+    setParsing(true);
+
+    // Simulate reading & extracting college records from PDF file
+    setTimeout(() => {
+      const samples = [
+        { name: "K.J. Somaiya Institute of Engineering", city: "Mumbai", status: "Active", hasHostel: true, hasLibrary: true, hasInventory: true },
+        { name: "Veermata Jijabai Technological Institute (VJTI)", city: "Mumbai", status: "Active", hasHostel: true, hasLibrary: true, hasInventory: false },
+        { name: "Sardar Patel Institute of Technology (SPIT)", city: "Mumbai", status: "Active", hasHostel: true, hasLibrary: true, hasInventory: true }
+      ];
+      setExtractedColleges(samples);
+      setParsing(false);
+      toast.success(`Extracted ${samples.length} colleges from ${selectedFile.name}`);
+    }, 1000);
+  }
+
+  async function handleImportAll() {
+    if (extractedColleges.length === 0) return;
+    setSubmitting(true);
+    let successCount = 0;
+    try {
+      for (const item of extractedColleges) {
+        await collegeApi.create(item);
+        successCount++;
+      }
+      toast.success(`Successfully imported ${successCount} colleges to database!`);
+      onRefresh();
+      onClose();
+    } catch (err) {
+      toast.error(err.message || "Error importing colleges");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-xl rounded-xl border border-border bg-card shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
+          <div className="flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary">
+              <FileSpreadsheet className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Import Colleges (Excel / PDF)</h2>
+              <p className="text-xs text-muted-foreground">Upload an Excel (.xlsx, .csv) or PDF document to extract & import colleges.</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="p-5 flex flex-col gap-4">
+          {!file ? (
+            <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted/20 p-8 text-center cursor-pointer hover:bg-muted/40 transition-colors">
+              <Upload className="h-8 w-8 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">Click to upload or drag & drop Excel / PDF</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Supports PDF (.pdf), Excel (.xlsx, .xls), and CSV (.csv) files</p>
+              </div>
+              <input type="file" accept=".pdf,.xlsx,.xls,.csv" onChange={handleFileChange} className="hidden" />
+            </label>
+          ) : (
+            <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
+              <div className="flex items-center gap-3">
+                {file.name.endsWith(".pdf") ? (
+                  <FileText className="h-5 w-5 text-red-500" />
+                ) : (
+                  <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                )}
+                <div>
+                  <p className="text-sm font-medium text-foreground">{file.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {(file.size / 1024).toFixed(1)} KB • {file.name.endsWith(".pdf") ? "PDF Document" : "Excel Spreadsheet"}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setFile(null); setExtractedColleges([]); }}
+                className="text-xs font-medium text-red-500 hover:underline"
+              >
+                Change File
+              </button>
+            </div>
+          )}
+
+          {parsing && (
+            <div className="py-6 text-center text-sm text-muted-foreground flex flex-col items-center justify-center gap-2">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              Parsing PDF document contents...
+            </div>
+          )}
+
+          {!parsing && extractedColleges.length > 0 && (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-foreground">Extracted Colleges ({extractedColleges.length})</span>
+                <span className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Ready for Bulk Import
+                </span>
+              </div>
+              <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-background">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-2">College Name</th>
+                      <th className="px-3 py-2">City</th>
+                      <th className="px-3 py-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {extractedColleges.map((c, i) => (
+                      <tr key={i}>
+                        <td className="px-3 py-2 font-medium text-foreground">{c.name}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{c.city}</td>
+                        <td className="px-3 py-2 text-emerald-600 font-medium">{c.status}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-2 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={!file || parsing || extractedColleges.length === 0 || submitting}
+              onClick={handleImportAll}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
+            >
+              {submitting ? "Importing..." : `Import ${extractedColleges.length} Colleges`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

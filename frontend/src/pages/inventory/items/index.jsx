@@ -35,7 +35,7 @@ function ItemsPage() {
     icon={Package}
     tint="#2563EB"
     breadcrumbs={[{ label: "Inventory Items" }]}
-    action={<Button className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+    action={<Button className="bg-primary hover:bg-primary/90">
             <Plus className="mr-1.5 h-4 w-4" /> Add Item
           </Button>}
   />
