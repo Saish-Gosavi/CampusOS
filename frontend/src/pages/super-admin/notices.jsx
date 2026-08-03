@@ -24,7 +24,7 @@ const Route = createFileRoute("/super-admin/notices")({
   component: NoticesPage,
 });
 
-const TINT = "#7B4CED";
+const TINT = "#210963";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getNoticeStatus(notice) {
@@ -206,7 +206,7 @@ function NoticesPage() {
               onClick={() => setStatusFilter(f)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 statusFilter === f
-                  ? "bg-[#7B4CED] text-white shadow-sm"
+                  ? "bg-[#210963] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
