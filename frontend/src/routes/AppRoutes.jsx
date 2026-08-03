@@ -144,6 +144,26 @@ function SeniorAdminTypoRedirect() {
   return <Navigate to={cleanPath + location.search} replace />;
 }
 
+function GenericModuleShell({ title, description }) {
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Building2 className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-sm">
+        <p className="text-base font-semibold text-foreground">{title} Module Active</p>
+        <p className="mt-1 text-sm text-muted-foreground">This module section is configured and ready for operational records.</p>
+      </div>
+    </div>
+  );
+}
+
 // Root navigator helper
 const RootNavigator = () => {
   const { user } = useAuth();
@@ -228,7 +248,20 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<HostelIndex.component />} />
+        <Route path="hostels" element={<HostelIndex.component />} />
+        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
+        <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
         <Route path="students" element={<HostelIndex.component />} />
+        <Route path="staff" element={<HostelIndex.component />} />
+        <Route path="fees" element={<HostelFees.component />} />
+        <Route path="leaves" element={<HostelLeaves.component />} />
+        <Route path="visitors" element={<HostelVisitors.component />} />
+        <Route path="in-out" element={<HostelIndex.component />} />
+        <Route path="complaints" element={<HostelComplaints.component />} />
+        <Route path="notices" element={<HostelIndex.component />} />
+        <Route path="reports" element={<GenericModuleShell title="Reports & Analytics" description="View system metrics and download hostel reports." />} />
+        
+        {/* Sub-routes */}
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
         <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
@@ -237,29 +270,6 @@ export default function AppRoutes() {
         <Route path="allocation/new" element={<HostelAllocationNew.component />} />
         <Route path="allocation/change" element={<HostelAllocationChange.component />} />
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
-        <Route path="complaints" element={<HostelComplaints.component />} />
-        <Route path="fees" element={<HostelFees.component />} />
-        <Route path="visitors" element={<HostelVisitors.component />} />
-        <Route path="in-out" element={<HostelIndex.component />} />
-        <Route path="leaves" element={<HostelLeaves.component />} />
-        <Route path="notices" element={<HostelIndex.component />} />
-        <Route path="staff" element={<HostelIndex.component />} />
-        <Route path="furniture" element={<HostelFurniture.component />} />
-        <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
-        <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />
-        <Route path="furniture/replacement" element={<HostelFurnitureReplacement.component />} />
-        <Route path="hostels" element={<HostelIndex.component />} />
-        <Route path="hostels/:id" element={<HostelDetail.component />} />
-        <Route path="hostels/add" element={<HostelAdd.component />} />
-        <Route path="beds" element={<HostelBeds.component />} />
-        <Route path="beds/add" element={<HostelBedAdd.component />} />
-        <Route path="beds/:id/edit" element={<HostelBedEdit.component />} />
-        <Route path="blocks" element={<HostelBlocks.component />} />
-        <Route path="blocks/add" element={<HostelBlockAdd.component />} />
-        <Route path="blocks/:id/edit" element={<HostelBlockEdit.component />} />
-        <Route path="floors" element={<HostelFloors.component />} />
-        <Route path="floors/add" element={<HostelFloorAdd.component />} />
-        <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
       </Route>
 
       {/* Warden Dashboard Routes */}
