@@ -83,14 +83,16 @@ function InventorySidebar() {
   return <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
-          <div className="flex items-center gap-2 px-1 py-1.5">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-white backdrop-blur shadow-sm">
-              <Warehouse className="h-5 w-5" />
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white/10 text-white backdrop-blur shadow-sm">
+              <Warehouse className="h-6 w-6" />
             </div>
-            {!collapsed && <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">Campus OS</p>
-                <p className="truncate text-xs text-slate-400">VPPCOE · Inventory Admin</p>
-              </div>}
+            {!collapsed && (
+              <div className="flex flex-col justify-center min-w-0">
+                <p className="truncate text-[20px] font-bold text-white leading-none tracking-normal font-sans">Campus OS</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-[#BDB5D2] mt-1.5 font-sans">Inventory</p>
+              </div>
+            )}
           </div>
         </SidebarHeader>
 
