@@ -36,6 +36,7 @@ export class AuthService {
         name: user.name,
         role: user.role.name,
         hostelId: user.hostelId,
+        collegeName: user.hostel?.name || null,
       },
       tokens: {
         accessToken,
@@ -148,6 +149,7 @@ export class AuthService {
       name: user.name,
       role: user.role.name,
       hostelId: user.hostelId,
+      collegeName: user.hostel?.name || null,
       status: user.status,
       createdAt: user.createdAt,
     };

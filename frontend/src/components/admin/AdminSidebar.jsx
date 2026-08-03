@@ -41,7 +41,6 @@ function AdminSidebar() {
   const mainItems = isSeniorAdmin
     ? [
         { title: "Dashboard", url: "/senior-admin", exact: true, icon: LayoutDashboard },
-        { title: "Colleges", url: "/senior-admin/colleges", icon: Building2 },
         { title: "Admins", url: "/senior-admin/admins", icon: Users }
       ]
     : [
@@ -113,6 +112,9 @@ function AdminSidebar() {
               <div className="flex flex-col justify-center min-w-0">
                 <p className="truncate text-[20px] font-bold text-white leading-none tracking-normal font-sans">Campus OS</p>
                 <p className="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-[#BDB5D2] mt-1.5 font-sans">{userRoleLabel}</p>
+                {isSeniorAdmin && user?.collegeName && (
+                  <p className="truncate text-[10px] font-normal text-white/70 mt-1 font-sans">{user.collegeName}</p>
+                )}
               </div>
             )}
           </div>

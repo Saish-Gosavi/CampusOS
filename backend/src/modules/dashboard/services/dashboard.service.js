@@ -1,7 +1,11 @@
 import { DashboardRepository } from "../repository/dashboard.repository.js";
 
 export class DashboardService {
-  static async getSuperAdminDashboard() {
+  static async getSuperAdminDashboard(user) {
+    if (user && user.role.toLowerCase() === "senioradmin") {
+      return DashboardRepository.getSeniorAdminDashboardStats(user.hostelId);
+    }
+
     const rawData = await DashboardRepository.getSuperAdminStats();
 
     return {
