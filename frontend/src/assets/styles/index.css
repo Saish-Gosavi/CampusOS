@@ -82,104 +82,90 @@
 }
 
 .dark {
-  /* ── Page & surface backgrounds ── */
-  --background: #13131f;            /* app-level page background — deep navy black */
-  --foreground: #e8e8f0;            /* primary text — near white */
-  --card: #1c1c2e;                  /* card / panel surface */
-  --card-foreground: #e8e8f0;
-  --popover: #1c1c2e;               /* dropdown / modal surface */
-  --popover-foreground: #e8e8f0;
-
-  /* ── Primary accent — vivid purple ── */
-  --primary: #7c5cfc;               /* buttons, active states, highlights */
+  --background: #131118;
+  --foreground: #f8fafc;
+  --card: #1c1a24;
+  --card-foreground: #f8fafc;
+  --popover: #1c1a24;
+  --popover-foreground: #f8fafc;
+  --primary: #7f56d9;
   --primary-foreground: #ffffff;
-  --primary-hover: #6a48f0;
-  --primary-active: #5838e0;
-
-  /* ── Secondary surface ── */
-  --secondary: #252540;             /* slightly lighter panel / input bg */
-  --secondary-foreground: #e8e8f0;
-
-  /* ── Muted / subdued surfaces ── */
-  --muted: #252540;                 /* muted background (tags, badges) */
-  --muted-foreground: #8888aa;      /* secondary / placeholder text */
-
-  /* ── Accent ── */
-  --accent: #2a2a45;                /* hover highlights, subtle accents */
-  --accent-foreground: #e8e8f0;
-
-  /* ── Feedback colors ── */
-  --destructive: #f05252;
+  --primary-hover: #906bf9;
+  --secondary: #262335;
+  --secondary-foreground: #f8fafc;
+  --muted: #262335;
+  --muted-foreground: #a7a5c6;
+  --accent: #262335;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --success: #22c55e;
   --success-foreground: #ffffff;
-
-  /* ── Borders & inputs ── */
-  --border: #2e2e50;                /* subtle purple-tinted border */
-  --input: #252540;                 /* input field background */
-  --ring: #7c5cfc;
+  --border: #262335;
+  --input: #262335;
+  --ring: #7f56d9;
 }
 
-/* ── Dark mode hard overrides ── */
+/* Comprehensive Dark Mode Overrides */
 .dark body {
-  background-color: #13131f !important;
-  color: #e8e8f0 !important;
+  background-color: #131118 !important;
+  color: #f8fafc !important;
 }
 
 .dark .bg-white {
-  background-color: #1c1c2e !important;
+  background-color: #1c1a24 !important;
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-50\/50,
 .dark .bg-slate-50\/60 {
-  background-color: #13131f !important;
+  background-color: #131118 !important;
 }
 
 .dark .bg-slate-100 {
-  background-color: #252540 !important;
+  background-color: #262335 !important;
 }
 
 .dark .text-slate-900 {
-  color: #e8e8f0 !important;
+  color: #f8fafc !important;
 }
 
 .dark .text-slate-800 {
-  color: #d8d8ec !important;
+  color: #f1f5f9 !important;
 }
 
 .dark .text-slate-700 {
-  color: #c8c8e0 !important;
+  color: #e2e8f0 !important;
 }
 
 .dark .text-slate-600 {
-  color: #a8a8c8 !important;
+  color: #cbd5e1 !important;
 }
 
 .dark .text-slate-500 {
-  color: #8888aa !important;
+  color: #a7a5c6 !important;
 }
 
 .dark .text-slate-400 {
-  color: #6666aa !important;
+  color: #7a789f !important;
 }
 
 .dark .border-slate-200,
 .dark .border-slate-100 {
-  border-color: #2e2e50 !important;
+  border-color: #262335 !important;
 }
 
 .dark .divide-slate-100 > * + * {
-  border-color: #2e2e50 !important;
+  border-color: #262335 !important;
 }
 
 .dark .hover\:bg-slate-50:hover,
 .dark .hover\:bg-slate-50\/60:hover {
-  background-color: #252540 !important;
+  background-color: #262335 !important;
 }
 
 .dark .hover\:bg-slate-100:hover {
-  background-color: #2e2e50 !important;
+  background-color: #2d2b3d !important;
 }
 
 .dark input.input-style,
@@ -187,13 +173,57 @@
 .dark input,
 .dark select,
 .dark textarea {
-  background-color: #252540 !important;
-  color: #e8e8f0 !important;
-  border-color: #2e2e50 !important;
+  background-color: #131118 !important;
+  color: #f8fafc !important;
+  border-color: #262335 !important;
 }
 
 .dark input::placeholder {
-  color: #6666aa !important;
+  color: #7a789f !important;
+}
+
+/* Specific Sidebar Overrides for Dark Mode matching the HRMS theme */
+.dark [data-sidebar="sidebar"] > .bg-primary {
+  background-color: #121118 !important; /* Deep dark charcoal sidebar background */
+}
+
+.dark [data-sidebar="sidebar"] .text-white\/80 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark [data-sidebar="sidebar"] .text-white\/80:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Active menu item styling in Dark Sidebar */
+.dark [data-sidebar="sidebar"] a[class*="bg-white"],
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] {
+  background-color: rgba(127, 86, 217, 0.15) !important; /* Soft violet/purple tint */
+  color: #a78bfa !important; /* Soft violet text matching HRMS */
+  border-left: 3px solid #7f56d9 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-weight: 600 !important;
+}
+
+.dark [data-sidebar="sidebar"] a[class*="bg-white"] svg,
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] svg {
+  color: #a78bfa !important;
+}
+
+/* Autofill overrides in dark mode */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0px 1000px #131118 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 @layer base {
@@ -227,10 +257,45 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2e2e50;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7c5cfc;
+  background: #94a3b8;
+}
+
+/* Premium Card and Hover Transitions for both modes (preserves original colors) */
+.bg-card, 
+.rounded-2xl.border.bg-card,
+[class*="rounded-2xl"][class*="border"][class*="bg-card"] {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.bg-card:hover, 
+.rounded-2xl.border.bg-card:hover,
+[class*="rounded-2xl"][class*="border"][class*="bg-card"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -8px rgba(45, 27, 105, 0.08), 0 4px 10px -5px rgba(45, 27, 105, 0.03) !important;
+}
+
+/* Sidebar active item indicator in day/light mode */
+:not(.dark) [data-sidebar="sidebar"] a[class*="bg-white"],
+:not(.dark) [data-sidebar="sidebar"] button[class*="bg-white"] {
+  border-left: 4px solid var(--primary-active, #15053F) !important;
+  border-radius: 4px 8px 8px 4px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+:not(.dark) [data-sidebar="sidebar"] a:not([class*="bg-white"]):hover,
+:not(.dark) [data-sidebar="sidebar"] button:not([class*="bg-white"]):hover {
+  transform: translateX(2px);
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out !important;
+}
+
+/* Dark mode active item border adjustment */
+.dark [data-sidebar="sidebar"] a[class*="bg-white"],
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] {
+  padding-left: 0.5rem !important;
 }
