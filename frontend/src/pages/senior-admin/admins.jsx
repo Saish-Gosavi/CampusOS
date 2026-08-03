@@ -14,14 +14,8 @@ import {
   UserCog,
   Shield,
   Loader2,
-  UserPlus,
-  Home,
-  BookOpen,
-  Package,
-  KeyRound,
-  ShieldCheck
+  Plus
 } from "lucide-react";
-import { toast } from "sonner";
 import { userApi, rolesApi } from "@/services/api";
 
 const Route = createFileRoute("/senior-admin/admins")({
@@ -148,16 +142,17 @@ function AdminsPage() {
       setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
     } else {
       try {
-        const adminRole = rolesList.find(r => r.name.toLowerCase() === data.module.toLowerCase()) ||
+        // Look up standard admin role ID dynamically
+        const adminRole = rolesList.find(r => r.name.toLowerCase() === data.module.toLowerCase()) || 
                           rolesList.find(r => r.name.toLowerCase() === "admin");
         const roleId = adminRole ? adminRole.id : 3;
 
         const res = await userApi.create({
           name: data.name,
           email: data.email,
-          password: data.password || "Password@123",
+          password: "Password@123",
           roleId,
-          status: "active",
+          status: data.status.toLowerCase(),
         });
         const created = res.data || res;
         setAdmins((prev) => [{
@@ -166,12 +161,10 @@ function AdminsPage() {
           email: created.email || data.email,
           module: data.module,
           campus: data.campus,
-          status: "Active",
+          status: data.status,
         }, ...prev]);
-        toast.success("Admin credentials created successfully!");
       } catch (err) {
         console.error("Failed to create admin:", err);
-        toast.error(err.message || "Failed to create admin credentials.");
       }
     }
     setModalOpen(false);
@@ -196,15 +189,14 @@ function AdminsPage() {
             </div>
           </div>
         </div>
-        {/* Add Admin button — upper right corner */}
-        <div className="mt-3 flex items-center">
+        {/* Add Admin Button — upper-right corner */}
+        <div className="mt-3 flex shrink-0 items-start">
           <button
             onClick={() => { setEditing(null); setModalOpen(true); }}
-            className="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #7B4CED, #2563EB)" }}
-            title="Add Sector Admin"
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #7B4CED, #5B33CC)" }}
           >
-            <UserPlus className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
             Add Admin
           </button>
         </div>
@@ -332,8 +324,6 @@ function AdminsPage() {
           initial={editing}
           onClose={() => setModalOpen(false)}
           onSave={save}
-          existingAdmins={admins}
-          onRemove={remove}
         />
       )}
     </div>
@@ -357,222 +347,104 @@ function KPI({ label, value, icon: Icon, tint }) {
   );
 }
 
-function AdminModal({ initial, onClose, onSave, existingAdmins = [], onRemove }) {
+function AdminModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [password, setPassword] = useState("");
-  const [hasHostel, setHasHostel] = useState(true);
-  const [hasLibrary, setHasLibrary] = useState(false);
-  const [hasInventory, setHasInventory] = useState(false);
-  const [sectorRole, setSectorRole] = useState("Admin");
-  const [submitting, setSubmitting] = useState(false);
+  const [module, setModule] = useState(initial?.module ?? "Admin");
+  const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
+  const [status, setStatus] = useState(initial?.status ?? "Pending");
 
-  const availableRoles = [];
-  if (hasHostel) availableRoles.push({ name: "Admin", label: "Hostel Admin" });
-  if (hasLibrary) availableRoles.push({ name: "Librarian", label: "Library Admin" });
-  if (hasInventory) availableRoles.push({ name: "Store", label: "Inventory Admin" });
-
-  async function submit(e) {
+  function submit(e) {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !password.trim()) return;
-    setSubmitting(true);
-    await onSave({ name: name.trim(), email: email.trim(), password, module: sectorRole });
-    setSubmitting(false);
+    if (!name.trim() || !email.trim()) return;
+    onSave({ name: name.trim(), email: email.trim(), module, campus, status });
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
-          <div>
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-primary" />
-              {initial ? "Edit Sector Admin" : "Create Sector Admin Credentials"}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Configure enabled facilities and create credentials for Hostel, Library, and Inventory administrators.
-            </p>
-          </div>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+      <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-foreground">
+            {initial ? "Edit Admin" : "Add Admin"}
+          </h3>
           <button
+            type="button"
             onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-
-        <div className="p-5 overflow-y-auto flex flex-col gap-6">
-          {/* Section: Enable College Facilities */}
-          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <Building2 className="h-4 w-4 text-primary" />
-              Enable College Facilities
-            </h3>
-            <div className="flex flex-wrap gap-5">
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasHostel}
-                  onChange={(e) => {
-                    setHasHostel(e.target.checked);
-                    if (e.target.checked) setSectorRole("Admin");
-                  }}
-                  className="h-4 w-4 rounded border-border text-primary"
-                />
-                <Home className="h-4 w-4 text-purple-500" />
-                <span>Hostel Management System</span>
-              </label>
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasLibrary}
-                  onChange={(e) => {
-                    setHasLibrary(e.target.checked);
-                    if (e.target.checked && !hasHostel) setSectorRole("Librarian");
-                  }}
-                  className="h-4 w-4 rounded border-border text-primary"
-                />
-                <BookOpen className="h-4 w-4 text-blue-500" />
-                <span>Library Management System</span>
-              </label>
-              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasInventory}
-                  onChange={(e) => {
-                    setHasInventory(e.target.checked);
-                    if (e.target.checked && !hasHostel && !hasLibrary) setSectorRole("Store");
-                  }}
-                  className="h-4 w-4 rounded border-border text-primary"
-                />
-                <Package className="h-4 w-4 text-emerald-500" />
-                <span>Inventory Management System</span>
-              </label>
-            </div>
+        <div className="flex flex-col gap-3">
+          <Field label="Full Name">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              required
+            />
+          </Field>
+          <Field label="Email">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              required
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Module">
+              <select
+                value={module}
+                onChange={(e) => setModule(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              >
+                <option value="Admin">Hostel</option>
+                <option value="Librarian">Library</option>
+                <option value="Store">Inventory</option>
+              </select>
+            </Field>
+            <Field label="Status">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              >
+                <option>Active</option>
+                <option>Pending</option>
+                <option>Inactive</option>
+              </select>
+            </Field>
           </div>
-
-          {/* Section: Create Sector Admin Credentials */}
-          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <UserPlus className="h-4 w-4 text-primary" />
-              Create Sector Admin Credentials
-            </h3>
-
-            {availableRoles.length === 0 ? (
-              <p className="text-xs text-amber-500">
-                Please enable at least one facility above to create an admin.
-              </p>
-            ) : (
-              <form onSubmit={submit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Admin Full Name</span>
-                  <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Rahul Sharma"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Email / Login Username</span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. admin@campusos.com"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Initial Password</span>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Set initial password"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Sector Facility Role</span>
-                  <select
-                    value={sectorRole}
-                    onChange={(e) => setSectorRole(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  >
-                    {availableRoles.map((r) => (
-                      <option key={r.name} value={r.name}>{r.label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="sm:col-span-2 flex justify-end mt-1">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                  >
-                    <KeyRound className="h-4 w-4" />
-                    {submitting ? "Creating..." : "Create Admin Credentials"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Section: Assigned Administrators */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              Assigned Administrators ({existingAdmins.length})
-            </h3>
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-2.5 font-medium">Name</th>
-                    <th className="px-4 py-2.5 font-medium">Role</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border text-foreground">
-                  {existingAdmins.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="px-4 py-6 text-center text-xs text-muted-foreground">
-                        No sector admins assigned yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    existingAdmins.map((a) => (
-                      <tr key={a.id} className="hover:bg-muted/20">
-                        <td className="px-4 py-2 text-xs font-semibold">{a.name}</td>
-                        <td className="px-4 py-2 text-[10px] uppercase font-bold text-primary">{a.module}</td>
-                        <td className="px-4 py-2 text-right">
-                          <button
-                            onClick={() => onRemove && onRemove(a.id)}
-                            className="text-xs text-red-500 hover:underline cursor-pointer"
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Field label="Campus">
+            <select
+              value={campus}
+              onChange={(e) => setCampus(e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            >
+              {CAMPUSES.map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </Field>
         </div>
-      </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+          >
+            {initial ? "Save Changes" : "Create Admin"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
