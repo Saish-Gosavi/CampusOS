@@ -91,7 +91,8 @@ function WardenSidebar() {
             </SidebarMenuButton>
           </SidebarMenuItem>;
   })}
-    </SidebarMenu>;
+    </SidebarMenu>
+  );
   return <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
