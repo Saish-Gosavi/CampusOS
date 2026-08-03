@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   Users,
@@ -18,7 +18,8 @@ import {
 import { userApi, rolesApi } from "@/services/api";
 
 const Route = createFileRoute("/senior-admin/admins")({
-  component: AdminsPage
+  component: AdminsPage,
+  validateSearch: (search) => ({ create: search.create }),
 });
 
 const CAMPUSES = [
@@ -53,6 +54,19 @@ function AdminsPage() {
   const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  const search = useSearch({ strict: false });
+  const navigate = useNavigate();
+
+  // Auto-open create modal when sidebar button passes ?create=true
+  useEffect(() => {
+    if (search?.create === "true") {
+      setEditing(null);
+      setModalOpen(true);
+      // Clear the param without adding to history
+      navigate({ to: "/senior-admin/admins", replace: true });
+    }
+  }, [search?.create]);
 
   const fetchAdmins = async () => {
     try {

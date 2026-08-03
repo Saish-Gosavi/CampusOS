@@ -11,7 +11,8 @@ import {
   Settings,
   UserCircle2,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  UserPlus
 } from "lucide-react";
 import {
   Sidebar,
@@ -121,6 +122,23 @@ function AdminSidebar() {
           <SidebarGroup>
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Overview</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(mainItems)}</SidebarGroupContent>
+
+          {/* Senior Admin: Create Admin quick-action button */}
+          {isSeniorAdmin && (
+            <div className={cn("mt-3 px-1", collapsed && "flex justify-center")}>
+              <button
+                onClick={() => navigate({ to: "/senior-admin/admins", search: { create: "true" } })}
+                title="Create Admin"
+                className={cn(
+                  "flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-white/25 hover:shadow-md active:scale-95",
+                  collapsed ? "justify-center w-10 h-10 p-0" : "w-full"
+                )}
+              >
+                <UserPlus className="h-4 w-4 shrink-0" />
+                {!collapsed && <span>Create Admin</span>}
+              </button>
+            </div>
+          )}
           </SidebarGroup>
 
           {insightItems.length > 0 && (
