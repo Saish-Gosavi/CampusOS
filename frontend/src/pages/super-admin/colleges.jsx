@@ -44,10 +44,8 @@ function CollegesPage() {
   
   // Modals
   const [collegeModalOpen, setCollegeModalOpen] = useState(false);
-  const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [selectedCollegeForAdmins, setSelectedCollegeForAdmins] = useState(null);
 
   const fetchColleges = async () => {
     setLoading(true);
@@ -66,10 +64,6 @@ function CollegesPage() {
           students: c.blocks ? c.blocks.length * 150 : 300,
         }));
         setColleges(formatted);
-        setSelectedCollegeForAdmins((prev) => {
-          if (!prev) return null;
-          return formatted.find((item) => item.id === prev.id) || null;
-        });
       }
     } catch (err) {
       toast.error("Failed to load colleges from database");
@@ -111,10 +105,7 @@ function CollegesPage() {
     setCollegeModalOpen(true);
   }
 
-  function openManageAdmins(c) {
-    setSelectedCollegeForAdmins(c);
-    setAdminModalOpen(true);
-  }
+
 
   async function remove(id) {
     if (!confirm("Are you sure you want to delete this college?")) return;
@@ -321,13 +312,7 @@ function CollegesPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
-                          <button
-                            onClick={() => openManageAdmins(c)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-                            title="Manage Admins & Credentials"
-                          >
-                            <UserPlus className="h-4 w-4" />
-                          </button>
+
                           <button
                             onClick={() => openEdit(c)}
                             className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
@@ -362,17 +347,7 @@ function CollegesPage() {
         />
       )}
 
-      {/* Modal 2: Manage College Admins & Facilities */}
-      {adminModalOpen && selectedCollegeForAdmins && (
-        <ManageCollegeAdminsModal
-          college={selectedCollegeForAdmins}
-          onClose={() => {
-            setAdminModalOpen(false);
-            setSelectedCollegeForAdmins(null);
-          }}
-          onRefresh={fetchColleges}
-        />
-      )}
+
 
       {/* Modal 3: Import Colleges from PDF */}
       {importModalOpen && (
@@ -471,233 +446,6 @@ function CollegeModal({ initial, onClose, onSave }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// Modal to Manage College Admins & Create Credentials by Sector
-// ─────────────────────────────────────────────────────────────
-function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
-  const [adminName, setAdminName] = useState("");
-  const [adminEmail, setAdminEmail] = useState("");
-  const [adminPassword, setAdminPassword] = useState("");
-  const [sectorRole, setSectorRole] = useState(
-    college.hasHostel ? "admin" : college.hasLibrary ? "librarian" : "store"
-  );
-  const [submitting, setSubmitting] = useState(false);
-
-  // Available Sector Roles based on Enabled Facilities
-  const availableRoles = [];
-  if (college.hasHostel) {
-    availableRoles.push({ name: "admin", label: "Hostel Admin" });
-  }
-  if (college.hasLibrary) {
-    availableRoles.push({ name: "librarian", label: "Library Admin" });
-  }
-  if (college.hasInventory) {
-    availableRoles.push({ name: "store", label: "Inventory Admin" });
-  }
-
-  async function handleCreateAdmin(e) {
-    e.preventDefault();
-    if (!adminName.trim() || !adminEmail.trim() || !adminPassword.trim()) {
-      toast.error("Please fill all admin credentials");
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await collegeApi.addAdmin(college.id, {
-        name: adminName.trim(),
-        email: adminEmail.trim(),
-        password: adminPassword,
-        roleName: sectorRole,
-      });
-      if (res.success) {
-        toast.success(`Admin credentials created for ${college.name}`);
-        setAdminName("");
-        setAdminEmail("");
-        setAdminPassword("");
-        onRefresh();
-      }
-    } catch (err) {
-      toast.error(err.message || "Failed to create admin");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  async function handleDeleteAdmin(userId) {
-    if (!confirm("Are you sure you want to remove this admin?")) return;
-    try {
-      const res = await collegeApi.deleteAdmin(college.id, userId);
-      if (res.success) {
-        toast.success("Admin removed successfully");
-        onRefresh();
-      }
-    } catch (err) {
-      toast.error(err.message || "Failed to remove admin");
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-2xl rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
-          <div>
-            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              Manage Sector Admins for {college.name}
-            </h2>
-            <p className="text-xs text-muted-foreground">
-              Create and manage credentials for Hostel, Library, and Inventory sector administrators.
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="p-5 overflow-y-auto flex flex-col gap-6">
-          {/* Section 1: Create New Sector Admin Credentials */}
-          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <UserPlus className="h-4 w-4 text-primary" />
-              Create Sector Admin Credentials
-            </h3>
-
-            {availableRoles.length === 0 ? (
-              <p className="text-xs text-amber-500">
-                No facilities enabled for this college. Edit the college to enable Hostel, Library, or Inventory facilities first.
-              </p>
-            ) : (
-              <form onSubmit={handleCreateAdmin} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Admin Full Name</span>
-                  <input
-                    required
-                    value={adminName}
-                    onChange={(e) => setAdminName(e.target.value)}
-                    placeholder="e.g. Rahul Sharma"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Email / Login Username</span>
-                  <input
-                    type="email"
-                    required
-                    value={adminEmail}
-                    onChange={(e) => setAdminEmail(e.target.value)}
-                    placeholder="e.g. warden.vppcoe@campusos.com"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Initial Password</span>
-                  <input
-                    type="password"
-                    required
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="Set initial password"
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  />
-                </div>
-                <div>
-                  <span className="text-xs font-medium text-muted-foreground block mb-1">Sector Facility Role</span>
-                  <select
-                    value={sectorRole}
-                    onChange={(e) => setSectorRole(e.target.value)}
-                    className="w-full rounded-lg border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
-                  >
-                    {availableRoles.map((r) => (
-                      <option key={r.name} value={r.name}>
-                        {r.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="sm:col-span-2 flex justify-end mt-1">
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                  >
-                    <KeyRound className="h-4 w-4" />
-                    {submitting ? "Creating..." : "Create Admin Credentials"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-
-          {/* Section 2: Active Admins for this College */}
-          <div>
-            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              Assigned Administrators ({college.users?.length || 0})
-            </h3>
-
-            <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-2.5 font-medium">Name</th>
-                    <th className="px-4 py-2.5 font-medium">Email</th>
-                    <th className="px-4 py-2.5 font-medium">Role</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {!college.users || college.users.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-8 text-center text-xs text-muted-foreground">
-                        No admins assigned to this college yet. Use the form above to add an admin.
-                      </td>
-                    </tr>
-                  ) : (
-                    college.users.map((u) => (
-                      <tr key={u.id} className="transition-colors hover:bg-muted/30">
-                        <td className="px-4 py-2.5 font-medium text-foreground">{u.name || "Admin"}</td>
-                        <td className="px-4 py-2.5 text-xs text-muted-foreground">{u.email}</td>
-                        <td className="px-4 py-2.5">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-600 dark:text-blue-400 capitalize">
-                            {(() => {
-                              const rn = u.role?.name;
-                              if (rn === "admin") return "Hostel Admin";
-                              if (rn === "librarian") return "Library Admin";
-                              if (rn === "store") return "Inventory Admin";
-                              return rn || "Admin";
-                            })()}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <button
-                            onClick={() => handleDeleteAdmin(u.id)}
-                            className="grid h-7 w-7 place-items-center rounded-lg text-muted-foreground hover:bg-[#EF4444]/10 hover:text-[#EF4444] ml-auto"
-                            title="Remove Admin"
-                          >
-                            <Trash className="h-3.5 w-3.5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Field({ label, children }) {
   return (
