@@ -47,6 +47,9 @@ function AdminsPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   /* ---------- data fetching ---------- */
+  // Only these roles count as "sector admins" — Senior/Super admins must NEVER appear here
+  const SECTOR_ROLES = new Set(["admin", "librarian", "store"]);
+
   const fetchAdmins = async () => {
     try {
       setLoading(true);
@@ -54,21 +57,25 @@ function AdminsPage() {
       const res  = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
 
-      const mapped = list.map((u) => {
-        const rawRole = u.role?.name || "General";
-        // Backend links users to hostels via hostelId, so college info is in u.hostel
-        const hostel = u.hostel;
-        return {
-          id:     u.id,
-          name:   u.name || u.email?.split("@")[0] || "User",
-          email:  u.email || "",
-          module: rawRole,
-          campus: hostel?.name
-            ? `${hostel.name}${hostel.city ? " — " + hostel.city : ""}`
-            : "—",
-          raw:    u
-        };
-      });
+      const mapped = list
+        // ✅ Strict filter: only show sector-level roles, never senioradmin / superadmin
+        .filter((u) => {
+          const role = (u.role?.name || "").toLowerCase();
+          return SECTOR_ROLES.has(role);
+        })
+        .map((u) => {
+          const rawRole = u.role?.name || "General";
+          return {
+            id:     u.id,
+            name:   u.name || u.email?.split("@")[0] || "User",
+            email:  u.email || "",
+            module: rawRole,
+            campus: u.college?.name
+              ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+              : "—",
+            raw:    u
+          };
+        });
 
       setAdmins(mapped);
     } catch (err) {
@@ -346,7 +353,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
       return;
     }
     if (availableRoles.length === 0) {
-      toast.error("No facilities are enabled for this college. Ask the Super Admin to enable facilities for this college.");
+      toast.error("No facilities are enabled for this college. Enable facilities from the Colleges page first.");
       return;
     }
 
@@ -443,7 +450,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
                 </span>
               )}
               {!selectedCollege.hasHostel && !selectedCollege.hasLibrary && !selectedCollege.hasInventory && (
-                <span className="text-xs text-amber-500">⚠ No facilities enabled — contact Super Admin to enable facilities</span>
+                <span className="text-xs text-amber-500">⚠ No facilities enabled — enable from Colleges page</span>
               )}
             </div>
           )}
