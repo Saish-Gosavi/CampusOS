@@ -56,13 +56,15 @@ function AdminsPage() {
 
       const mapped = list.map((u) => {
         const rawRole = u.role?.name || "General";
+        // Backend links users to hostels via hostelId, so college info is in u.hostel
+        const hostel = u.hostel;
         return {
           id:     u.id,
           name:   u.name || u.email?.split("@")[0] || "User",
           email:  u.email || "",
           module: rawRole,
-          campus: u.college?.name
-            ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+          campus: hostel?.name
+            ? `${hostel.name}${hostel.city ? " — " + hostel.city : ""}`
             : "—",
           raw:    u
         };
@@ -344,7 +346,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
       return;
     }
     if (availableRoles.length === 0) {
-      toast.error("No facilities are enabled for this college. Enable facilities from the Colleges page first.");
+      toast.error("No facilities are enabled for this college. Ask the Super Admin to enable facilities for this college.");
       return;
     }
 
@@ -441,7 +443,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
                 </span>
               )}
               {!selectedCollege.hasHostel && !selectedCollege.hasLibrary && !selectedCollege.hasInventory && (
-                <span className="text-xs text-amber-500">⚠ No facilities enabled — enable from Colleges page</span>
+                <span className="text-xs text-amber-500">⚠ No facilities enabled — contact Super Admin to enable facilities</span>
               )}
             </div>
           )}
