@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { userApi, rolesApi } from "@/services/api";
 
-const Route = createFileRoute("/super-admin/admins")({
+const Route = createFileRoute("/senior-admin/admins")({
   component: AdminsPage
 });
 
@@ -35,9 +35,12 @@ const STATUS_META = {
 };
 
 const MODULE_META = {
-  Senioradmin: { bg: "#2563EB1A", fg: "#2563EB" },
-  Superadmin: { bg: "#EF44441A", fg: "#DC2626" },
+  Hostel: { bg: "#7B4CED1A", fg: "#7B4CED" },
+  Library: { bg: "#3B82F61A", fg: "#3B82F6" },
+  Inventory: { bg: "#22C55E1A", fg: "#16A34A" },
   Admin: { bg: "#7B4CED1A", fg: "#7B4CED" },
+  Librarian: { bg: "#3B82F61A", fg: "#3B82F6" },
+  Store: { bg: "#22C55E1A", fg: "#16A34A" },
   General: { bg: "#64748B1A", fg: "#64748B" }
 };
 
@@ -48,6 +51,7 @@ function AdminsPage() {
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -55,12 +59,12 @@ function AdminsPage() {
     try {
       setLoading(true);
       setError(null);
-      // Fetch users with the role 'senioradmin'
-      const res = await userApi.getAll("senioradmin");
+      // Fetch all users. The backend logic automatically limits Senior Admins to see only standard Admins
+      const res = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
       
       const mapped = list.map((u) => {
-        const rawRole = u.role?.name || "Senioradmin";
+        const rawRole = u.role?.name || "General";
         const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
         const rawStatus = u.status || "Active";
         const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
@@ -78,7 +82,7 @@ function AdminsPage() {
 
       setAdmins(mapped);
     } catch (err) {
-      console.error("Failed to load senior admins:", err);
+      console.error("Failed to load admins:", err);
       setError("Unable to load data from server");
     } finally {
       setLoading(false);
@@ -104,15 +108,17 @@ function AdminsPage() {
     return admins.filter((a) => {
       const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.campus.toLowerCase().includes(q);
       const mS = statusFilter === "All" || a.status.toLowerCase() === statusFilter.toLowerCase();
-      return mQ && mS;
+      const mM = moduleFilter === "All" || a.module.toLowerCase() === moduleFilter.toLowerCase();
+      return mQ && mS && mM;
     });
-  }, [admins, query, statusFilter]);
+  }, [admins, query, statusFilter, moduleFilter]);
 
   const counts = useMemo(
     () => ({
       total: admins.length,
       active: admins.filter((a) => a.status.toLowerCase() === "active").length,
       pending: admins.filter((a) => a.status.toLowerCase() === "pending").length,
+      modules: new Set(admins.map((a) => a.module)).size
     }),
     [admins]
   );
@@ -123,12 +129,13 @@ function AdminsPage() {
   }
 
   async function remove(id) {
-    if (confirm("Remove this Senior Admin?")) {
+    if (confirm("Remove this sector admin?")) {
       try {
         await userApi.delete(id);
         setAdmins((prev) => prev.filter((a) => a.id !== id));
       } catch (err) {
-        console.error("Failed to delete backend user:", err);
+        console.error("Failed to delete admin:", err);
+        toast.error("Failed to delete admin credentials.");
       }
     }
   }
@@ -138,9 +145,10 @@ function AdminsPage() {
       setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
     } else {
       try {
-        // Resolve senioradmin role ID dynamically
-        const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
-        const roleId = seniorRole ? seniorRole.id : 2;
+        // Look up standard admin role ID dynamically
+        const adminRole = rolesList.find(r => r.name.toLowerCase() === data.module.toLowerCase()) || 
+                          rolesList.find(r => r.name.toLowerCase() === "admin");
+        const roleId = adminRole ? adminRole.id : 3;
 
         const res = await userApi.create({
           name: data.name,
@@ -154,12 +162,12 @@ function AdminsPage() {
           id: created.id || `a${Date.now()}`,
           name: created.name || data.name,
           email: created.email || data.email,
-          module: "Senioradmin",
+          module: data.module,
           campus: data.campus,
           status: data.status,
         }, ...prev]);
       } catch (err) {
-        console.error("Failed to create senior admin:", err);
+        console.error("Failed to create admin:", err);
       }
     }
     setModalOpen(false);
@@ -177,51 +185,51 @@ function AdminsPage() {
               <Users className="h-5 w-5" />
             </span>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Senior Admin Management</h1>
-              <p className="text-sm text-slate-500">
-                View and manage Senior Administrators. Senior Admins manage individual college/sector admins.
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Sector Admin Management</h1>
+              <p className="text-sm text-muted-foreground">
+                View and manage sector administrators (Hostel, Library, Inventory) dynamically.
               </p>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              setEditing(null);
-              setModalOpen(true);
-            }}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90"
-          >
-            Create Senior Admin
-          </button>
-        </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <KPI label="Total Senior Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <KPI label="Total Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
         <KPI label="Active" value={counts.active} icon={CheckCircle2} tint="#22C55E" />
         <KPI label="Pending" value={counts.pending} icon={Clock} tint="#EAB308" />
+        <KPI label="Modules Covered" value={counts.modules} icon={Shield} tint="#7B4CED" />
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 md:flex-row md:items-center md:justify-between shadow-sm">
         <div className="relative w-full md:max-w-sm">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, email or campus..."
-            className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:bg-white"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1">
+          <select
+            value={moduleFilter}
+            onChange={(e) => setModuleFilter(e.target.value)}
+            className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+          >
+            <option value="All">All Modules</option>
+            <option value="Admin">Hostel</option>
+            <option value="Librarian">Library</option>
+            <option value="Store">Inventory</option>
+          </select>
+          <div className="flex rounded-lg border border-border bg-muted p-1">
             {["All", "Active", "Pending", "Inactive"].map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${statusFilter === s ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${statusFilter === s ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
               >
                 {s}
               </button>
@@ -231,22 +239,22 @@ function AdminsPage() {
       </div>
 
       {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+            <thead className="bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 font-medium">Senior Admin</th>
-                <th className="px-4 py-3 font-medium">Role</th>
+                <th className="px-4 py-3 font-medium">Admin</th>
+                <th className="px-4 py-3 font-medium">Module / Role</th>
                 <th className="px-4 py-3 font-medium">Campus</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border text-foreground">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading live data...
@@ -255,17 +263,17 @@ function AdminsPage() {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
-                    {error || "No senior admins match your filters."}
+                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    {error || "No admins match your filters."}
                   </td>
                 </tr>
               ) : (
                 filtered.map((a) => {
                   const s = STATUS_META[a.status] || STATUS_META.Active;
-                  const m = MODULE_META[a.module] || { bg: "#2563EB1A", fg: "#2563EB" };
+                  const m = MODULE_META[a.module] || { bg: "#64748B1A", fg: "#64748B" };
                   const StatusIcon = s.icon || CheckCircle2;
                   return (
-                    <tr key={a.id} className="hover:bg-slate-50/60">
+                    <tr key={a.id} className="hover:bg-muted/30">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <span
@@ -275,8 +283,8 @@ function AdminsPage() {
                             {a.name.split(" ").map((p) => p[0]).slice(0, 2).join("")}
                           </span>
                           <div>
-                            <div className="font-medium text-slate-900">{a.name}</div>
-                            <div className="flex items-center gap-1 text-xs text-slate-500">
+                            <div className="font-medium text-foreground">{a.name}</div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
                               <Mail className="h-3 w-3" /> {a.email}
                             </div>
                           </div>
@@ -291,8 +299,8 @@ function AdminsPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 text-slate-700">
-                          <Building2 className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-foreground">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
                           {a.campus}
                         </div>
                       </td>
@@ -309,7 +317,7 @@ function AdminsPage() {
                         <div className="flex justify-end gap-1">
                           <button
                             onClick={() => remove(a.id)}
-                            className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
+                            className="rounded-md p-2 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500"
                             aria-label="Delete"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -338,9 +346,9 @@ function AdminsPage() {
 
 function KPI({ label, value, icon: Icon, tint }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-500">{label}</span>
+        <span className="text-sm text-muted-foreground">{label}</span>
         <span
           className="grid h-8 w-8 place-items-center rounded-lg"
           style={{ backgroundColor: `${tint}1A`, color: tint }}
@@ -348,7 +356,7 @@ function KPI({ label, value, icon: Icon, tint }) {
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
+      <div className="mt-2 text-2xl font-bold text-foreground">{value}</div>
     </div>
   );
 }
@@ -356,26 +364,27 @@ function KPI({ label, value, icon: Icon, tint }) {
 function AdminModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
+  const [module, setModule] = useState(initial?.module ?? "Admin");
   const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
   const [status, setStatus] = useState(initial?.status ?? "Pending");
 
   function submit(e) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
-    onSave({ name: name.trim(), email: email.trim(), campus, status });
+    onSave({ name: name.trim(), email: email.trim(), module, campus, status });
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-900/50 p-4">
-      <form onSubmit={submit} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
+      <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">
-            {initial ? "Edit Senior Admin" : "Create Senior Admin"}
+          <h3 className="text-lg font-semibold text-foreground">
+            {initial ? "Edit Admin" : "Add Admin"}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </button>
@@ -385,7 +394,7 @@ function AdminModal({ initial, onClose, onSave }) {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               required
             />
           </Field>
@@ -394,23 +403,27 @@ function AdminModal({ initial, onClose, onSave }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               required
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Role">
-              <input
-                value="Senioradmin"
-                disabled
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none cursor-not-allowed"
-              />
+            <Field label="Module">
+              <select
+                value={module}
+                onChange={(e) => setModule(e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              >
+                <option value="Admin">Hostel</option>
+                <option value="Librarian">Library</option>
+                <option value="Store">Inventory</option>
+              </select>
             </Field>
             <Field label="Status">
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
               >
                 <option>Active</option>
                 <option>Pending</option>
@@ -422,7 +435,7 @@ function AdminModal({ initial, onClose, onSave }) {
             <select
               value={campus}
               onChange={(e) => setCampus(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
             >
               {CAMPUSES.map((c) => (
                 <option key={c}>{c}</option>
@@ -434,7 +447,7 @@ function AdminModal({ initial, onClose, onSave }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
           >
             Cancel
           </button>
@@ -442,7 +455,7 @@ function AdminModal({ initial, onClose, onSave }) {
             type="submit"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
-            {initial ? "Save Changes" : "Create Senior Admin"}
+            {initial ? "Save Changes" : "Create Admin"}
           </button>
         </div>
       </form>
@@ -453,7 +466,7 @@ function AdminModal({ initial, onClose, onSave }) {
 function Field({ label, children }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-slate-600">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       {children}
     </label>
   );

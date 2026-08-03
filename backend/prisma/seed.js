@@ -63,6 +63,7 @@ async function main() {
   // 2. Ensure System Roles
   const roles = [
     { name: "superadmin", description: "Super Administrator with full access" },
+    { name: "senioradmin", description: "Senior Administrator who manages Admins" },
     { name: "admin", description: "Hostel Administrator" },
     { name: "warden", description: "Hostel Warden" },
     { name: "student", description: "Hostel Student" },
@@ -135,6 +136,35 @@ async function main() {
     });
   }
   console.log("  ✅ System Permissions configured");
+
+  // Configure permissions for Senior Admin
+  const roleSeniorAdmin = await prisma.role.findUnique({ where: { name: "senioradmin" } });
+  const seniorAdminPermissions = [
+    "users:read",
+    "users:write",
+    "users:delete",
+    "dashboard:read",
+  ];
+
+  for (const permName of seniorAdminPermissions) {
+    const perm = await prisma.permission.findUnique({ where: { name: permName } });
+    if (perm) {
+      await prisma.rolesOnPermissions.upsert({
+        where: {
+          roleId_permissionId: {
+            roleId: roleSeniorAdmin.id,
+            permissionId: perm.id,
+          },
+        },
+        update: {},
+        create: {
+          roleId: roleSeniorAdmin.id,
+          permissionId: perm.id,
+        },
+      });
+    }
+  }
+  console.log("  ✅ Senior Admin Permissions configured");
 
   // 4. Ensure Superadmin User
   const salt = await bcrypt.genSalt(10);

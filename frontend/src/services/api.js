@@ -203,8 +203,9 @@ export const rolesApi = {
 };
 
 export const userApi = {
-  async getAll() {
-    return apiClient.get("/users");
+  async getAll(role = "") {
+    const params = role ? { role } : {};
+    return apiClient.get("/users", { params });
   },
   async create(data) {
     return apiClient.post("/users", data);

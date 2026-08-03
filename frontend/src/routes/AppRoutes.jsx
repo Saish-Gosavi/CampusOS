@@ -24,6 +24,13 @@ import { Route as SuperAdminProfile } from "@/pages/super-admin/profile";
 import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 
+// Senior Admin Pages
+import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
+import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
+import { Route as SeniorAdminColleges } from "@/pages/senior-admin/colleges";
+import { Route as SeniorAdminSettings } from "@/pages/senior-admin/settings";
+import { Route as SeniorAdminProfile } from "@/pages/senior-admin/profile";
+
 // Hostel Pages
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
@@ -138,6 +145,7 @@ const RootNavigator = () => {
   const role = user.role?.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
+  if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
   if (role === "admin") return <Navigate to="/hostel-admin" replace />;
   if (role === "warden") return <Navigate to="/warden" replace />;
   if (role === "librarian") return <Navigate to="/library-admin" replace />;
@@ -176,6 +184,22 @@ export default function AppRoutes() {
         <Route path="profile" element={<SuperAdminProfile.component />} />
         <Route path="audit-logs" element={<SuperAdminAuditLogs.component />} />
         <Route path="reports" element={<SuperAdminReports.component />} />
+      </Route>
+
+      {/* Senior Admin Dashboard Routes */}
+      <Route
+        path="/senior-admin"
+        element={
+          <RoleRoute allowedRoles={["senioradmin"]}>
+            <DashboardLayout />
+          </RoleRoute>
+        }
+      >
+        <Route index element={<SeniorAdminIndex.component />} />
+        <Route path="admins" element={<SeniorAdminAdmins.component />} />
+        <Route path="colleges" element={<SeniorAdminColleges.component />} />
+        <Route path="settings" element={<SeniorAdminSettings.component />} />
+        <Route path="profile" element={<SeniorAdminProfile.component />} />
       </Route>
 
       {/* Hostel Admin Dashboard Routes */}

@@ -13,6 +13,7 @@ export const HTTP_STATUS = {
 
 export const ROLES = {
   SUPERADMIN: "superadmin",
+  SENIOR_ADMIN: "senioradmin",
   ADMIN: "admin",
   WARDEN: "warden",
   LIBRARIAN: "librarian",
