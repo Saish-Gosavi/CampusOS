@@ -1,5 +1,11 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+
+function SeniorAdminTypoRedirect() {
+  const location = useLocation();
+  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
+  return <Navigate to={cleanPath + location.search} replace />;
+}
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
@@ -207,8 +213,10 @@ export default function AppRoutes() {
       </Route>
 
       {/* Graceful redirects for senior admin spacing typos */}
-      <Route path="/senior admin" element={<Navigate to="/senior-admin" replace />} />
-      <Route path="/senior admin/*" element={<Navigate to="/senior-admin" replace />} />
+      <Route path="/senior admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior admin/*" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin/*" element={<SeniorAdminTypoRedirect />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route
