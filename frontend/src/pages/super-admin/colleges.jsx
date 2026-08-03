@@ -221,20 +221,19 @@ function CollegesPage() {
                 <th className="px-4 py-3 font-medium">College</th>
                 <th className="px-4 py-3 font-medium">City</th>
                 <th className="px-4 py-3 font-medium">College Admins</th>
-                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     Loading colleges from database...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     No colleges found in database. Click "Add College" to create one.
                   </td>
                 </tr>
@@ -269,15 +268,7 @@ function CollegesPage() {
                           <span>{c.users.length} Admin(s)</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{ backgroundColor: meta.bg, color: meta.fg }}
-                        >
-                          <meta.icon className="h-3 w-3" />
-                          {c.status}
-                        </span>
-                      </td>
+
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
 
