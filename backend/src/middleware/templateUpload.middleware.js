@@ -58,7 +58,7 @@ export const templateUpload = multer({
   storage: templateStorage,
   fileFilter,
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB max per file
+    fileSize: 100 * 1024 * 1024, // 100 MB max per file
     files: 2, // max 2 files (template + image)
   },
 });
