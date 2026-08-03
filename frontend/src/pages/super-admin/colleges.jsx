@@ -391,10 +391,6 @@ function CollegesPage() {
 function CollegeModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [city, setCity] = useState(initial?.city ?? "");
-  const [status, setStatus] = useState(initial?.status ?? "Active");
-  const [hasHostel, setHasHostel] = useState(initial?.hasHostel ?? true);
-  const [hasLibrary, setHasLibrary] = useState(initial?.hasLibrary ?? true);
-  const [hasInventory, setHasInventory] = useState(initial?.hasInventory ?? true);
   const [submitting, setSubmitting] = useState(false);
 
   async function submit(e) {
@@ -404,10 +400,10 @@ function CollegeModal({ initial, onClose, onSave }) {
     await onSave({
       name: name.trim(),
       city: city.trim(),
-      status,
-      hasHostel,
-      hasLibrary,
-      hasInventory
+      status: initial?.status ?? "Active",
+      hasHostel: initial?.hasHostel ?? false,
+      hasLibrary: initial?.hasLibrary ?? false,
+      hasInventory: initial?.hasInventory ?? false
     });
     setSubmitting(false);
   }
@@ -423,7 +419,7 @@ function CollegeModal({ initial, onClose, onSave }) {
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <h2 className="text-base font-semibold text-foreground">
-            {initial ? "Edit College & Facilities" : "Add New College"}
+            {initial ? "Edit College" : "Add New College"}
           </h2>
           <button
             onClick={onClose}
@@ -452,51 +448,6 @@ function CollegeModal({ initial, onClose, onSave }) {
               placeholder="e.g. Mumbai"
             />
           </Field>
-          <Field label="Status">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </Field>
-
-          {/* Enabled Facilities Checkboxes */}
-          <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-3">
-            <span className="text-xs font-semibold text-foreground">Enable Facilities for this College</span>
-            <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hasHostel}
-                onChange={(e) => setHasHostel(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
-              />
-              <Home className="h-4 w-4 text-purple-500" />
-              <span>Hostel Management System</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hasLibrary}
-                onChange={(e) => setHasLibrary(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
-              />
-              <BookOpen className="h-4 w-4 text-blue-500" />
-              <span>Library Management System</span>
-            </label>
-            <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hasInventory}
-                onChange={(e) => setHasInventory(e.target.checked)}
-                className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
-              />
-              <Package className="h-4 w-4 text-emerald-500" />
-              <span>Inventory Management System</span>
-            </label>
-          </div>
 
           <div className="mt-2 flex justify-end gap-2">
             <button

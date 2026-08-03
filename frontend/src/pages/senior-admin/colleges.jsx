@@ -270,20 +270,55 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [hasHostel, setHasHostel] = useState(college.hasHostel);
+  const [hasLibrary, setHasLibrary] = useState(college.hasLibrary);
+  const [hasInventory, setHasInventory] = useState(college.hasInventory);
   const [sectorRole, setSectorRole] = useState(
     college.hasHostel ? "admin" : college.hasLibrary ? "librarian" : "store"
   );
   const [submitting, setSubmitting] = useState(false);
 
   const availableRoles = [];
-  if (college.hasHostel) {
+  if (hasHostel) {
     availableRoles.push({ name: "admin", label: "Hostel Admin" });
   }
-  if (college.hasLibrary) {
+  if (hasLibrary) {
     availableRoles.push({ name: "librarian", label: "Library Admin" });
   }
-  if (college.hasInventory) {
+  if (hasInventory) {
     availableRoles.push({ name: "store", label: "Inventory Admin" });
+  }
+
+  async function toggleFacility(facility, value) {
+    try {
+      const updatedData = {
+        name: college.name,
+        city: college.city,
+        status: college.status,
+        hasHostel: facility === "hostel" ? value : hasHostel,
+        hasLibrary: facility === "library" ? value : hasLibrary,
+        hasInventory: facility === "inventory" ? value : hasInventory,
+      };
+      const res = await collegeApi.update(college.id, updatedData);
+      if (res.success) {
+        toast.success("College facilities updated successfully");
+        if (facility === "hostel") {
+          setHasHostel(value);
+          if (value && !sectorRole) setSectorRole("admin");
+        }
+        if (facility === "library") {
+          setHasLibrary(value);
+          if (value && !sectorRole) setSectorRole("librarian");
+        }
+        if (facility === "inventory") {
+          setHasInventory(value);
+          if (value && !sectorRole) setSectorRole("store");
+        }
+        onRefresh();
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to update facilities");
+    }
   }
 
   async function handleCreateAdmin(e) {
@@ -343,7 +378,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
               Manage Sector Admins for {college.name}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Create and manage credentials for Hostel, Library, and Inventory sector administrators.
+              Configure enabled facilities and manage credentials for Hostel, Library, and Inventory administrators.
             </p>
           </div>
           <button
@@ -355,6 +390,46 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
         </div>
 
         <div className="p-5 overflow-y-auto flex flex-col gap-6">
+          {/* Section: Enable / Disable College Facilities */}
+          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+              <Building2 className="h-4 w-4 text-primary" />
+              Enable College Facilities
+            </h3>
+            <div className="flex flex-wrap gap-5">
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasHostel}
+                  onChange={(e) => toggleFacility("hostel", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <Home className="h-4 w-4 text-purple-500" />
+                <span>Hostel Management System</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasLibrary}
+                  onChange={(e) => toggleFacility("library", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <BookOpen className="h-4 w-4 text-blue-500" />
+                <span>Library Management System</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasInventory}
+                  onChange={(e) => toggleFacility("inventory", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <Package className="h-4 w-4 text-emerald-500" />
+                <span>Inventory Management System</span>
+              </label>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
               <UserPlus className="h-4 w-4 text-primary" />
