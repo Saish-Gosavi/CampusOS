@@ -86,7 +86,7 @@ function WardenSidebar() {
               <ShieldCheck className="h-5 w-5" />
             </div>
             {!collapsed && <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white">Edu360</p>
+                <p className="truncate text-sm font-semibold text-white">Campus OS</p>
                 <p className="truncate text-xs text-slate-400">VPPCOE · Warden Portal</p>
               </div>}
           </div>
