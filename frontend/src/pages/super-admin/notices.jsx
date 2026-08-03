@@ -168,7 +168,7 @@ function NoticesPage() {
 
   // ── list view ──────────────────────────────────────────────────────────────
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-6">
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       {/* page header */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
