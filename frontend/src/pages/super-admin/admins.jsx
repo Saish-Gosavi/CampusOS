@@ -35,10 +35,11 @@ const STATUS_META = {
 };
 
 const MODULE_META = {
-  Senioradmin: { bg: "#2563EB1A", fg: "#2563EB" },
-  Superadmin: { bg: "#EF44441A", fg: "#DC2626" },
-  Admin: { bg: "#7B4CED1A", fg: "#7B4CED" },
-  General: { bg: "#64748B1A", fg: "#64748B" }
+  Senioradmin: { bg: "#2563EB1A", fg: "#2563EB", label: "Senior Admin" },
+  senioradmin: { bg: "#2563EB1A", fg: "#2563EB", label: "Senior Admin" },
+  Superadmin:  { bg: "#EF44441A", fg: "#DC2626", label: "Super Admin"  },
+  Admin:       { bg: "#7B4CED1A", fg: "#7B4CED", label: "Sector Admin"  },
+  General:     { bg: "#64748B1A", fg: "#64748B", label: "General"       }
 };
 
 function AdminsPage() {
@@ -131,33 +132,29 @@ function AdminsPage() {
   async function save(data) {
     if (editing) {
       setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
+      setModalOpen(false);
     } else {
       try {
         // Resolve senioradmin role ID dynamically
         const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
         const roleId = seniorRole ? seniorRole.id : 2;
 
-        const res = await userApi.create({
+        await userApi.create({
           name: data.name,
           email: data.email,
           password: data.password || "Password@123",
           roleId,
           status: "active",
         });
-        const created = res.data || res;
-        setAdmins((prev) => [{
-          id: created.id || `a${Date.now()}`,
-          name: created.name || data.name,
-          email: created.email || data.email,
-          module: "Senioradmin",
-          campus: data.campus,
-          status: data.status,
-        }, ...prev]);
+
+        // ✅ Re-fetch from server so count and list are always accurate
+        await fetchAdmins();
+        setModalOpen(false);
       } catch (err) {
         console.error("Failed to create senior admin:", err);
+        alert(err?.response?.data?.message || "Failed to create Senior Admin.");
       }
     }
-    setModalOpen(false);
   }
 
   return (
@@ -266,7 +263,7 @@ function AdminsPage() {
                           className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
                           style={{ backgroundColor: m.bg, color: m.fg }}
                         >
-                          {a.module}
+                          {m.label || a.module}
                         </span>
                       </td>
                       <td className="px-4 py-3">
