@@ -1,11 +1,5 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-
-function SeniorAdminTypoRedirect() {
-  const location = useLocation();
-  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
-  return <Navigate to={cleanPath + location.search} replace />;
-}
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
@@ -143,6 +137,12 @@ import { Route as InventoryStock } from "@/pages/inventory/stock/index";
 // Error Pages
 import { Route as Error403 } from "@/pages/errors/403";
 import { Route as Error404 } from "@/pages/errors/404";
+
+function SeniorAdminTypoRedirect() {
+  const location = useLocation();
+  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
+  return <Navigate to={cleanPath + location.search} replace />;
+}
 
 // Root navigator helper
 const RootNavigator = () => {
