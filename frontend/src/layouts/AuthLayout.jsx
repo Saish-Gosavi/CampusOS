@@ -1,5 +1,5 @@
 import { GraduationCap } from "lucide-react";
-const APP_NAME = "Edu360";
+const APP_NAME = "Campus OS";
 const COLLEGE_NAME = "College Management System";
 
 function AuthLayout({ children, title, subtitle }) {
