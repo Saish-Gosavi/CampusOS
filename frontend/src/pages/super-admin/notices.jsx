@@ -147,18 +147,22 @@ function NoticesPage() {
   // ── form view ──────────────────────────────────────────────────────────────
   if (view === "create" || view === "edit") {
     return (
-      <div className="mx-auto flex max-w-[900px] flex-col gap-6 p-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: `${TINT}22`, color: TINT }}>
-              <Megaphone className="h-5 w-5" />
-            </span>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">{view === "edit" ? "Edit Notice" : "Create Notice"}</h1>
-              <p className="text-sm text-muted-foreground">Broadcast to all college admins</p>
+      <div className="mx-auto flex max-w-[900px] flex-col gap-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="mt-3 flex items-center gap-3">
+              <span className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: `${TINT}22`, color: TINT }}>
+                <Megaphone className="h-5 w-5" />
+              </span>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">{view === "edit" ? "Edit Notice" : "Create Notice"}</h1>
+                <p className="text-sm text-muted-foreground">Broadcast to all college admins.</p>
+              </div>
             </div>
           </div>
-          <Button variant="outline" onClick={() => { setView("list"); setEditTarget(null); }}>Cancel</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => { setView("list"); setEditTarget(null); }}>Cancel</Button>
+          </div>
         </div>
         <NoticeForm initial={editTarget} onSubmit={handleSubmit} onPreview={setPreview} />
         {preview && <NoticePreviewOverlay notice={preview} onClose={() => setPreview(null)} />}
@@ -170,19 +174,23 @@ function NoticesPage() {
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       {/* page header */}
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: `${TINT}22`, color: TINT }}>
-            <Megaphone className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Global Notices</h1>
-            <p className="text-sm text-muted-foreground">Broadcast announcements to all college admins</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="mt-3 flex items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: `${TINT}22`, color: TINT }}>
+              <Megaphone className="h-5 w-5" />
+            </span>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">Global Notices</h1>
+              <p className="text-sm text-muted-foreground">Broadcast announcements to all college admins.</p>
+            </div>
           </div>
         </div>
-        <Button style={{ backgroundColor: TINT }} className="text-slate-900 font-semibold hover:opacity-90" onClick={() => setView("create")}>
-          <Plus className="mr-1.5 h-4 w-4" /> New Notice
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button style={{ backgroundColor: TINT }} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:opacity-90" onClick={() => setView("create")}>
+            <Plus className="h-4 w-4" /> New Notice
+          </Button>
+        </div>
       </div>
 
       {/* search + filter bar */}
