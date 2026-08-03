@@ -27,7 +27,6 @@ import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 // Senior Admin Pages
 import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
 import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
-import { Route as SeniorAdminColleges } from "@/pages/senior-admin/colleges";
 import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
@@ -200,6 +199,10 @@ export default function AppRoutes() {
         <Route path="settings" element={<SeniorAdminSettings.component />} />
         <Route path="profile" element={<SeniorAdminProfile.component />} />
       </Route>
+
+      {/* Graceful redirects for senior admin spacing typos */}
+      <Route path="/senior admin" element={<Navigate to="/senior-admin" replace />} />
+      <Route path="/senior admin/*" element={<Navigate to="/senior-admin" replace />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route
