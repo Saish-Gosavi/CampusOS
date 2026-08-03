@@ -70,25 +70,28 @@ function SecuritySidebar() {
     return url === longestMatch;
   };
 
-  const renderMenu = (items) => <SidebarMenu>
+  const renderMenu = (items) => (
+    <SidebarMenu>
       {items.map((item) => {
-    const active = isActive(item.url);
-    return <SidebarMenuItem key={item.title}>
+        const active = isActive(item.url);
+        return (
+          <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-      asChild
-      tooltip={item.title}
-      className={cn(
-        "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
-        active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
-      )}
-    >
+              asChild
+              tooltip={item.title}
+              className={cn(
+                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
+              )}
+            >
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>;
-  })}
+          </SidebarMenuItem>
+        );
+      })}
     </SidebarMenu>
   );
   return <Sidebar collapsible="icon" className="border-r-0">
