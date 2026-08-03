@@ -41,7 +41,10 @@ function AdminSidebar() {
   const mainItems = isSeniorAdmin
     ? [
         { title: "Dashboard", url: "/senior-admin", exact: true, icon: LayoutDashboard },
-        { title: "Admins", url: "/senior-admin/admins", icon: Users }
+        { title: "Admins", url: "/senior-admin/admins", icon: Users },
+        { title: "Hostel Management", url: "/senior-admin/hostel", icon: Home },
+        { title: "Library Management", url: "/senior-admin/library", icon: BookOpen },
+        { title: "Inventory Management", url: "/senior-admin/inventory", icon: Package }
       ]
     : [
         { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
