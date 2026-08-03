@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
@@ -11,7 +11,10 @@ import {
   Settings,
   UserCircle2,
   LogOut,
-  GraduationCap
+  GraduationCap,
+  Home,
+  BookOpen,
+  Package
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +37,7 @@ function AdminSidebar() {
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isSeniorAdmin = user?.role?.toLowerCase() === "senioradmin";
   const userRoleLabel = isSeniorAdmin ? "Senior Admin" : "Super Admin";
@@ -70,12 +74,12 @@ function AdminSidebar() {
         { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
       ];
 
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const pathname = location.pathname;
   const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const renderMenu = (items) => (
