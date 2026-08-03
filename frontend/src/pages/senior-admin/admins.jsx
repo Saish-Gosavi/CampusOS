@@ -50,7 +50,6 @@ function AdminsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
   const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -107,17 +106,14 @@ function AdminsPage() {
     const q = query.toLowerCase().trim();
     return admins.filter((a) => {
       const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.campus.toLowerCase().includes(q);
-      const mS = statusFilter === "All" || a.status.toLowerCase() === statusFilter.toLowerCase();
       const mM = moduleFilter === "All" || a.module.toLowerCase() === moduleFilter.toLowerCase();
-      return mQ && mS && mM;
+      return mQ && mM;
     });
-  }, [admins, query, statusFilter, moduleFilter]);
+  }, [admins, query, moduleFilter]);
 
   const counts = useMemo(
     () => ({
       total: admins.length,
-      active: admins.filter((a) => a.status.toLowerCase() === "active").length,
-      pending: admins.filter((a) => a.status.toLowerCase() === "pending").length,
       modules: new Set(admins.map((a) => a.module)).size
     }),
     [admins]
@@ -195,10 +191,8 @@ function AdminsPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <KPI label="Total Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
-        <KPI label="Active" value={counts.active} icon={CheckCircle2} tint="#22C55E" />
-        <KPI label="Pending" value={counts.pending} icon={Clock} tint="#EAB308" />
         <KPI label="Modules Covered" value={counts.modules} icon={Shield} tint="#7B4CED" />
       </div>
 
@@ -224,17 +218,6 @@ function AdminsPage() {
             <option value="Librarian">Library</option>
             <option value="Store">Inventory</option>
           </select>
-          <div className="flex rounded-lg border border-border bg-muted p-1">
-            {["All", "Active", "Pending", "Inactive"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${statusFilter === s ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -247,14 +230,13 @@ function AdminsPage() {
                 <th className="px-4 py-3 font-medium">Admin</th>
                 <th className="px-4 py-3 font-medium">Module / Role</th>
                 <th className="px-4 py-3 font-medium">Campus</th>
-                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-foreground">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading live data...
@@ -263,7 +245,7 @@ function AdminsPage() {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     {error || "No admins match your filters."}
                   </td>
                 </tr>
@@ -304,15 +286,7 @@ function AdminsPage() {
                           {a.campus}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-                          style={{ backgroundColor: s.bg, color: s.fg }}
-                        >
-                          <StatusIcon className="h-3 w-3" />
-                          {a.status}
-                        </span>
-                      </td>
+
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
                           <button
