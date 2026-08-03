@@ -23,7 +23,7 @@ import {
   FileSpreadsheet,
   Upload
 } from "lucide-react";
-import { collegeApi } from "@/services/api";
+import { collegeApi, userApi } from "@/services/api";
 import { toast } from "sonner";
 
 const Route = createFileRoute("/super-admin/colleges")({
@@ -40,6 +40,7 @@ function CollegesPage() {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [adminsCount, setAdminsCount] = useState(0);
   
   // Modals
   const [collegeModalOpen, setCollegeModalOpen] = useState(false);
@@ -64,6 +65,9 @@ function CollegesPage() {
         }));
         setColleges(formatted);
       }
+      const adminsRes = await userApi.getAll("senioradmin");
+      const adminsList = Array.isArray(adminsRes.data) ? adminsRes.data : (Array.isArray(adminsRes) ? adminsRes : []);
+      setAdminsCount(adminsList.length);
     } catch (err) {
       toast.error("Failed to load colleges from database");
     } finally {
@@ -174,11 +178,10 @@ function CollegesPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {[
           { label: "Total Colleges", value: counts.total, tint: "#2563EB", icon: Building2 },
-          { label: "Active", value: counts.active, tint: "#22C55E", icon: CheckCircle2 },
-          { label: "Inactive", value: counts.inactive, tint: "#EF4444", icon: XCircle },
+          { label: "Total Admins", value: adminsCount, tint: "#22C55E", icon: ShieldCheck },
           { label: "Total Students", value: counts.students.toLocaleString(), tint: "#7B4CED", icon: Users }
         ].map((k) => (
           <div key={k.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -217,7 +220,6 @@ function CollegesPage() {
               <tr className="text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3 font-medium">College</th>
                 <th className="px-4 py-3 font-medium">City</th>
-                <th className="px-4 py-3 font-medium">Enabled Facilities</th>
                 <th className="px-4 py-3 font-medium">College Admins</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -226,13 +228,13 @@ function CollegesPage() {
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     Loading colleges from database...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     No colleges found in database. Click "Add College" to create one.
                   </td>
                 </tr>
@@ -260,25 +262,7 @@ function CollegesPage() {
                           {c.city}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {c.hasHostel && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600 dark:text-purple-400">
-                              <Home className="h-3 w-3" /> Hostel
-                            </span>
-                          )}
-                          {c.hasLibrary && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
-                              <BookOpen className="h-3 w-3" /> Library
-                            </span>
-                          )}
-                          {c.hasInventory && (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                              <Package className="h-3 w-3" /> Inventory
-                            </span>
-                          )}
-                        </div>
-                      </td>
+
                       <td className="px-4 py-3">
                         <span className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-2.5 py-1 text-xs font-medium text-foreground">
                           <ShieldCheck className="h-3.5 w-3.5 text-primary" />
