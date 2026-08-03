@@ -15,7 +15,7 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import { userApi } from "@/services/api";
+import { userApi, rolesApi } from "@/services/api";
 
 const Route = createFileRoute("/super-admin/admins")({
   component: AdminsPage
@@ -35,9 +35,7 @@ const STATUS_META = {
 };
 
 const MODULE_META = {
-  Hostel: { bg: "#7B4CED1A", fg: "#7B4CED" },
-  Library: { bg: "#3B82F61A", fg: "#3B82F6" },
-  Inventory: { bg: "#22C55E1A", fg: "#16A34A" },
+  Senioradmin: { bg: "#2563EB1A", fg: "#2563EB" },
   Superadmin: { bg: "#EF44441A", fg: "#DC2626" },
   Admin: { bg: "#7B4CED1A", fg: "#7B4CED" },
   General: { bg: "#64748B1A", fg: "#64748B" }
@@ -45,11 +43,11 @@ const MODULE_META = {
 
 function AdminsPage() {
   const [admins, setAdmins] = useState([]);
+  const [rolesList, setRolesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
@@ -57,11 +55,12 @@ function AdminsPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await userApi.getAll();
+      // Fetch users with the role 'senioradmin'
+      const res = await userApi.getAll("senioradmin");
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
       
       const mapped = list.map((u) => {
-        const rawRole = u.role?.name || "General";
+        const rawRole = u.role?.name || "Senioradmin";
         const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
         const rawStatus = u.status || "Active";
         const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
@@ -79,7 +78,7 @@ function AdminsPage() {
 
       setAdmins(mapped);
     } catch (err) {
-      console.error("Failed to load admins:", err);
+      console.error("Failed to load senior admins:", err);
       setError("Unable to load data from server");
     } finally {
       setLoading(false);
@@ -87,6 +86,16 @@ function AdminsPage() {
   };
 
   useEffect(() => {
+    async function loadRoles() {
+      try {
+        const res = await rolesApi.getAll();
+        const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        setRolesList(list);
+      } catch (err) {
+        console.error("Failed to load roles:", err);
+      }
+    }
+    loadRoles();
     fetchAdmins();
   }, []);
 
@@ -95,17 +104,15 @@ function AdminsPage() {
     return admins.filter((a) => {
       const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.campus.toLowerCase().includes(q);
       const mS = statusFilter === "All" || a.status.toLowerCase() === statusFilter.toLowerCase();
-      const mM = moduleFilter === "All" || a.module.toLowerCase() === moduleFilter.toLowerCase();
-      return mQ && mS && mM;
+      return mQ && mS;
     });
-  }, [admins, query, statusFilter, moduleFilter]);
+  }, [admins, query, statusFilter]);
 
   const counts = useMemo(
     () => ({
       total: admins.length,
       active: admins.filter((a) => a.status.toLowerCase() === "active").length,
       pending: admins.filter((a) => a.status.toLowerCase() === "pending").length,
-      modules: new Set(admins.map((a) => a.module)).size
     }),
     [admins]
   );
@@ -116,13 +123,13 @@ function AdminsPage() {
   }
 
   async function remove(id) {
-    if (confirm("Remove this admin?")) {
+    if (confirm("Remove this Senior Admin?")) {
       try {
         await userApi.delete(id);
+        setAdmins((prev) => prev.filter((a) => a.id !== id));
       } catch (err) {
         console.error("Failed to delete backend user:", err);
       }
-      setAdmins((prev) => prev.filter((a) => a.id !== id));
     }
   }
 
@@ -131,11 +138,15 @@ function AdminsPage() {
       setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
     } else {
       try {
+        // Resolve senioradmin role ID dynamically
+        const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
+        const roleId = seniorRole ? seniorRole.id : 2;
+
         const res = await userApi.create({
           name: data.name,
           email: data.email,
           password: "Password@123",
-          roleId: 2,
+          roleId,
           status: data.status.toLowerCase(),
         });
         const created = res.data || res;
@@ -143,12 +154,12 @@ function AdminsPage() {
           id: created.id || `a${Date.now()}`,
           name: created.name || data.name,
           email: created.email || data.email,
-          module: data.module,
+          module: "Senioradmin",
           campus: data.campus,
           status: data.status,
         }, ...prev]);
       } catch (err) {
-        console.error("Failed to create admin:", err);
+        console.error("Failed to create senior admin:", err);
       }
     }
     setModalOpen(false);
@@ -158,7 +169,7 @@ function AdminsPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-                    <div className="mt-3 flex items-center gap-3">
+          <div className="mt-3 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#EAB3081A", color: "#B45309" }}
@@ -166,21 +177,31 @@ function AdminsPage() {
               <Users className="h-5 w-5" />
             </span>
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">Admin Management</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-slate-900">Senior Admin Management</h1>
               <p className="text-sm text-slate-500">
-                View module admins and manage assigned campuses dynamically.
+                View and manage Senior Administrators. Senior Admins manage individual college/sector admins.
               </p>
             </div>
           </div>
         </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setEditing(null);
+              setModalOpen(true);
+            }}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary/90"
+          >
+            Create Senior Admin
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KPI label="Total Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <KPI label="Total Senior Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
         <KPI label="Active" value={counts.active} icon={CheckCircle2} tint="#22C55E" />
         <KPI label="Pending" value={counts.pending} icon={Clock} tint="#EAB308" />
-        <KPI label="Modules Covered" value={counts.modules} icon={Shield} tint="#7B4CED" />
       </div>
 
       {/* Filters */}
@@ -195,18 +216,6 @@ function AdminsPage() {
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={moduleFilter}
-            onChange={(e) => setModuleFilter(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-primary"
-          >
-            <option value="All">All Modules</option>
-            <option value="Hostel">Hostel</option>
-            <option value="Library">Library</option>
-            <option value="Inventory">Inventory</option>
-            <option value="Superadmin">Superadmin</option>
-            <option value="Admin">Admin</option>
-          </select>
           <div className="flex rounded-lg border border-slate-200 bg-slate-50 p-1">
             {["All", "Active", "Pending", "Inactive"].map((s) => (
               <button
@@ -227,8 +236,8 @@ function AdminsPage() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
               <tr>
-                <th className="px-4 py-3 font-medium">Admin</th>
-                <th className="px-4 py-3 font-medium">Module / Role</th>
+                <th className="px-4 py-3 font-medium">Senior Admin</th>
+                <th className="px-4 py-3 font-medium">Role</th>
                 <th className="px-4 py-3 font-medium">Campus</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
@@ -247,13 +256,13 @@ function AdminsPage() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-500">
-                    {error || "No admins match your filters."}
+                    {error || "No senior admins match your filters."}
                   </td>
                 </tr>
               ) : (
                 filtered.map((a) => {
                   const s = STATUS_META[a.status] || STATUS_META.Active;
-                  const m = MODULE_META[a.module] || { bg: "#64748B1A", fg: "#64748B" };
+                  const m = MODULE_META[a.module] || { bg: "#2563EB1A", fg: "#2563EB" };
                   const StatusIcon = s.icon || CheckCircle2;
                   return (
                     <tr key={a.id} className="hover:bg-slate-50/60">
@@ -298,13 +307,6 @@ function AdminsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
-                          <button
-                            onClick={() => openEdit(a)}
-                            className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-                            aria-label="Edit"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
                           <button
                             onClick={() => remove(a.id)}
                             className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
@@ -354,14 +356,13 @@ function KPI({ label, value, icon: Icon, tint }) {
 function AdminModal({ initial, onClose, onSave }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
-  const [module, setModule] = useState(initial?.module ?? "Hostel");
   const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
   const [status, setStatus] = useState(initial?.status ?? "Pending");
 
   function submit(e) {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
-    onSave({ name: name.trim(), email: email.trim(), module, campus, status });
+    onSave({ name: name.trim(), email: email.trim(), campus, status });
   }
 
   return (
@@ -369,7 +370,7 @@ function AdminModal({ initial, onClose, onSave }) {
       <form onSubmit={submit} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-900">
-            {initial ? "Edit Admin" : "Add Admin"}
+            {initial ? "Edit Senior Admin" : "Create Senior Admin"}
           </h3>
           <button
             type="button"
@@ -398,17 +399,12 @@ function AdminModal({ initial, onClose, onSave }) {
             />
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Module">
-              <select
-                value={module}
-                onChange={(e) => setModule(e.target.value)}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
-              >
-                <option>Hostel</option>
-                <option>Library</option>
-                <option>Inventory</option>
-                <option>Admin</option>
-              </select>
+            <Field label="Role">
+              <input
+                value="Senioradmin"
+                disabled
+                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none cursor-not-allowed"
+              />
             </Field>
             <Field label="Status">
               <select
@@ -446,7 +442,7 @@ function AdminModal({ initial, onClose, onSave }) {
             type="submit"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
           >
-            {initial ? "Save Changes" : "Create Admin"}
+            {initial ? "Save Changes" : "Create Senior Admin"}
           </button>
         </div>
       </form>

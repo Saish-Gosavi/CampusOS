@@ -29,28 +29,44 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
-const mainItems = [
-  { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
-  { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
-  { title: "Admins", url: "/super-admin/admins", icon: Users }
-];
-
-const insightItems = [
-  { title: "Reports", url: "/super-admin/reports", icon: BarChart3 },
-  { title: "Global Notices", url: "/super-admin/notices", icon: Megaphone },
-  { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
-];
-
-const accountItems = [
-  { title: "Settings", url: "/super-admin/settings", icon: Settings },
-  { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
-];
-
 function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const isSeniorAdmin = user?.role?.toLowerCase() === "senioradmin";
+  const userRoleLabel = isSeniorAdmin ? "Senior Admin" : "Super Admin";
+
+  const mainItems = isSeniorAdmin
+    ? [
+        { title: "Dashboard", url: "/senior-admin", exact: true, icon: LayoutDashboard },
+        { title: "Colleges", url: "/senior-admin/colleges", icon: Building2 },
+        { title: "Admins", url: "/senior-admin/admins", icon: Users }
+      ]
+    : [
+        { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
+        { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
+        { title: "Admins", url: "/super-admin/admins", icon: Users }
+      ];
+
+  const insightItems = isSeniorAdmin
+    ? []
+    : [
+        { title: "Reports", url: "/super-admin/reports", icon: BarChart3 },
+        { title: "Global Notices", url: "/super-admin/notices", icon: Megaphone },
+        { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
+      ];
+
+  const accountItems = isSeniorAdmin
+    ? [
+        { title: "Settings", url: "/senior-admin/settings", icon: Settings },
+        { title: "Profile", url: "/senior-admin/profile", icon: UserCircle2 }
+      ]
+    : [
+        { title: "Settings", url: "/super-admin/settings", icon: Settings },
+        { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
+      ];
 
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
@@ -89,14 +105,14 @@ function AdminSidebar() {
     <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
-          <div className="flex items-center gap-2 px-1 py-1.5">
-            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/10 text-white backdrop-blur shadow-sm">
-              <GraduationCap className="h-5 w-5" />
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white/10 text-white backdrop-blur shadow-sm">
+              <GraduationCap className="h-6 w-6" />
             </div>
             {!collapsed && (
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white tracking-wide">Campus OS</p>
-                <p className="truncate text-[10px] uppercase tracking-wider text-white/60">Super Admin</p>
+              <div className="flex flex-col justify-center min-w-0">
+                <p className="truncate text-[20px] font-bold text-white leading-none tracking-normal font-sans">Campus OS</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-[#BDB5D2] mt-1.5 font-sans">{userRoleLabel}</p>
               </div>
             )}
           </div>
@@ -108,10 +124,12 @@ function AdminSidebar() {
             <SidebarGroupContent>{renderMenu(mainItems)}</SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Insights</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(insightItems)}</SidebarGroupContent>
-          </SidebarGroup>
+          {insightItems.length > 0 && (
+            <SidebarGroup>
+              {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Insights</SidebarGroupLabel>}
+              <SidebarGroupContent>{renderMenu(insightItems)}</SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
           <SidebarGroup>
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}

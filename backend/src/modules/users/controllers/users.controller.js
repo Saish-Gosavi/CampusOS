@@ -32,7 +32,15 @@ export class UsersController {
 
   static async getAllUsers(req, res, next) {
     try {
-      const users = await UsersService.getAllUsers();
+      const creatorRoleName = req.user.role.toLowerCase();
+      let users;
+      if (creatorRoleName === "senioradmin") {
+        users = await UsersService.getAllUsers("admin");
+      } else if (creatorRoleName === "superadmin" && req.query.role) {
+        users = await UsersService.getAllUsers(req.query.role);
+      } else {
+        users = await UsersService.getAllUsers();
+      }
       return apiResponse.success(res, users, "Users list retrieved successfully");
     } catch (error) {
       next(error);

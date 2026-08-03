@@ -194,7 +194,7 @@ function AuditLogsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-4 md:p-6">
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       {/* Page Header */}
       <div>
                 <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
