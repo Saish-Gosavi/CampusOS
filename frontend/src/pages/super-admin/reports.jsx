@@ -158,7 +158,7 @@ function ReportsPage() {
   );
 
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-6 text-foreground">
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       
       {/* 1. Page Header (Matches Admin Management Style) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
