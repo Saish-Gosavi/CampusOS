@@ -30,17 +30,13 @@ const Route = createFileRoute("/super-admin/colleges")({
   component: CollegesPage
 });
 
-const STATUS_META = {
-  Active: { bg: "#22C55E1A", fg: "#16A34A", icon: CheckCircle2 },
-  Pending: { bg: "#EAB3081A", fg: "#B45309", icon: Clock },
-  Inactive: { bg: "#EF44441A", fg: "#DC2626", icon: XCircle }
-};
+
 
 function CollegesPage() {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+
   
   // Modals
   const [collegeModalOpen, setCollegeModalOpen] = useState(false);
@@ -77,20 +73,18 @@ function CollegesPage() {
   }, []);
 
   const filtered = useMemo(() => {
+  const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return colleges.filter((c) => {
-      const matchesQ = !q || c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q);
-      const matchesS = statusFilter === "All" || c.status === statusFilter;
-      return matchesQ && matchesS;
+      return !q || c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q);
     });
-  }, [colleges, query, statusFilter]);
+  }, [colleges, query]);
 
   const counts = useMemo(
     () => ({
       total: colleges.length,
-      active: colleges.filter((c) => c.status === "Active").length,
-      inactive: colleges.filter((c) => c.status === "Inactive").length,
-      students: colleges.reduce((s, c) => s + c.students, 0)
+      students: colleges.reduce((s, c) => s + c.students, 0),
+      facilities: colleges.reduce((acc, c) => acc + (c.hasHostel ? 1 : 0) + (c.hasLibrary ? 1 : 0) + (c.hasInventory ? 1 : 0), 0)
     }),
     [colleges]
   );
@@ -177,12 +171,11 @@ function CollegesPage() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
           { label: "Total Colleges", value: counts.total, tint: "#2563EB", icon: Building2 },
-          { label: "Active", value: counts.active, tint: "#22C55E", icon: CheckCircle2 },
-          { label: "Inactive", value: counts.inactive, tint: "#EF4444", icon: XCircle },
-          { label: "Total Students", value: counts.students.toLocaleString(), tint: "#7B4CED", icon: Users }
+          { label: "Total Students", value: counts.students.toLocaleString(), tint: "#7B4CED", icon: Users },
+          { label: "Active Facilities", value: counts.facilities, tint: "#22C55E", icon: CheckCircle2 }
         ].map((k) => (
           <div key={k.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between">
@@ -210,19 +203,6 @@ function CollegesPage() {
             className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
-        <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
-          {["All", "Active", "Inactive"].map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                statusFilter === s ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Table */}
@@ -235,26 +215,24 @@ function CollegesPage() {
                 <th className="px-4 py-3 font-medium">City</th>
                 <th className="px-4 py-3 font-medium">Enabled Facilities</th>
                 <th className="px-4 py-3 font-medium">College Admins</th>
-                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     Loading colleges from database...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     No colleges found in database. Click "Add College" to create one.
                   </td>
                 </tr>
               ) : (
                 filtered.map((c, index) => {
-                  const meta = STATUS_META[c.status] || STATUS_META.Active;
                   return (
                     <tr key={c.id} className="transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3">
@@ -301,15 +279,7 @@ function CollegesPage() {
                           <span>{c.users.length} Admin(s)</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{ backgroundColor: meta.bg, color: meta.fg }}
-                        >
-                          <meta.icon className="h-3 w-3" />
-                          {c.status}
-                        </span>
-                      </td>
+
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
 
