@@ -28,8 +28,8 @@ import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
 import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
 import { Route as SeniorAdminColleges } from "@/pages/senior-admin/colleges";
-import { Route as SeniorAdminSettings } from "@/pages/senior-admin/settings";
-import { Route as SeniorAdminProfile } from "@/pages/senior-admin/profile";
+import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
+import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
 // Hostel Pages
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
