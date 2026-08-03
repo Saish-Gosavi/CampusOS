@@ -69,7 +69,20 @@ function AdminSidebar() {
       ];
 
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
+  const allItems = [...mainItems, ...insightItems, ...accountItems];
+  const hasExactMatch = allItems.some((item) => item.url === pathname);
+
+  const isActive = (url) => {
+    if (hasExactMatch) {
+      return pathname === url;
+    }
+    if (!pathname.startsWith(url + "/")) return false;
+    const matchingUrls = allItems
+      .map((i) => i.url)
+      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
+    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
+    return url === longestMatch;
+  };
 
   const handleLogout = () => {
     logout();
@@ -79,7 +92,7 @@ function AdminSidebar() {
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url, item.exact);
+        const active = isActive(item.url);
         return (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
