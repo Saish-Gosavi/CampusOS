@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { userApi, collegeApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 const Route = createFileRoute("/senior-admin/admins")({
   component: AdminsPage
@@ -38,6 +39,7 @@ const MODULE_META = {
 };
 
 function AdminsPage() {
+  const { user: currentUser } = useAuth();   // logged-in Senior Admin
   const [admins, setAdmins]       = useState([]);
   const [colleges, setColleges]   = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -47,9 +49,6 @@ function AdminsPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   /* ---------- data fetching ---------- */
-  // Only these roles count as "sector admins" — Senior/Super admins must NEVER appear here
-  const SECTOR_ROLES = new Set(["admin", "librarian", "store"]);
-
   const fetchAdmins = async () => {
     try {
       setLoading(true);
@@ -57,25 +56,22 @@ function AdminsPage() {
       const res  = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
 
+      // Filter out the currently logged-in Senior Admin so they never appear in their own list
       const mapped = list
-        // ✅ Strict filter: only show sector-level roles, never senioradmin / superadmin
-        .filter((u) => {
-          const role = (u.role?.name || "").toLowerCase();
-          return SECTOR_ROLES.has(role);
-        })
+        .filter((u) => u.id !== currentUser?.id)
         .map((u) => {
-          const rawRole = u.role?.name || "General";
-          return {
-            id:     u.id,
-            name:   u.name || u.email?.split("@")[0] || "User",
-            email:  u.email || "",
-            module: rawRole,
-            campus: u.college?.name
-              ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
-              : "—",
-            raw:    u
-          };
-        });
+        const rawRole = u.role?.name || "General";
+        return {
+          id:     u.id,
+          name:   u.name || u.email?.split("@")[0] || "User",
+          email:  u.email || "",
+          module: rawRole,
+          campus: u.college?.name
+            ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+            : "—",
+          raw:    u
+        };
+      });
 
       setAdmins(mapped);
     } catch (err) {
