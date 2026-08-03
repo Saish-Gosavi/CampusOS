@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, Repeat, User, BedDouble } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/hostel/StatusPill";

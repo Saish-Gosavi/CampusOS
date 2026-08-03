@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
 import {
   Building2,
   UserCog,
