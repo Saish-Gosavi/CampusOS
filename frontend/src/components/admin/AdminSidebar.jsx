@@ -95,7 +95,7 @@ function AdminSidebar() {
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white tracking-wide">Edu360</p>
+                <p className="truncate text-sm font-semibold text-white tracking-wide">Campus OS</p>
                 <p className="truncate text-[10px] uppercase tracking-wider text-white/60">Super Admin</p>
               </div>
             )}
