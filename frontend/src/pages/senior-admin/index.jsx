@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-  Building2,
   UserCog,
   ShieldCheck,
   GraduationCap,
@@ -60,33 +59,22 @@ function DashboardPage() {
     fetchStats();
   }, []);
 
-  const iconMap = {
-    "Total Admins": UserCog,
-    "Total Students": GraduationCap,
-    "Active Users (24h)": Users,
-    "Platform Uptime": ActivityIcon,
-  };
-  const tintMap = {
-    "Total Admins": "#7B4CED",
-    "Total Students": "#EAB308",
-    "Active Users (24h)": "#22C55E",
-    "Platform Uptime": "#22C55E",
-  };
+  const statIcons = [UserCog, ShieldCheck, GraduationCap, Users, ActivityIcon];
+  const statTints = ["#7B4CED", "#3B82F6", "#EAB308", "#22C55E", "#22C55E"];
 
-  const rawStats = statsData?.stats || [
-    { label: "Total Admins", value: "0", delta: "Configured Staff", trend: "up" },
-    { label: "Total Students", value: "0", delta: "Enrolled", trend: "up" },
-    { label: "Active Users (24h)", value: "1", delta: "Operational Accounts", trend: "up" },
-    { label: "Platform Uptime", value: "99.99%", delta: "Last 30 days", trend: "up" }
-  ];
-
-  const seniorAdminStats = rawStats
-    .filter(s => s.label !== "Total Colleges" && s.label !== "Total Senior Admin" && s.label !== "System Roles")
-    .map((s) => ({
-      ...s,
-      icon: iconMap[s.label] || UserCog,
-      tint: tintMap[s.label] || "#7B4CED",
-    }));
+  const seniorAdminStats = statsData?.stats
+    ? statsData.stats.map((s, i) => ({
+        ...s,
+        icon: statIcons[i % statIcons.length],
+        tint: statTints[i % statTints.length],
+      }))
+    : [
+        { label: "Total Admins",       value: "0",      delta: "Configured Staff",       trend: "up", icon: UserCog,      tint: "#7B4CED" },
+        { label: "System Roles",        value: "8",      delta: "Active RBAC Scopes",     trend: "up", icon: ShieldCheck,  tint: "#3B82F6" },
+        { label: "Total Students",      value: "0",      delta: "Enrolled",               trend: "up", icon: GraduationCap, tint: "#EAB308" },
+        { label: "Active Users (24h)",  value: "1",      delta: "Operational Accounts",   trend: "up", icon: Users,        tint: "#22C55E" },
+        { label: "Platform Uptime",     value: "99.99%", delta: "Last 30 days",           trend: "up", icon: ActivityIcon,  tint: "#22C55E" }
+      ];
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
@@ -177,7 +165,7 @@ function DashboardPage() {
                 <Users className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
                 <p className="text-sm font-medium text-foreground">No Admins Assigned Yet</p>
                 <p className="text-xs text-muted-foreground mt-1 max-w-[210px]">
-                  Onboard sector administrators from the Colleges view.
+                  Onboard sector administrators from the Admins module.
                 </p>
               </div>
             )}
