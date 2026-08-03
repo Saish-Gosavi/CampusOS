@@ -82,90 +82,104 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.03 260);          /* #0F172A */
-  --foreground: oklch(0.98 0.003 250);         /* #F8FAFC */
-  --card: oklch(0.24 0.04 265);               /* #1E293B */
-  --card-foreground: oklch(0.98 0.003 250);
-  --popover: oklch(0.24 0.04 265);
-  --popover-foreground: oklch(0.98 0.003 250);
-  --primary: oklch(0.62 0.19 260);
-  --primary-foreground: oklch(1 0 0);
-  --primary-hover: oklch(0.68 0.19 260);
-  --secondary: oklch(0.30 0.04 260);
-  --secondary-foreground: oklch(0.98 0.003 250);
-  --muted: oklch(0.28 0.04 260);
-  --muted-foreground: oklch(0.7 0.04 257);
-  --accent: oklch(0.32 0.05 260);
-  --accent-foreground: oklch(0.98 0.003 250);
-  --destructive: oklch(0.7 0.19 22);
-  --destructive-foreground: oklch(1 0 0);
-  --success: oklch(0.7 0.17 152);
-  --success-foreground: oklch(1 0 0);
-  --border: oklch(0.35 0.04 260);
-  --input: oklch(0.35 0.04 260);
-  --ring: oklch(0.62 0.19 260);
+  /* ── Page & surface backgrounds ── */
+  --background: #13131f;            /* app-level page background — deep navy black */
+  --foreground: #e8e8f0;            /* primary text — near white */
+  --card: #1c1c2e;                  /* card / panel surface */
+  --card-foreground: #e8e8f0;
+  --popover: #1c1c2e;               /* dropdown / modal surface */
+  --popover-foreground: #e8e8f0;
+
+  /* ── Primary accent — vivid purple ── */
+  --primary: #7c5cfc;               /* buttons, active states, highlights */
+  --primary-foreground: #ffffff;
+  --primary-hover: #6a48f0;
+  --primary-active: #5838e0;
+
+  /* ── Secondary surface ── */
+  --secondary: #252540;             /* slightly lighter panel / input bg */
+  --secondary-foreground: #e8e8f0;
+
+  /* ── Muted / subdued surfaces ── */
+  --muted: #252540;                 /* muted background (tags, badges) */
+  --muted-foreground: #8888aa;      /* secondary / placeholder text */
+
+  /* ── Accent ── */
+  --accent: #2a2a45;                /* hover highlights, subtle accents */
+  --accent-foreground: #e8e8f0;
+
+  /* ── Feedback colors ── */
+  --destructive: #f05252;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+
+  /* ── Borders & inputs ── */
+  --border: #2e2e50;                /* subtle purple-tinted border */
+  --input: #252540;                 /* input field background */
+  --ring: #7c5cfc;
 }
 
-/* Comprehensive Dark Mode Overrides */
+/* ── Dark mode hard overrides ── */
 .dark body {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
+  background-color: #13131f !important;
+  color: #e8e8f0 !important;
 }
 
 .dark .bg-white {
-  background-color: #1e293b !important;
+  background-color: #1c1c2e !important;
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-50\/50,
 .dark .bg-slate-50\/60 {
-  background-color: #0f172a !important;
+  background-color: #13131f !important;
 }
 
 .dark .bg-slate-100 {
-  background-color: #334155 !important;
+  background-color: #252540 !important;
 }
 
 .dark .text-slate-900 {
-  color: #f8fafc !important;
+  color: #e8e8f0 !important;
 }
 
 .dark .text-slate-800 {
-  color: #f1f5f9 !important;
+  color: #d8d8ec !important;
 }
 
 .dark .text-slate-700 {
-  color: #e2e8f0 !important;
+  color: #c8c8e0 !important;
 }
 
 .dark .text-slate-600 {
-  color: #cbd5e1 !important;
+  color: #a8a8c8 !important;
 }
 
 .dark .text-slate-500 {
-  color: #94a3b8 !important;
+  color: #8888aa !important;
 }
 
 .dark .text-slate-400 {
-  color: #64748b !important;
+  color: #6666aa !important;
 }
 
 .dark .border-slate-200,
 .dark .border-slate-100 {
-  border-color: #334155 !important;
+  border-color: #2e2e50 !important;
 }
 
 .dark .divide-slate-100 > * + * {
-  border-color: #334155 !important;
+  border-color: #2e2e50 !important;
 }
 
 .dark .hover\:bg-slate-50:hover,
 .dark .hover\:bg-slate-50\/60:hover {
-  background-color: #334155 !important;
+  background-color: #252540 !important;
 }
 
 .dark .hover\:bg-slate-100:hover {
-  background-color: #475569 !important;
+  background-color: #2e2e50 !important;
 }
 
 .dark input.input-style,
@@ -173,13 +187,13 @@
 .dark input,
 .dark select,
 .dark textarea {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+  background-color: #252540 !important;
+  color: #e8e8f0 !important;
+  border-color: #2e2e50 !important;
 }
 
 .dark input::placeholder {
-  color: #64748b !important;
+  color: #6666aa !important;
 }
 
 @layer base {
@@ -213,10 +227,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #2e2e50;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #7c5cfc;
 }
