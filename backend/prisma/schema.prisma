@@ -416,21 +416,3 @@ model Notice {
   @@index([createdById])
 }
 
-// ==========================================
-// 9. Global Notices
-// ==========================================
-
-model Notice {
-  id          Int       @id @default(autoincrement())
-  title       String
-  content     String?
-  isActive    Boolean   @default(true)
-  scheduledAt DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  createdById Int
-  createdBy   User      @relation(fields: [createdById], references: [id])
-
-  @@index([createdById])
-}
