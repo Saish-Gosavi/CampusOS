@@ -6,7 +6,7 @@ export class DashboardRepository {
       hostelsCount,
       collegesCount,
       adminsCount,
-      rolesCount,
+      seniorAdminsCount,
       studentsCount,
       activeUsersCount,
       recentAuditLogs,
@@ -27,7 +27,13 @@ export class DashboardRepository {
           },
         },
       }).catch(() => 0),
-      prisma.role.count().catch(() => 0),
+      prisma.user.count({
+        where: {
+          role: {
+            name: "senioradmin",
+          },
+        },
+      }).catch(() => 0),
       prisma.student.count().catch(() => 0),
       prisma.user.count({ where: { status: "active" } }).catch(() => 0),
       prisma.auditLog.findMany({
@@ -113,7 +119,7 @@ export class DashboardRepository {
     return {
       totalColleges,
       adminsCount,
-      rolesCount,
+      seniorAdminsCount,
       studentsCount,
       activeUsersCount,
       recentAuditLogs,
