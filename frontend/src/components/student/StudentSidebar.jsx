@@ -81,10 +81,10 @@ function StudentSidebar() {
             <SidebarMenuButton
       asChild
       tooltip={item.title}
-      className={cn(
-        "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
-        active && "bg-primary text-white hover:bg-primary/90 hover:text-white"
-      )}
+              className={cn(
+                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
+              )}
     >
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />

@@ -68,10 +68,10 @@ function LibrarySidebar() {
             <SidebarMenuButton
       asChild
       tooltip={item.title}
-      className={cn(
-        "text-slate-300 hover:bg-white/10 hover:text-white data-[active=true]:bg-[#0D9488] data-[active=true]:text-white",
-        active && "bg-[#0D9488] text-white hover:bg-[#0b7d72] hover:text-white"
-      )}
+              className={cn(
+                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
+              )}
     >
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />
