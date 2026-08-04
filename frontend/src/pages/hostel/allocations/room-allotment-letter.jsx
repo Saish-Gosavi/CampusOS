@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   FileCheck,
   Edit3,
+  Eye,
 } from "lucide-react";
 import { allotmentLetterApi, allotmentTemplateApi } from "@/services/api";
 import { toast } from "sonner";
@@ -37,6 +38,7 @@ function HostelRoomAllotmentLetterPage() {
 
   // Modals
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedLetter, setSelectedLetter] = useState(null);
 
@@ -188,6 +190,14 @@ function HostelRoomAllotmentLetterPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+                onClick={() => setIsViewModalOpen(true)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -351,6 +361,32 @@ function HostelRoomAllotmentLetterPage() {
                   Save
                 </>
               )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ───────── View Format Modal (Read-Only) ───────── */}
+      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
+        <DialogContent className="sm:max-w-[620px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              Room Allotment Letter Format
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 py-2">
+            <div className="w-full rounded-xl border border-border bg-slate-50/50 p-4 text-sm font-mono leading-relaxed text-slate-700 whitespace-pre-wrap overflow-y-auto max-h-[400px] shadow-inner select-text">
+              {activeTemplate?.description || "No format content defined."}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
+            <Button
+              type="button"
+              onClick={() => setIsViewModalOpen(false)}
+            >
+              Close
             </Button>
           </div>
         </DialogContent>
