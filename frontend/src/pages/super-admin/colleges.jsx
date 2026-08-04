@@ -23,7 +23,7 @@ import {
   FileSpreadsheet,
   Upload
 } from "lucide-react";
-import { collegeApi, userApi } from "@/services/api";
+import { collegeApi } from "@/services/api";
 import { toast } from "sonner";
 
 const Route = createFileRoute("/super-admin/colleges")({
@@ -40,7 +40,7 @@ function CollegesPage() {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [adminsCount, setAdminsCount] = useState(0);
+
   
   // Modals
   const [collegeModalOpen, setCollegeModalOpen] = useState(false);
@@ -65,9 +65,6 @@ function CollegesPage() {
         }));
         setColleges(formatted);
       }
-      const adminsRes = await userApi.getAll("senioradmin");
-      const adminsList = Array.isArray(adminsRes.data) ? adminsRes.data : (Array.isArray(adminsRes) ? adminsRes : []);
-      setAdminsCount(adminsList.length);
     } catch (err) {
       toast.error("Failed to load colleges from database");
     } finally {
@@ -91,7 +88,8 @@ function CollegesPage() {
       total: colleges.length,
       active: colleges.filter((c) => c.status === "Active").length,
       inactive: colleges.filter((c) => c.status === "Inactive").length,
-      students: colleges.reduce((s, c) => s + c.students, 0)
+      students: colleges.reduce((s, c) => s + c.students, 0),
+      totalAdmins: colleges.reduce((acc, c) => acc + c.users.length, 0)
     }),
     [colleges]
   );
@@ -106,47 +104,45 @@ function CollegesPage() {
     setCollegeModalOpen(true);
   }
 
-
-
   async function remove(id) {
-    if (!confirm("Are you sure you want to delete this college?")) return;
-    try {
-      const res = await collegeApi.delete(id);
-      if (res.success) {
+    if (confirm("Delete this college and all associated data?")) {
+      try {
+        await collegeApi.delete(id);
+        setColleges((prev) => prev.filter((c) => c.id !== id));
         toast.success("College deleted successfully");
-        fetchColleges();
+      } catch (err) {
+        toast.error("Failed to delete college");
       }
-    } catch (err) {
-      toast.error(err.message || "Failed to delete college");
     }
   }
 
-  async function saveCollege(data) {
+  async function save(data) {
     try {
       if (editing) {
         const res = await collegeApi.update(editing.id, data);
         if (res.success) {
+          setColleges((prev) => prev.map((c) => (c.id === editing.id ? { ...c, ...data } : c)));
           toast.success("College updated successfully");
-          fetchColleges();
         }
       } else {
         const res = await collegeApi.create(data);
         if (res.success) {
+          fetchColleges(); // reload fully to get new ID
           toast.success("College created successfully");
-          fetchColleges();
         }
       }
       setCollegeModalOpen(false);
     } catch (err) {
-      toast.error(err.message || "Failed to save college");
+      toast.error(err?.response?.data?.message || "Failed to save college");
     }
   }
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-                    <div className="mt-3 flex items-center gap-3">
+          <div className="mt-2 flex items-center gap-3">
             <span
               className="grid h-11 w-11 place-items-center rounded-xl"
               style={{ backgroundColor: "#2563EB1A", color: "#2563EB" }}
@@ -181,7 +177,7 @@ function CollegesPage() {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {[
           { label: "Total Colleges", value: counts.total, tint: "#2563EB", icon: Building2 },
-          { label: "Total Admins", value: adminsCount, tint: "#22C55E", icon: ShieldCheck },
+          { label: "Total Admins", value: counts.totalAdmins, tint: "#22C55E", icon: ShieldCheck },
           { label: "Total Students", value: counts.students.toLocaleString(), tint: "#7B4CED", icon: Users }
         ].map((k) => (
           <div key={k.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -302,7 +298,7 @@ function CollegesPage() {
         <CollegeModal
           initial={editing}
           onClose={() => setCollegeModalOpen(false)}
-          onSave={saveCollege}
+          onSave={save}
         />
       )}
 

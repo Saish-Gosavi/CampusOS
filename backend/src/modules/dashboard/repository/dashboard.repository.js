@@ -124,6 +124,9 @@ export class DashboardRepository {
       activeUsersCount,
       recentAuditLogs,
       recentHostels,
+      hostelAdminsCount,
+      libraryAdminsCount,
+      inventoryAdminsCount,
       adminDistribution: [
         { name: "Hostel", value: hostelAdminsCount },
         { name: "Inventory", value: inventoryAdminsCount },
