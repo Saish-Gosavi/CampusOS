@@ -57,7 +57,7 @@ function StaffManagementPage() {
     try {
       setLoading(true);
       const res = await staffApi.getAll();
-      setStaff(res.data.data || []);
+      setStaff(res.data || []);
     } catch {
       toast.error("Failed to load staff.");
     } finally {
@@ -143,7 +143,7 @@ function StaffManagementPage() {
     setAttendanceLoading(true);
     try {
       const res = await staffApi.getAttendance(s.id);
-      setAttendanceData(res.data.data || []);
+      setAttendanceData(res.data || []);
     } catch {
       toast.error("Failed to load attendance");
     } finally {
