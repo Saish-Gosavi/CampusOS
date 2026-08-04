@@ -41,7 +41,7 @@ function AdminNavbar() {
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const getInitials = (name) => {
