@@ -136,38 +136,28 @@ function AdminsPage() {
       setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
       setModalOpen(false);
     } else {
-      try {
-        // Resolve senioradmin role ID dynamically from the roles list
-        const seniorRole = rolesList.find((r) => r.name?.toLowerCase() === "senioradmin");
-        const roleId = seniorRole ? seniorRole.id : null;
+      // Resolve senioradmin role ID dynamically from the roles list
+      const seniorRole = rolesList.find((r) => r.name?.toLowerCase() === "senioradmin");
+      const roleId = seniorRole ? seniorRole.id : null;
 
-        if (!roleId) {
-          showToast("error", "Senior Admin role not found in system. Please contact support.");
-          return;
-        }
-
-        await userApi.create({
-          name: data.name,
-          email: data.email,
-          password: data.password || "Password@123",
-          roleId,
-          status: "active",
-        });
-
-        // Re-fetch from server so count and list are always accurate
-        await fetchAdmins();
-        setModalOpen(false);
-        showToast("success", `Senior Admin "${data.name}" created successfully!`);
-      } catch (err) {
-        console.error("Failed to create senior admin:", err);
-        // Extract actual backend error message
-        const msg =
-          err?.message ||
-          err?.data?.message ||
-          err?.response?.data?.message ||
-          "Failed to create Senior Admin. Please check the details and try again.";
+      if (!roleId) {
+        const msg = "Senior Admin role not found in system. Please contact support.";
         showToast("error", msg);
+        throw new Error(msg);
       }
+
+      await userApi.create({
+        name: data.name,
+        email: data.email,
+        password: data.password || "Password@123",
+        roleId,
+        status: "active",
+      });
+
+      // Re-fetch from server so count and list are always accurate
+      await fetchAdmins();
+      setModalOpen(false);
+      showToast("success", `Senior Admin "${data.name}" created successfully!`);
     }
   }
 
@@ -361,15 +351,28 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
   const [email, setEmail] = useState(initial?.email ?? "");
   const [password, setPassword] = useState("");
   const [campus, setCampus] = useState(initial?.campus ?? (colleges[0]?.name || ""));
+  const [saving, setSaving] = useState(false);
+  const [inlineError, setInlineError] = useState("");
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
-    if (!initial && !password.trim()) {
-      alert("Password is required to create a new Senior Admin");
-      return;
+    setInlineError("");
+
+    if (!name.trim()) { setInlineError("Full Name is required."); return; }
+    if (!email.trim()) { setInlineError("Email is required."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setInlineError("Please enter a valid email address."); return; }
+    if (!initial && !password.trim()) { setInlineError("Password is required to create a new Senior Admin."); return; }
+    if (!initial && password.trim().length < 8) { setInlineError("Password must be at least 8 characters."); return; }
+
+    setSaving(true);
+    try {
+      await onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "active" });
+    } catch (err) {
+      const msg = err?.message || err?.data?.message || "An unexpected error occurred. Please try again.";
+      setInlineError(msg);
+    } finally {
+      setSaving(false);
     }
-    onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "Active" });
   }
 
   return (
@@ -435,6 +438,13 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
             </select>
           </Field>
         </div>
+        {/* Inline error banner */}
+        {inlineError && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700">
+            <span className="mt-0.5 shrink-0">⚠️</span>
+            <span>{inlineError}</span>
+          </div>
+        )}
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"
@@ -445,9 +455,11 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {initial ? "Save Changes" : "Create Senior Admin"}
+            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {saving ? "Creating..." : (initial ? "Save Changes" : "Create Senior Admin")}
           </button>
         </div>
       </form>

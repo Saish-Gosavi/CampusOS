@@ -50,11 +50,26 @@ export class UsersService {
     const salt = await bcrypt.genSalt(10);
     // Strip fields not present in the Prisma User model (e.g. campus)
     const { campus, ...userData } = data;
+
+    // Pre-check: ensure email is not already registered
+    const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
+    if (existingUser) {
+      throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
+    }
+
     const hashedPassword = await bcrypt.hash(userData.password, salt);
-    return UsersRepository.create({
-      ...userData,
-      password: hashedPassword,
-    });
+    try {
+      return await UsersRepository.create({
+        ...userData,
+        password: hashedPassword,
+      });
+    } catch (err) {
+      // Handle Prisma unique constraint violation (P2002) gracefully
+      if (err?.code === "P2002" || err?.message?.includes("Unique constraint")) {
+        throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
+      }
+      throw err;
+    }
   }
 
   static async deleteUser(creator, id) {
