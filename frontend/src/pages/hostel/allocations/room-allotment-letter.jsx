@@ -181,11 +181,6 @@ function HostelRoomAllotmentLetterPage() {
                     Active Format
                   </span>
                 </div>
-                {activeTemplate.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 whitespace-pre-line">
-                    {activeTemplate.description}
-                  </p>
-                )}
                 <p className="text-xs text-muted-foreground mt-0.5">
                   Saved by {activeTemplate.user?.name || "Admin"} on{" "}
                   {new Date(activeTemplate.updatedAt || activeTemplate.createdAt).toLocaleDateString()}
