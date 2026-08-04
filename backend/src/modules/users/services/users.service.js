@@ -48,9 +48,11 @@ export class UsersService {
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
+    // Strip fields not present in the Prisma User model (e.g. campus)
+    const { campus, ...userData } = data;
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
     return UsersRepository.create({
-      ...data,
+      ...userData,
       password: hashedPassword,
     });
   }

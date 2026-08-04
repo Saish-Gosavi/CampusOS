@@ -49,7 +49,7 @@ export class UsersController {
 
   static async createUser(req, res, next) {
     try {
-      const user = await UsersService.createUser(req.body);
+      const user = await UsersService.createUser(req.user, req.body);
       await AuditLogService.logAction({
         userId: req.user?.id,
         module: "Admins",
@@ -68,7 +68,7 @@ export class UsersController {
 
   static async deleteUser(req, res, next) {
     try {
-      await UsersService.deleteUser(req.params.id);
+      await UsersService.deleteUser(req.user, req.params.id);
       await AuditLogService.logAction({
         userId: req.user?.id,
         module: "Admins",

@@ -46,6 +46,7 @@ function AdminsPage() {
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   const fetchAdmins = async () => {
     try {
@@ -136,9 +137,14 @@ function AdminsPage() {
       setModalOpen(false);
     } else {
       try {
-        // Resolve senioradmin role ID dynamically
-        const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
-        const roleId = seniorRole ? seniorRole.id : 2;
+        // Resolve senioradmin role ID dynamically from the roles list
+        const seniorRole = rolesList.find((r) => r.name?.toLowerCase() === "senioradmin");
+        const roleId = seniorRole ? seniorRole.id : null;
+
+        if (!roleId) {
+          showToast("error", "Senior Admin role not found in system. Please contact support.");
+          return;
+        }
 
         await userApi.create({
           name: data.name,
@@ -148,18 +154,45 @@ function AdminsPage() {
           status: "active",
         });
 
-        // ✅ Re-fetch from server so count and list are always accurate
+        // Re-fetch from server so count and list are always accurate
         await fetchAdmins();
         setModalOpen(false);
+        showToast("success", `Senior Admin "${data.name}" created successfully!`);
       } catch (err) {
         console.error("Failed to create senior admin:", err);
-        alert(err?.response?.data?.message || "Failed to create Senior Admin.");
+        // Extract actual backend error message
+        const msg =
+          err?.message ||
+          err?.data?.message ||
+          err?.response?.data?.message ||
+          "Failed to create Senior Admin. Please check the details and try again.";
+        showToast("error", msg);
       }
     }
   }
 
+  function showToast(type, message) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 5000);
+  }
+
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-5 right-5 z-[100] flex items-center gap-3 rounded-xl px-5 py-3.5 shadow-2xl text-sm font-medium transition-all ${
+            toast.type === "success"
+              ? "bg-green-600 text-white"
+              : "bg-red-600 text-white"
+          }`}
+          style={{ minWidth: 280, maxWidth: 420 }}
+        >
+          <span className="text-lg">{toast.type === "success" ? "✅" : "❌"}</span>
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} className="ml-auto opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mt-3 flex items-center gap-3">
