@@ -157,6 +157,9 @@ export const authApi = {
 export const dashboardApi = {
   async getSuperAdminStats() {
     return apiClient.get("/dashboard/superadmin");
+  },
+  async getHostelAdminStats() {
+    return apiClient.get("/dashboard/hosteladmin");
   }
 };
 

@@ -21,4 +21,90 @@ export class DashboardService {
       recentActivity: rawData.recentAuditLogs,
     };
   }
+
+  static async getHostelAdminDashboard() {
+    const rawData = await DashboardRepository.getHostelAdminStats();
+
+    // Map blocks for chart
+    const occupancyByBlock = rawData.blocks.map(block => {
+      let capacity = 0;
+      let occupied = 0;
+      block.rooms.forEach(room => {
+        capacity += room.capacity || 0;
+        occupied += room.beds?.length || 0;
+      });
+      return {
+        block: block.name,
+        capacity,
+        occupied
+      };
+    });
+
+    // Map complaint distribution
+    const complaintColors = {
+      open: "#EF4444",
+      pending: "#EAB308",
+      resolved: "#22C55E",
+      closed: "#6B7280"
+    };
+    const complaintOverview = rawData.complaintDistribution.map(c => ({
+      name: c.status.charAt(0).toUpperCase() + c.status.slice(1),
+      value: c._count.id,
+      color: complaintColors[c.status] || "#94A3B8"
+    }));
+
+    // Map leave distribution
+    const leaveColors = {
+      pending: "#EAB308",
+      approved: "#22C55E",
+      rejected: "#EF4444"
+    };
+    const leaveOverview = rawData.leaveDistribution.map(l => ({
+      name: l.status.charAt(0).toUpperCase() + l.status.slice(1),
+      value: l._count.id,
+      color: leaveColors[l.status] || "#94A3B8"
+    }));
+
+    return {
+      stats: {
+        totalStudents: rawData.studentsCount,
+        totalRooms: rawData.roomsCount,
+        occupiedRooms: rawData.occupiedRoomsCount,
+        availableRooms: rawData.availableRoomsCount,
+        pendingComplaints: rawData.pendingComplaints,
+        pendingLeaves: rawData.pendingLeaves,
+        visitorsToday: rawData.visitorsToday,
+        feeCollection: rawData.feeCollection
+      },
+      charts: {
+        occupancyByBlock,
+        complaintOverview,
+        leaveOverview
+      },
+      lists: {
+        recentLeaves: rawData.recentLeaves.map(l => ({
+          id: l.id,
+          studentName: l.student?.fullName || "Unknown",
+          room: l.student?.allocations?.[0]?.bed?.room ? l.student.allocations[0].bed.room.number : "Unallocated",
+          date: `${new Date(l.startDate).toISOString().split('T')[0]} → ${new Date(l.endDate).toISOString().split('T')[0]}`,
+          reason: l.reason,
+          status: l.status
+        })),
+        recentActivity: rawData.recentAuditLogs.map(a => ({
+          id: a.id,
+          action: a.action,
+          description: a.description,
+          time: a.createdAt,
+          user: a.user?.name || "System"
+        })),
+        recentStudents: rawData.recentStudents.map(s => ({
+          id: s.id,
+          name: s.fullName,
+          program: s.collegeId,
+          room: s.allocations?.[0]?.bed?.room ? s.allocations[0].bed.room.number : "Unallocated",
+          status: s.status || "Active"
+        }))
+      }
+    };
+  }
 }

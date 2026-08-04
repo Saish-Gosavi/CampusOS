@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   Users,
@@ -9,9 +9,6 @@ import {
   MessageSquareWarning,
   Megaphone,
   BarChart3,
-  Settings,
-  UserCircle2,
-  LogOut,
   Building2,
   Blocks,
   Layers,
@@ -23,7 +20,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -34,7 +30,6 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
 
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
@@ -57,18 +52,8 @@ const opsItems = [
   { title: "Notice Board", url: "/hostel-admin/notices", icon: Megaphone },
   { title: "Reports", url: "/hostel-admin/reports", icon: BarChart3 }
 ];
-const accountItems = [
-  { title: "Profile", url: "/hostel-admin/profile", icon: UserCircle2 },
-  { title: "Settings", url: "/hostel-admin/settings", icon: Settings }
-];
-function HostelSidebar() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/login" });
-  };
+function HostelSidebar() {
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -121,26 +106,7 @@ function HostelSidebar() {
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
-
-        <SidebarFooter className="border-t border-white/10 p-3">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={handleLogout}
-                tooltip="Logout"
-                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
       </div>
     </Sidebar>;
 }

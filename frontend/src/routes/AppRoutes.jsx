@@ -25,6 +25,7 @@ import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 
 // Hostel Pages
+import { Route as HostelDashboard } from "@/pages/hostel/dashboard/index";
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
 import { Route as HostelAdd } from "@/pages/hostel/hostel/add";
@@ -187,7 +188,7 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelIndex.component />} />
+        <Route index element={<HostelDashboard.component />} />
         <Route path="students" element={<HostelIndex.component />} />
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
