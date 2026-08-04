@@ -127,6 +127,50 @@ export class AllotmentTemplateController {
   }
 
   /**
+   * POST /allotment-template/upload-pdf
+   * Uploads a PDF, extracts text content, and saves as active format.
+   */
+  static async uploadPdf(req, res, next) {
+    try {
+      const pdfFile = req.files?.pdfFile?.[0] || req.file;
+
+      if (!pdfFile) {
+        return apiResponse.error(res, "Please upload a valid PDF file.", 400);
+      }
+
+      // Validate MIME type
+      if (pdfFile.mimetype !== "application/pdf") {
+        return apiResponse.error(res, "Only PDF files are accepted.", 400);
+      }
+
+      // Validate size (10 MB max)
+      if (pdfFile.size > 10 * 1024 * 1024) {
+        return apiResponse.error(res, "PDF file must be under 10 MB.", 400);
+      }
+
+      const template = await AllotmentTemplateService.uploadPdf({
+        pdfFile,
+        uploadedBy: req.user?.id,
+      });
+
+      await AuditLogService.logAction({
+        userId: req.user?.id,
+        module: "Hostel",
+        action: "Upload PDF Allotment Format",
+        description: `Uploaded PDF and extracted text as allotment format: "${template.name}"`,
+        status: "Success",
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        newData: { id: template.id, name: template.name, fileType: template.fileType },
+      });
+
+      return apiResponse.success(res, template, "PDF uploaded and text extracted successfully", 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * DELETE /allotment-template/:id
    * Deletes a template record and its associated disk files.
    */

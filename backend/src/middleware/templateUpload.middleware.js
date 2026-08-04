@@ -38,16 +38,20 @@ const fileFilter = (_req, file, cb) => {
     file.fieldname === "templateFile" &&
     Object.keys(ALLOWED_TEMPLATE_TYPES).includes(file.mimetype);
 
+  const isPdfUpload =
+    file.fieldname === "pdfFile" &&
+    file.mimetype === "application/pdf";
+
   const isImage =
     file.fieldname === "templateImage" &&
     Object.keys(ALLOWED_IMAGE_TYPES).includes(file.mimetype);
 
-  if (isTemplate || isImage) {
+  if (isTemplate || isPdfUpload || isImage) {
     cb(null, true);
   } else {
     cb(
       new Error(
-        `Invalid file type for ${file.fieldname}. Allowed: PDF/DOCX for template, PNG/JPG for image.`
+        `Invalid file type for ${file.fieldname}. Only PDF files are accepted.`
       ),
       false
     );

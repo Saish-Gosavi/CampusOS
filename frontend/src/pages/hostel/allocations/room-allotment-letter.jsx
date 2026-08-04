@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   FileText,
   Plus,
@@ -12,6 +12,7 @@ import {
   FileCheck,
   Edit3,
   Eye,
+  Upload,
 } from "lucide-react";
 import { allotmentLetterApi, allotmentTemplateApi } from "@/services/api";
 import { toast } from "sonner";
@@ -45,6 +46,8 @@ function HostelRoomAllotmentLetterPage() {
   // Format editor state
   const [formatText, setFormatText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const pdfInputRef = useRef(null);
 
   /* ── fetch data ── */
   const fetchData = useCallback(async () => {
@@ -76,6 +79,48 @@ function HostelRoomAllotmentLetterPage() {
   const handleOpenFormatModal = () => {
     setFormatText(activeTemplate?.description || "");
     setIsFormatModalOpen(true);
+  };
+
+  /* ── upload PDF and extract text ── */
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset file input so same file can be re-selected
+    if (pdfInputRef.current) pdfInputRef.current.value = "";
+
+    // Client-side validation
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are accepted. Please select a valid PDF.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("PDF file must be under 10 MB.");
+      return;
+    }
+
+    setPdfUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("pdfFile", file);
+
+      const res = await allotmentTemplateApi.uploadPdf(fd);
+
+      if (res?.data) {
+        const extracted = res.data.description || "";
+        setFormatText(extracted);
+        setActiveTemplate(res.data);
+        toast.success("PDF uploaded and text extracted! Review or edit below, then click Save.");
+      }
+    } catch (err) {
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "PDF upload failed. Please try again.";
+      toast.error(msg);
+    } finally {
+      setPdfUploading(false);
+    }
   };
 
   /* ── save format text ── */
@@ -322,18 +367,56 @@ function HostelRoomAllotmentLetterPage() {
       <Dialog open={isFormatModalOpen} onOpenChange={setIsFormatModalOpen}>
         <DialogContent className="sm:max-w-[620px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
-              Room Allotment Letter Format
-            </DialogTitle>
+            <div className="flex items-center justify-between pr-6">
+              <DialogTitle className="text-xl font-bold">
+                Room Allotment Letter Format
+              </DialogTitle>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs shrink-0"
+                onClick={() => pdfInputRef.current?.click()}
+                disabled={pdfUploading || saving}
+              >
+                {pdfUploading ? (
+                  <>
+                    <div className="h-3.5 w-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    Extracting...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    Upload PDF
+                  </>
+                )}
+              </Button>
+              {/* Hidden PDF file input */}
+              <input
+                ref={pdfInputRef}
+                type="file"
+                accept="application/pdf,.pdf"
+                className="hidden"
+                onChange={handlePdfUpload}
+              />
+            </div>
           </DialogHeader>
+
+          {pdfUploading && (
+            <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-4 py-2.5 text-sm text-primary">
+              <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+              <span>Uploading PDF and extracting text, please wait...</span>
+            </div>
+          )}
 
           <div className="flex flex-col gap-3 py-2">
             <textarea
               value={formatText}
               onChange={(e) => setFormatText(e.target.value)}
-              placeholder="Type or paste the allotment letter format here..."
+              placeholder="Type or paste the allotment letter format here, or upload a PDF above to auto-fill..."
               rows={14}
-              className="w-full rounded-xl border border-border bg-background p-4 text-sm font-mono leading-relaxed outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner resize-y min-h-[280px]"
+              disabled={pdfUploading}
+              className="w-full rounded-xl border border-border bg-background p-4 text-sm font-mono leading-relaxed outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner resize-y min-h-[280px] disabled:opacity-60 disabled:cursor-not-allowed"
             />
           </div>
 
@@ -342,12 +425,13 @@ function HostelRoomAllotmentLetterPage() {
               type="button"
               variant="outline"
               onClick={() => setIsFormatModalOpen(false)}
+              disabled={pdfUploading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSaveFormat}
-              disabled={saving}
+              disabled={saving || pdfUploading}
               className="gap-2"
             >
               {saving ? (

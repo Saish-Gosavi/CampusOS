@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 import { AllotmentTemplateRepository } from "../repository/allotment-template.repository.js";
 import { safeDeleteFile, UPLOAD_DIR } from "../../../../middleware/templateUpload.middleware.js";
 import { AppError } from "../../../../utils/AppError.js";
@@ -82,6 +83,69 @@ export class AllotmentTemplateService {
       filePath: "text_format",
       fileName: "format.txt",
       fileType: "text",
+      isActive: true,
+      uploadedBy: uploadedBy ? Number(uploadedBy) : null,
+    };
+
+    return AllotmentTemplateRepository.create(data);
+  }
+
+  /**
+   * Upload a PDF, extract its text content, and save as the active format.
+   * - Only accepts PDF files.
+   * - Uses pdf-parse to extract text.
+   * - Deactivates all prior active templates.
+   * - Stores the PDF file path + extracted text as description.
+   */
+  static async uploadPdf({ pdfFile, uploadedBy }) {
+    if (!pdfFile) {
+      throw new AppError("A PDF file is required.", 400);
+    }
+
+    const ext = path.extname(pdfFile.originalname).toLowerCase();
+    if (ext !== ".pdf") {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError("Only PDF files are supported for text extraction.", 400);
+    }
+
+    // Dynamically import pdf-parse (CommonJS module)
+    let pdfParse;
+    try {
+      const mod = await import("pdf-parse/lib/pdf-parse.js");
+      pdfParse = mod.default;
+    } catch {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError("PDF parsing library could not be loaded. Please try again.", 500);
+    }
+
+    // Read file and extract text
+    let extractedText = "";
+    try {
+      const dataBuffer = fs.readFileSync(pdfFile.path);
+      const parsed = await pdfParse(dataBuffer);
+      extractedText = (parsed.text || "").trim();
+    } catch (parseErr) {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError(`PDF text extraction failed: ${parseErr.message}`, 422);
+    }
+
+    if (!extractedText) {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError(
+        "No readable text could be extracted from this PDF. The file may be scanned or image-based.",
+        422
+      );
+    }
+
+    // Deactivate all prior templates
+    await AllotmentTemplateRepository.deactivateAll();
+
+    const data = {
+      name: "Room Allotment Letter Format",
+      description: extractedText,
+      filePath: pdfFile.path,
+      fileName: pdfFile.filename,
+      fileType: "pdf",
       isActive: true,
       uploadedBy: uploadedBy ? Number(uploadedBy) : null,
     };

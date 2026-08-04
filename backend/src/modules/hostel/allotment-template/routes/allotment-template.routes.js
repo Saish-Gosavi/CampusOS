@@ -13,6 +13,13 @@ router.get("/", AllotmentTemplateController.getAll);
 // POST save text-based format
 router.post("/save-format", AllotmentTemplateController.saveFormat);
 
+// POST upload PDF and extract text as active format
+router.post(
+  "/upload-pdf",
+  templateUpload.fields([{ name: "pdfFile", maxCount: 1 }]),
+  AllotmentTemplateController.uploadPdf
+);
+
 // POST upload a new template (multipart/form-data)
 router.post(
   "/upload",
