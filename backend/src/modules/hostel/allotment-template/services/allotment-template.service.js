@@ -65,6 +65,31 @@ export class AllotmentTemplateService {
   }
 
   /**
+   * Save plain text format template.
+   * - Deactivates existing active templates.
+   * - Saves new plain text format in DB.
+   */
+  static async saveFormat({ name, content, uploadedBy }) {
+    if (!content || !content.trim()) {
+      throw new AppError("Format content cannot be empty.", 400);
+    }
+
+    await AllotmentTemplateRepository.deactivateAll();
+
+    const data = {
+      name: name ? name.trim() : "Room Allotment Letter Format",
+      description: content.trim(),
+      filePath: "text_format",
+      fileName: "format.txt",
+      fileType: "text",
+      isActive: true,
+      uploadedBy: uploadedBy ? Number(uploadedBy) : null,
+    };
+
+    return AllotmentTemplateRepository.create(data);
+  }
+
+  /**
    * Delete a template record and its associated files from disk.
    */
   static async deleteTemplate(id) {

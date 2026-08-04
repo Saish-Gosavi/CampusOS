@@ -1,20 +1,16 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FileText,
   Plus,
   Search,
   Trash2,
   Printer,
-  Upload,
-  X,
   Building,
   User,
   Calendar,
   CheckCircle2,
-  AlertTriangle,
   FileCheck,
-  RefreshCw,
-  Download,
+  Edit3,
 } from "lucide-react";
 import { allotmentLetterApi, allotmentTemplateApi } from "@/services/api";
 import { toast } from "sonner";
@@ -27,37 +23,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 
 export const Route = {
   component: HostelRoomAllotmentLetterPage,
 };
 
-/* ─────────────────────────── helpers ─────────────────────────── */
-const formatBytes = (bytes) => {
-  if (!bytes) return "0 B";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-};
-
-const fileTypeLabel = (mime) => {
-  if (!mime) return "Unknown";
-  if (mime.includes("pdf")) return "PDF";
-  if (mime.includes("wordprocessingml") || mime.includes("msword")) return "DOCX";
-  if (mime.includes("png")) return "PNG";
-  if (mime.includes("jpeg") || mime.includes("jpg")) return "JPG";
-  return mime.split("/")[1]?.toUpperCase() || "File";
-};
-
-const ALLOWED_TEMPLATE = [
-  "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/msword",
-];
-
-/* ─────────────────────────── component ─────────────────────────── */
 function HostelRoomAllotmentLetterPage() {
   const [letters, setLetters] = useState([]);
   const [activeTemplate, setActiveTemplate] = useState(null);
@@ -65,19 +36,15 @@ function HostelRoomAllotmentLetterPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Modals
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [showReplaceConfirm, setShowReplaceConfirm] = useState(false);
   const [selectedLetter, setSelectedLetter] = useState(null);
 
-  // Upload form state
-  const [templateFile, setTemplateFile] = useState(null);
-  const [dragOver, setDragOver] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  // Format editor state
+  const [formatText, setFormatText] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const fileInputRef = useRef(null);
-
-  /* ── fetch ── */
+  /* ── fetch data ── */
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -103,106 +70,50 @@ function HostelRoomAllotmentLetterPage() {
     fetchData();
   }, [fetchData]);
 
-  /* ── filtered letters ── */
-  const filteredLetters = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return letters;
-    return letters.filter((l) => {
-      const name = l.allocation?.student?.fullName || "";
-      const ref = l.referenceNo || "";
-      return name.toLowerCase().includes(q) || ref.toLowerCase().includes(q);
-    });
-  }, [letters, searchQuery]);
-
-  /* ── drag & drop ── */
-  const onTemplateDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_TEMPLATE.includes(file.type)) {
-      toast.error("Only PDF or DOCX files are allowed for the template.");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Template file must be under 10 MB.");
-      return;
-    }
-    setTemplateFile(file);
+  /* ── open format modal ── */
+  const handleOpenFormatModal = () => {
+    setFormatText(activeTemplate?.description || "");
+    setIsFormatModalOpen(true);
   };
 
-  const onTemplateFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!ALLOWED_TEMPLATE.includes(file.type)) {
-      toast.error("Only PDF or DOCX files are allowed.");
+  /* ── save format text ── */
+  const handleSaveFormat = async () => {
+    if (!formatText.trim()) {
+      toast.error("Please enter format text before saving.");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Template file must be under 10 MB.");
-      return;
-    }
-    setTemplateFile(file);
-  };
-
-  /* ── reset form ── */
-  const resetForm = () => {
-    setTemplateFile(null);
-    setShowReplaceConfirm(false);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  /* ── submit upload ── */
-  const handleUpload = async (replaceExisting = false) => {
-    if (!templateFile) {
-      toast.error("Please upload a PDF or DOCX template file.");
-      return;
-    }
-
-    // If active template exists and replace not confirmed yet → show confirm
-    if (activeTemplate && !replaceExisting) {
-      setShowReplaceConfirm(true);
-      return;
-    }
-
-    setUploading(true);
+    setSaving(true);
     try {
-      const fd = new FormData();
-      // Auto-generate name from filename (strip extension)
-      const autoName = templateFile.name.replace(/\.[^.]+$/, "") || "Allotment Format";
-      fd.append("name", autoName);
-      fd.append("templateFile", templateFile);
-      fd.append("replaceExisting", String(replaceExisting));
-
-      const res = await allotmentTemplateApi.upload(fd);
+      const res = await allotmentTemplateApi.saveFormat({
+        name: "Room Allotment Letter Format",
+        content: formatText.trim(),
+      });
 
       if (res?.data) {
-        toast.success("Template uploaded and saved successfully!");
+        toast.success("Room allotment letter format saved successfully!");
         setActiveTemplate(res.data);
-        setIsUploadOpen(false);
-        resetForm();
+        setIsFormatModalOpen(false);
         fetchData();
       }
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || err?.message || "Upload failed. Please try again.";
+      const msg = err?.response?.data?.message || err?.message || "Failed to save format.";
       toast.error(msg);
     } finally {
-      setUploading(false);
+      setSaving(false);
     }
   };
 
   /* ── delete template ── */
   const handleDeleteTemplate = async () => {
     if (!activeTemplate) return;
-    if (!confirm(`Are you sure you want to delete the template "${activeTemplate.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Are you sure you want to delete the active allotment format? This cannot be undone.`)) return;
     try {
       await allotmentTemplateApi.delete(activeTemplate.id);
-      toast.success("Template deleted successfully.");
+      toast.success("Allotment format deleted successfully.");
       setActiveTemplate(null);
       fetchData();
     } catch {
-      toast.error("Failed to delete template.");
+      toast.error("Failed to delete template format.");
     }
   };
 
@@ -220,7 +131,17 @@ function HostelRoomAllotmentLetterPage() {
 
   const handlePrint = () => window.print();
 
-  /* ─────────── render ─────────── */
+  /* ── filtered letters ── */
+  const filteredLetters = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return letters;
+    return letters.filter((l) => {
+      const name = l.allocation?.student?.fullName || "";
+      const ref = l.referenceNo || "";
+      return name.toLowerCase().includes(q) || ref.toLowerCase().includes(q);
+    });
+  }, [letters, searchQuery]);
+
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-4 md:p-6">
       {/* Header */}
@@ -234,64 +155,52 @@ function HostelRoomAllotmentLetterPage() {
               Room Allotment Letters
             </h1>
             <p className="text-sm text-muted-foreground">
-              Upload, manage, and use official allotment letter templates.
+              Manage and use official room allotment letter text formats.
             </p>
           </div>
         </div>
 
-        <Button onClick={() => setIsUploadOpen(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Generate Format
+        <Button onClick={handleOpenFormatModal} className="gap-2">
+          {activeTemplate ? <Edit3 className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+          {activeTemplate ? "Edit Format" : "Generate Format"}
         </Button>
       </div>
 
-      {/* Active Template Banner */}
+      {/* Active Format Banner */}
       {activeTemplate && (
         <Card className="border border-primary/30 bg-primary/5">
           <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary shrink-0">
                 <FileCheck className="h-5 w-5" />
               </span>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-foreground">{activeTemplate.name}</p>
-                  <span className="rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 uppercase">
-                    Active
-                  </span>
-                  <span className="rounded-full bg-muted text-muted-foreground text-xs font-mono px-2 py-0.5 uppercase">
-                    {activeTemplate.fileType}
+                  <p className="font-semibold text-foreground truncate">{activeTemplate.name}</p>
+                  <span className="rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 uppercase shrink-0">
+                    Active Format
                   </span>
                 </div>
                 {activeTemplate.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5">{activeTemplate.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2 whitespace-pre-line">
+                    {activeTemplate.description}
+                  </p>
                 )}
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Uploaded by {activeTemplate.user?.name || "Admin"} on{" "}
-                  {new Date(activeTemplate.createdAt).toLocaleDateString()}
+                  Saved by {activeTemplate.user?.name || "Admin"} on{" "}
+                  {new Date(activeTemplate.updatedAt || activeTemplate.createdAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {activeTemplate.fileUrl && (
-                <a
-                  href={activeTemplate.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download
-                </a>
-              )}
               <Button
                 variant="outline"
                 size="sm"
                 className="gap-1.5"
-                onClick={() => setIsUploadOpen(true)}
+                onClick={handleOpenFormatModal}
               >
-                <RefreshCw className="h-3.5 w-3.5" />
-                Replace
+                <Edit3 className="h-3.5 w-3.5" />
+                Edit Format
               </Button>
               <Button
                 variant="ghost"
@@ -413,153 +322,51 @@ function HostelRoomAllotmentLetterPage() {
         </div>
       )}
 
-      {/* ───────── Upload Format Modal ───────── */}
-      <Dialog
-        open={isUploadOpen}
-        onOpenChange={(open) => {
-          if (!open) resetForm();
-          setIsUploadOpen(open);
-        }}
-      >
-        <DialogContent className="sm:max-w-[480px]">
+      {/* ───────── Format Editor Modal (Notes Style) ───────── */}
+      <Dialog open={isFormatModalOpen} onOpenChange={setIsFormatModalOpen}>
+        <DialogContent className="sm:max-w-[620px]">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">Upload Format</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              Room Allotment Letter Format
+            </DialogTitle>
           </DialogHeader>
 
-          {/* Replace warning */}
-          {activeTemplate && !showReplaceConfirm && (
-            <div className="flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
-              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
-              <span>
-                An active format <strong>"{activeTemplate.name}"</strong> already exists.
-                Uploading a new one will replace it.
-              </span>
-            </div>
-          )}
+          <div className="flex flex-col gap-3 py-2">
+            <textarea
+              value={formatText}
+              onChange={(e) => setFormatText(e.target.value)}
+              placeholder="Type or paste the allotment letter format here..."
+              rows={14}
+              className="w-full rounded-xl border border-border bg-background p-4 text-sm font-mono leading-relaxed outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner resize-y min-h-[280px]"
+            />
+          </div>
 
-          {/* Drag & Drop zone or file preview */}
-          {templateFile ? (
-            <div className="flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/5 px-4 py-4">
-              <FileCheck className="h-9 w-9 text-primary shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{templateFile.name}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {fileTypeLabel(templateFile.type)} · {formatBytes(templateFile.size)}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setTemplateFile(null);
-                  if (fileInputRef.current) fileInputRef.current.value = "";
-                }}
-                className="rounded-md p-1 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Remove file"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={onTemplateDrop}
-              onClick={() => fileInputRef.current?.click()}
-              className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed px-6 py-14 cursor-pointer transition-colors ${
-                dragOver
-                  ? "border-primary bg-primary/5"
-                  : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
-              }`}
+          <div className="flex justify-end gap-2 pt-2 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsFormatModalOpen(false)}
             >
-              <Upload
-                className={`h-9 w-9 transition-colors ${
-                  dragOver ? "text-primary" : "text-muted-foreground"
-                }`}
-              />
-              <div className="text-center">
-                <p className="text-sm font-medium">
-                  Drag & drop here, or{" "}
-                  <span className="text-primary underline underline-offset-2">browse</span>
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">PDF or DOCX · Max 10 MB</p>
-              </div>
-            </div>
-          )}
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.docx,.doc,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            className="hidden"
-            onChange={onTemplateFileChange}
-          />
-
-          {/* Replace confirmation */}
-          {showReplaceConfirm && (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 space-y-3">
-              <div className="flex items-start gap-2.5 text-sm text-rose-800">
-                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0 text-rose-600" />
-                <div>
-                  <p className="font-semibold">Replace existing format?</p>
-                  <p className="text-xs mt-0.5">
-                    The current format <strong>"{activeTemplate?.name}"</strong> will be permanently
-                    removed. This cannot be undone.
-                  </p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setShowReplaceConfirm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 bg-rose-600 hover:bg-rose-700 text-white"
-                  disabled={uploading}
-                  onClick={() => handleUpload(true)}
-                >
-                  {uploading ? "Uploading..." : "Yes, Replace & Save"}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          {!showReplaceConfirm && (
-            <div className="flex justify-end gap-2 pt-1 border-t border-border">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  resetForm();
-                  setIsUploadOpen(false);
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => handleUpload(false)}
-                disabled={uploading || !templateFile}
-                className="gap-2"
-              >
-                {uploading ? (
-                  <>
-                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-4 w-4" />
-                    Save
-                  </>
-                )}
-              </Button>
-            </div>
-          )}
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSaveFormat}
+              disabled={saving}
+              className="gap-2"
+            >
+              {saving ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Save
+                </>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

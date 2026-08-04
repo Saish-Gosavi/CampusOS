@@ -10,6 +10,9 @@ router.get("/active", AllotmentTemplateController.getActive);
 // GET all templates (admin history)
 router.get("/", AllotmentTemplateController.getAll);
 
+// POST save text-based format
+router.post("/save-format", AllotmentTemplateController.saveFormat);
+
 // POST upload a new template (multipart/form-data)
 router.post(
   "/upload",

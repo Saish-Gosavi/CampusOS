@@ -298,6 +298,9 @@ export const allotmentTemplateApi = {
   async getAll() {
     return apiClient.get("/hostel/allotment-template");
   },
+  async saveFormat(data) {
+    return apiClient.post("/hostel/allotment-template/save-format", data);
+  },
   async upload(formData) {
     return apiClient.post("/hostel/allotment-template/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },

@@ -93,6 +93,40 @@ export class AllotmentTemplateController {
   }
 
   /**
+   * POST /allotment-template/save-format
+   * Handles saving text-based allotment letter format.
+   */
+  static async saveFormat(req, res, next) {
+    try {
+      const { content, name } = req.body;
+      if (!content || typeof content !== "string" || !content.trim()) {
+        return apiResponse.error(res, "Format content is required", 400);
+      }
+
+      const template = await AllotmentTemplateService.saveFormat({
+        name: name || "Room Allotment Letter Format",
+        content,
+        uploadedBy: req.user?.id,
+      });
+
+      await AuditLogService.logAction({
+        userId: req.user?.id,
+        module: "Hostel",
+        action: "Save Allotment Format",
+        description: `Saved room allotment letter format text`,
+        status: "Success",
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        newData: { id: template.id, name: template.name },
+      });
+
+      return apiResponse.success(res, template, "Allotment format saved successfully", 200);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * DELETE /allotment-template/:id
    * Deletes a template record and its associated disk files.
    */
