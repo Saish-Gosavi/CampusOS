@@ -128,14 +128,6 @@ function HostelSidebar() {
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            {!collapsed && (
-              <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">
-                Account
-              </SidebarGroupLabel>
-            )}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">
