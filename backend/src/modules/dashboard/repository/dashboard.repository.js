@@ -23,7 +23,7 @@ export class DashboardRepository {
       prisma.user.count({
         where: {
           role: {
-            name: { in: ["admin", "superadmin", "warden", "security", "librarian", "store"] },
+            name: "senioradmin",
           },
         },
       }).catch(() => 0),
