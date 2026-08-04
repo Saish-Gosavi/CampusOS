@@ -4,7 +4,8 @@ import { apiResponse } from "../../../../helpers/response.helper.js";
 export class RoomController {
   static async getAll(req, res, next) {
     try {
-      const data = await RoomService.getAll();
+      const { floorId } = req.query;
+      const data = await RoomService.getAll(floorId);
       return apiResponse.success(res, data, "Records retrieved successfully");
     } catch (error) {
       next(error);
