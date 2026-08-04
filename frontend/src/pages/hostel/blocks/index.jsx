@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@/routes/compat";
 import { useMemo, useState } from "react";
 import { Blocks, Plus, Search, Filter, Pencil, Trash2, Building2, Layers, DoorClosed } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";

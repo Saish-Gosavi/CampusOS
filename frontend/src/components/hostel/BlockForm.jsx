@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ function BlockForm({ mode, block }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const onSubmit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/blocks" });
+    navigate("/hostel-admin/blocks");
   };
   const Field = ({ label, children }) => <div className="flex flex-col gap-1.5">
       <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</label>

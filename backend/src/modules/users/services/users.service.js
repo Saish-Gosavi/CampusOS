@@ -17,23 +17,10 @@ export class UsersService {
   }
 
   static async getAllUsers(roleName) {
-    // Sector admin roles that Senior Admin manages
-    const SECTOR_ROLES = ["admin", "librarian", "store"];
-
-    if (roleName === "admin") {
-      // senioradmin path — return ALL sector roles, not just "admin"
-      return prisma.user.findMany({
-        where: { role: { name: { in: SECTOR_ROLES } } },
-        include: {
-          role: true,
-          hostel: true,
-        },
-      });
-    }
     if (roleName) {
       return prisma.user.findMany({
         where: { role: { name: roleName } },
-        include: { role: true, hostel: true },
+        include: { role: true },
       });
     }
     return UsersRepository.findAll();

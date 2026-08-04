@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@/routes/compat";
 import { Armchair, List, UserPlus, AlertTriangle, Wrench, RefreshCcw, Plus } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ const tabs = [
   { to: "/hostel-admin/furniture/replacement", label: "Replacement", icon: RefreshCcw }
 ];
 function FurnitureLayout() {
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const { pathname } = useLocation();
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <HostelPageHeader
     title="Furniture Management"

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -72,7 +72,7 @@ function AllocateWizardPage() {
     toast.success(
       `${student.name} allocated \u2192 ${hostel.name} \xB7 ${block.name} \xB7 Floor ${floor.number} \xB7 Room ${room.number} \xB7 ${bed.number}`
     );
-    navigate({ to: "/hostel-admin/allocation" });
+    navigate("/hostel-admin/allocation");
   };
   const availPct = (occ, cap) => cap === 0 ? 0 : Math.round((cap - occ) / cap * 100);
   return <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">

@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import {
   Megaphone,
   Plus,

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Settings, Moon, Sun, Globe, Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";

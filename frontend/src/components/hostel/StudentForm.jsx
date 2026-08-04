@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Upload, Save, X, User, GraduationCap, Users2, ShieldAlert, FileText, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +54,7 @@ function StudentForm({ initial, mode }) {
   const set = (k, v) => setD((p) => ({ ...p, [k]: v }));
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/students" });
+    navigate("/hostel-admin/students");
   };
   return <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <Section title="Personal Information" icon={<User className="h-4 w-4" />}>

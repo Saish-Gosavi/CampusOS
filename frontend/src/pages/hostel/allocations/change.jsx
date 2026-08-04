@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Repeat, User, BedDouble } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,7 @@ function RoomChangePage() {
     toast.success(
       `${student?.name} transferred from ${curRoom?.number} \u2192 ${newRoom?.number} (${newBed?.number})`
     );
-    navigate({ to: "/hostel-admin/allocation" });
+    navigate("/hostel-admin/allocation");
   };
   return <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
       {

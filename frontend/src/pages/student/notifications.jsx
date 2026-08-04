@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Bell, BedDouble, BookOpen, GraduationCap } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { notificationsFeed } from "@/lib/student-data";

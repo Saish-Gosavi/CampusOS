@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@/routes/compat";
 import { useMemo, useState } from "react";
 import {
   BedDouble,

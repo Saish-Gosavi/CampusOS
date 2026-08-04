@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 function WardenBreadcrumbs({ items }) {
   return <nav className="flex items-center gap-1 text-sm text-muted-foreground">

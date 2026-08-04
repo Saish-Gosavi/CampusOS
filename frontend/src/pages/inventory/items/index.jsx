@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Package, Plus, Search, Filter, Pencil, Trash2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { InventoryPageHeader } from "@/components/inventory/InventoryPageHeader";
 import { InventoryStatusPill } from "@/components/inventory/InventoryStatusPill";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { ShieldAlert, Plus, Eye, Filter } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
