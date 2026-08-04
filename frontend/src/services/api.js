@@ -280,7 +280,6 @@ export const wardenApi = {
     return apiClient.delete(`/hostel/wardens/${id}`);
   }
 };
-};
 
 export const userApi = {
   async getAll(role = "") {
