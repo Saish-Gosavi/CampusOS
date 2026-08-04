@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { PDFParse } from "pdf-parse";
 import { AllotmentTemplateRepository } from "../repository/allotment-template.repository.js";
 import { safeDeleteFile, UPLOAD_DIR } from "../../../../middleware/templateUpload.middleware.js";
 import { AppError } from "../../../../utils/AppError.js";
@@ -109,21 +110,14 @@ export class AllotmentTemplateService {
     }
 
     // Dynamically import pdf-parse (CommonJS module)
-    let pdfParse;
-    try {
-      const mod = await import("pdf-parse/lib/pdf-parse.js");
-      pdfParse = mod.default;
-    } catch {
-      safeDeleteFile(pdfFile.path);
-      throw new AppError("PDF parsing library could not be loaded. Please try again.", 500);
-    }
-
     // Read file and extract text
     let extractedText = "";
     try {
       const dataBuffer = fs.readFileSync(pdfFile.path);
-      const parsed = await pdfParse(dataBuffer);
-      extractedText = (parsed.text || "").trim();
+      const parser = new PDFParse({ data: dataBuffer });
+      await parser.load();
+      const parsed = await parser.getText();
+      extractedText = (typeof parsed === "string" ? parsed : parsed?.text || "").trim();
     } catch (parseErr) {
       safeDeleteFile(pdfFile.path);
       throw new AppError(`PDF text extraction failed: ${parseErr.message}`, 422);
