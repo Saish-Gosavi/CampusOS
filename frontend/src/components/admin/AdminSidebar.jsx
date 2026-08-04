@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
@@ -7,11 +7,11 @@ import {
   BarChart3,
   Megaphone,
   ScrollText,
-  Activity,
-  Settings,
-  UserCircle2,
-  LogOut,
-  GraduationCap
+  Activity, LogOut,
+  GraduationCap,
+  Home,
+  BookOpen,
+  Package
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,35 +29,46 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
-const mainItems = [
-  { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
-  { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
-  { title: "Admins", url: "/super-admin/admins", icon: Users }
-];
-
-const insightItems = [
-  { title: "Reports", url: "/super-admin/reports", icon: BarChart3 },
-  { title: "Global Notices", url: "/super-admin/notices", icon: Megaphone },
-  { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
-];
-
-const accountItems = [
-  { title: "Settings", url: "/super-admin/settings", icon: Settings },
-  { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
-];
-
 function AdminSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const isSeniorAdmin = user?.role?.toLowerCase() === "senioradmin";
+  const userRoleLabel = isSeniorAdmin ? "Senior Admin" : "Super Admin";
+
+  const mainItems = isSeniorAdmin
+    ? [
+        { title: "Dashboard", url: "/senior-admin", exact: true, icon: LayoutDashboard },
+        { title: "Admins", url: "/senior-admin/admins", icon: Users },
+        { title: "Hostel Management", url: "/senior-admin/hostel", icon: Home },
+        { title: "Library Management", url: "/senior-admin/library", icon: BookOpen },
+        { title: "Inventory Management", url: "/senior-admin/inventory", icon: Package }
+      ]
+    : [
+        { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
+        { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
+        { title: "Senior Admin", url: "/super-admin/admins", icon: Users }
+      ];
+
+  const insightItems = isSeniorAdmin
+    ? []
+    : [
+        { title: "Reports", url: "/super-admin/reports", icon: BarChart3 },
+        { title: "Global Notices", url: "/super-admin/notices", icon: Megaphone },
+        { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
+      ];
+
+  
+
+  const pathname = location.pathname;
   const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const renderMenu = (items) => (
@@ -96,7 +107,7 @@ function AdminSidebar() {
             {!collapsed && (
               <div className="flex flex-col justify-center min-w-0">
                 <p className="truncate text-[20px] font-bold text-white leading-none tracking-normal font-sans">Campus OS</p>
-                <p className="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-[#BDB5D2] mt-1.5 font-sans">Super Admin</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-[0.15em] text-[#BDB5D2] mt-1.5 font-sans">{userRoleLabel}</p>
               </div>
             )}
           </div>
@@ -108,15 +119,14 @@ function AdminSidebar() {
             <SidebarGroupContent>{renderMenu(mainItems)}</SidebarGroupContent>
           </SidebarGroup>
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Insights</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(insightItems)}</SidebarGroupContent>
-          </SidebarGroup>
+          {insightItems.length > 0 && (
+            <SidebarGroup>
+              {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Insights</SidebarGroupLabel>}
+              <SidebarGroupContent>{renderMenu(insightItems)}</SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
+          
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">

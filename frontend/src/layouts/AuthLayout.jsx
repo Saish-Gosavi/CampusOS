@@ -28,10 +28,10 @@ function AuthLayout({ children, title, subtitle }) {
           {(title || subtitle) && (
             <div className="mb-6">
               {title && (
-                <h2 className="text-2xl font-bold text-[#1A103C] mb-2">{title}</h2>
+                <h2 className="text-2xl font-bold text-[#1A103C] dark:text-white mb-2">{title}</h2>
               )}
               {subtitle && (
-                <p className="text-sm text-muted-foreground">{subtitle}</p>
+                <p className="text-sm text-muted-foreground dark:text-muted-foreground">{subtitle}</p>
               )}
             </div>
           )}
@@ -40,7 +40,7 @@ function AuthLayout({ children, title, subtitle }) {
         
         {/* Footer */}
         <div className="pb-8 text-center bg-white">
-          <p className="text-xs text-muted-foreground font-medium">www.getflytechnologies.com</p>
+          <p className="text-xs text-muted-foreground dark:text-muted-foreground font-medium">www.getflytechnologies.com</p>
         </div>
       </div>
       

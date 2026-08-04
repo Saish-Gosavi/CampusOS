@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Library, Plus, Pencil, Trash2 } from "lucide-react";
 import { LibraryPageHeader } from "@/components/library/LibraryPageHeader";
 import { LibraryStatusPill } from "@/components/library/LibraryStatusPill";

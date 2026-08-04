@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { UserCircle2, Pencil, Mail, Phone, HeartPulse, Users2, BedDouble, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { BarChart3, Users, BedDouble, MessageSquareWarning, UserRoundCheck, Armchair, Download, FileText, FileSpreadsheet, FileType } from "lucide-react";
 import {
   Area,

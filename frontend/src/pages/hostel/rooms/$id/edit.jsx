@@ -1,4 +1,4 @@
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@/routes/compat";
 import { Pencil } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { RoomForm } from "@/components/hostel/RoomForm";

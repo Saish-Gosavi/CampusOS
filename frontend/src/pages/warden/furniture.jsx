@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Armchair, Search, Eye, ArrowRightLeft, AlertTriangle, Wrench, Plus, Download } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { StatCard } from "@/components/admin/StatCard";

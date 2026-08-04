@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Settings, Moon, Languages, Bell } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { Button } from "@/components/ui/button";

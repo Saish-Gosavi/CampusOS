@@ -1,5 +1,6 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
@@ -23,6 +24,15 @@ import { Route as SuperAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SuperAdminProfile } from "@/pages/super-admin/profile";
 import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
+
+// Senior Admin Pages
+import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
+import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
+import { Route as SeniorAdminHostel } from "@/pages/senior-admin/hostel";
+import { Route as SeniorAdminLibrary } from "@/pages/senior-admin/library";
+import { Route as SeniorAdminInventory } from "@/pages/senior-admin/inventory";
+import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
+import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
 // Hostel Pages
 import { Route as HostelDashboard } from "@/pages/hostel/dashboard/index";
@@ -130,6 +140,32 @@ import { Route as InventoryStock } from "@/pages/inventory/stock/index";
 import { Route as Error403 } from "@/pages/errors/403";
 import { Route as Error404 } from "@/pages/errors/404";
 
+function SeniorAdminTypoRedirect() {
+  const location = useLocation();
+  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
+  return <Navigate to={cleanPath + location.search} replace />;
+}
+
+function GenericModuleShell({ title, description }) {
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Building2 className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-sm">
+        <p className="text-base font-semibold text-foreground">{title} Module Active</p>
+        <p className="mt-1 text-sm text-muted-foreground">This module section is configured and ready for operational records.</p>
+      </div>
+    </div>
+  );
+}
+
 // Root navigator helper
 const RootNavigator = () => {
   const { user } = useAuth();
@@ -139,6 +175,7 @@ const RootNavigator = () => {
   const role = user.role?.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
+  if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
   if (role === "admin") return <Navigate to="/hostel-admin" replace />;
   if (role === "warden") return <Navigate to="/warden" replace />;
   if (role === "librarian") return <Navigate to="/library-admin" replace />;
@@ -178,6 +215,30 @@ export default function AppRoutes() {
         <Route path="audit-logs" element={<SuperAdminAuditLogs.component />} />
         <Route path="reports" element={<SuperAdminReports.component />} />
       </Route>
+
+      {/* Senior Admin Dashboard Routes */}
+      <Route
+        path="/senior-admin"
+        element={
+          <RoleRoute allowedRoles={["senioradmin"]}>
+            <DashboardLayout />
+          </RoleRoute>
+        }
+      >
+        <Route index element={<SeniorAdminIndex.component />} />
+        <Route path="admins" element={<SeniorAdminAdmins.component />} />
+        <Route path="hostel" element={<SeniorAdminHostel.component />} />
+        <Route path="library" element={<SeniorAdminLibrary.component />} />
+        <Route path="inventory" element={<SeniorAdminInventory.component />} />
+        <Route path="settings" element={<SeniorAdminSettings.component />} />
+        <Route path="profile" element={<SeniorAdminProfile.component />} />
+      </Route>
+
+      {/* Graceful redirects for senior admin spacing typos */}
+      <Route path="/senior admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior admin/*" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin/*" element={<SeniorAdminTypoRedirect />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route
@@ -221,6 +282,9 @@ export default function AppRoutes() {
         <Route path="floors" element={<HostelFloors.component />} />
         <Route path="floors/add" element={<HostelFloorAdd.component />} />
         <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
+        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
+        <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
+        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 
       {/* Warden Dashboard Routes */}

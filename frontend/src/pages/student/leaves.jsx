@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useState } from "react";
 import { CalendarDays, Plus } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";

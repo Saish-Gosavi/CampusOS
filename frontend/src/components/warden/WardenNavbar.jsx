@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Bell,
   Search,
@@ -24,31 +23,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 const notifications = [
   { icon: MessageSquareWarning, tint: "#EF4444", title: "New complaint raised", meta: "Block A \xB7 Room 214 \u2014 5 min ago" },
   { icon: CalendarDays, tint: "#F97316", title: "Leave request pending", meta: "Aarav Sharma \u2014 Home Visit" },
   { icon: UserRoundCheck, tint: "#06B6D4", title: "Visitor awaiting approval", meta: "Guardian \u2014 Priya Iyer" }
 ];
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(false);
-  useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem("campusos-theme") : null;
-    const dark = stored ? stored === "dark" : false;
-    setIsDark(dark);
-    document.documentElement.classList.toggle("dark", dark);
-  }, []);
-  const toggle = () => {
-    setIsDark((prev) => {
-      const next = !prev;
-      document.documentElement.classList.toggle("dark", next);
-      window.localStorage.setItem("campusos-theme", next ? "dark" : "light");
-      return next;
-    });
-  };
-  return { isDark, toggle };
-}
 function WardenNavbar() {
-  const { isDark, toggle } = useDarkMode();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   return <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
       <SidebarTrigger className="text-muted-foreground" />
       <Separator orientation="vertical" className="mx-1 h-6" />
@@ -63,11 +49,11 @@ function WardenNavbar() {
 
       <div className="ml-auto flex flex-1 items-center justify-end gap-1 md:flex-none">
         <button
-    onClick={toggle}
+    onClick={toggleTheme}
     aria-label="Toggle theme"
     className="grid h-9 w-9 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
   >
-          {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4" />}
         </button>
 
         <DropdownMenu>

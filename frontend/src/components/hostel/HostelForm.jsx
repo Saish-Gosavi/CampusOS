@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Save, X, Building2, MapPin, UserCog, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ function HostelForm({ initial, mode }) {
   const set = (k, v) => setD((p) => ({ ...p, [k]: v }));
   const submit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/hostels" });
+    navigate("/hostel-admin/hostels");
   };
   return <form onSubmit={submit} className="flex flex-col gap-5">
       <Section title="Hostel Information" icon={<Building2 className="h-4 w-4" />}>

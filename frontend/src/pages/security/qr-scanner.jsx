@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { QrCode, Camera, Keyboard, CheckCircle2, LogIn, LogOut, User, RefreshCcw } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { Button } from "@/components/ui/button";

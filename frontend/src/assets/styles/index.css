@@ -82,48 +82,48 @@
 }
 
 .dark {
-  --background: oklch(0.18 0.03 260);          /* #0F172A */
-  --foreground: oklch(0.98 0.003 250);         /* #F8FAFC */
-  --card: oklch(0.24 0.04 265);               /* #1E293B */
-  --card-foreground: oklch(0.98 0.003 250);
-  --popover: oklch(0.24 0.04 265);
-  --popover-foreground: oklch(0.98 0.003 250);
-  --primary: oklch(0.62 0.19 260);
-  --primary-foreground: oklch(1 0 0);
-  --primary-hover: oklch(0.68 0.19 260);
-  --secondary: oklch(0.30 0.04 260);
-  --secondary-foreground: oklch(0.98 0.003 250);
-  --muted: oklch(0.28 0.04 260);
-  --muted-foreground: oklch(0.7 0.04 257);
-  --accent: oklch(0.32 0.05 260);
-  --accent-foreground: oklch(0.98 0.003 250);
-  --destructive: oklch(0.7 0.19 22);
-  --destructive-foreground: oklch(1 0 0);
-  --success: oklch(0.7 0.17 152);
-  --success-foreground: oklch(1 0 0);
-  --border: oklch(0.35 0.04 260);
-  --input: oklch(0.35 0.04 260);
-  --ring: oklch(0.62 0.19 260);
+  --background: #131118;
+  --foreground: #f8fafc;
+  --card: #1c1a24;
+  --card-foreground: #f8fafc;
+  --popover: #1c1a24;
+  --popover-foreground: #f8fafc;
+  --primary: #7f56d9;
+  --primary-foreground: #ffffff;
+  --primary-hover: #906bf9;
+  --secondary: #262335;
+  --secondary-foreground: #f8fafc;
+  --muted: #262335;
+  --muted-foreground: #a7a5c6;
+  --accent: #262335;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+  --border: #262335;
+  --input: #262335;
+  --ring: #7f56d9;
 }
 
 /* Comprehensive Dark Mode Overrides */
 .dark body {
-  background-color: #0f172a !important;
+  background-color: #131118 !important;
   color: #f8fafc !important;
 }
 
 .dark .bg-white {
-  background-color: #1e293b !important;
+  background-color: #1c1a24 !important;
 }
 
 .dark .bg-slate-50,
 .dark .bg-slate-50\/50,
 .dark .bg-slate-50\/60 {
-  background-color: #0f172a !important;
+  background-color: #131118 !important;
 }
 
 .dark .bg-slate-100 {
-  background-color: #334155 !important;
+  background-color: #262335 !important;
 }
 
 .dark .text-slate-900 {
@@ -143,29 +143,29 @@
 }
 
 .dark .text-slate-500 {
-  color: #94a3b8 !important;
+  color: #a7a5c6 !important;
 }
 
 .dark .text-slate-400 {
-  color: #64748b !important;
+  color: #7a789f !important;
 }
 
 .dark .border-slate-200,
 .dark .border-slate-100 {
-  border-color: #334155 !important;
+  border-color: #262335 !important;
 }
 
 .dark .divide-slate-100 > * + * {
-  border-color: #334155 !important;
+  border-color: #262335 !important;
 }
 
 .dark .hover\:bg-slate-50:hover,
 .dark .hover\:bg-slate-50\/60:hover {
-  background-color: #334155 !important;
+  background-color: #262335 !important;
 }
 
 .dark .hover\:bg-slate-100:hover {
-  background-color: #475569 !important;
+  background-color: #2d2b3d !important;
 }
 
 .dark input.input-style,
@@ -173,13 +173,57 @@
 .dark input,
 .dark select,
 .dark textarea {
-  background-color: #0f172a !important;
+  background-color: #131118 !important;
   color: #f8fafc !important;
-  border-color: #334155 !important;
+  border-color: #262335 !important;
 }
 
 .dark input::placeholder {
-  color: #64748b !important;
+  color: #7a789f !important;
+}
+
+/* Specific Sidebar Overrides for Dark Mode matching the HRMS theme */
+.dark [data-sidebar="sidebar"] > .bg-primary {
+  background-color: #121118 !important; /* Deep dark charcoal sidebar background */
+}
+
+.dark [data-sidebar="sidebar"] .text-white\/80 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.dark [data-sidebar="sidebar"] .text-white\/80:hover {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+/* Active menu item styling in Dark Sidebar */
+.dark [data-sidebar="sidebar"] a[class*="bg-white"],
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] {
+  background-color: rgba(127, 86, 217, 0.15) !important; /* Soft violet/purple tint */
+  color: #a78bfa !important; /* Soft violet text matching HRMS */
+  border-left: 3px solid #7f56d9 !important;
+  border-radius: 0 8px 8px 0 !important;
+  font-weight: 600 !important;
+}
+
+.dark [data-sidebar="sidebar"] a[class*="bg-white"] svg,
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] svg {
+  color: #a78bfa !important;
+}
+
+/* Autofill overrides in dark mode */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark textarea:-webkit-autofill,
+.dark textarea:-webkit-autofill:hover,
+.dark textarea:-webkit-autofill:focus,
+.dark select:-webkit-autofill,
+.dark select:-webkit-autofill:hover,
+.dark select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0px 1000px #131118 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 @layer base {
@@ -219,4 +263,39 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Premium Card and Hover Transitions for both modes (preserves original colors) */
+.bg-card, 
+.rounded-2xl.border.bg-card,
+[class*="rounded-2xl"][class*="border"][class*="bg-card"] {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.bg-card:hover, 
+.rounded-2xl.border.bg-card:hover,
+[class*="rounded-2xl"][class*="border"][class*="bg-card"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -8px rgba(45, 27, 105, 0.08), 0 4px 10px -5px rgba(45, 27, 105, 0.03) !important;
+}
+
+/* Sidebar active item indicator in day/light mode */
+:not(.dark) [data-sidebar="sidebar"] a[class*="bg-white"],
+:not(.dark) [data-sidebar="sidebar"] button[class*="bg-white"] {
+  border-left: 4px solid var(--primary-active, #15053F) !important;
+  border-radius: 4px 8px 8px 4px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+:not(.dark) [data-sidebar="sidebar"] a:not([class*="bg-white"]):hover,
+:not(.dark) [data-sidebar="sidebar"] button:not([class*="bg-white"]):hover {
+  transform: translateX(2px);
+  transition: transform 0.2s ease-in-out, background-color 0.2s ease-in-out !important;
+}
+
+/* Dark mode active item border adjustment */
+.dark [data-sidebar="sidebar"] a[class*="bg-white"],
+.dark [data-sidebar="sidebar"] button[class*="bg-white"] {
+  padding-left: 0.5rem !important;
 }

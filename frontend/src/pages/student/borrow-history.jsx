@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { History } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { myBorrowHistory } from "@/lib/student-data";

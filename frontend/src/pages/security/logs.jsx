@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { ClipboardList, Plus, Eye, LogIn, LogOut, ShieldAlert } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { Button } from "@/components/ui/button";

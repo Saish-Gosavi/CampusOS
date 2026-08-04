@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import {
   Megaphone,
   Plus,
@@ -24,7 +24,7 @@ const Route = createFileRoute("/super-admin/notices")({
   component: NoticesPage,
 });
 
-const TINT = "#EAB308";
+const TINT = "#210963";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getNoticeStatus(notice) {
@@ -187,7 +187,7 @@ function NoticesPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button style={{ backgroundColor: TINT }} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:opacity-90" onClick={() => setView("create")}>
+          <Button style={{ backgroundColor: TINT }} className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90" onClick={() => setView("create")}>
             <Plus className="h-4 w-4" /> New Notice
           </Button>
         </div>
@@ -206,7 +206,7 @@ function NoticesPage() {
               onClick={() => setStatusFilter(f)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 statusFilter === f
-                  ? "bg-[#EAB308] text-slate-900 shadow-sm"
+                  ? "bg-[#210963] text-white shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Search, Download, History } from "lucide-react";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { Button } from "@/components/ui/button";

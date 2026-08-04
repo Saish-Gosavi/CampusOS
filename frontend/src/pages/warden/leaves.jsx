@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { CalendarDays, CheckCircle2, XCircle, Eye, Search } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
