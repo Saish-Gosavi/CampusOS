@@ -50,6 +50,7 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
+  staffAttendance   StaffAttendance[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -416,3 +417,17 @@ model Notice {
   @@index([createdById])
 }
 
+// ==========================================
+// 10. Staff Management
+// ==========================================
+
+model StaffAttendance {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date      DateTime
+  present   Boolean
+  remarks   String?
+
+  @@index([userId])
+}

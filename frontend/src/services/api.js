@@ -260,3 +260,21 @@ export const reportsApi = {
     return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
   }
 };
+
+export const staffApi = {
+  async getAll() {
+    return apiClient.get("/admin/staff-management");
+  },
+  async create(data) {
+    return apiClient.post("/admin/staff-management", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/admin/staff-management/${id}`);
+  },
+  async getAttendance(id) {
+    return apiClient.get(`/admin/staff-management/${id}/attendance`);
+  }
+};

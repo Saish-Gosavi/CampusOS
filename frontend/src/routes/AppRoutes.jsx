@@ -64,6 +64,7 @@ import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damage
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
 import { Route as HostelFurnitureReplacement } from "@/pages/hostel/furniture/replacement";
 import { Route as HostelFees } from "@/pages/hostel/fees/index";
+import { Route as HostelStaff } from "@/pages/hostel/staff/index";
 
 // Warden Pages
 import { Route as WardenIndex } from "@/pages/warden/index";
@@ -265,7 +266,7 @@ export default function AppRoutes() {
         <Route path="in-out" element={<HostelIndex.component />} />
         <Route path="leaves" element={<HostelLeaves.component />} />
         <Route path="notices" element={<HostelIndex.component />} />
-        <Route path="staff" element={<HostelIndex.component />} />
+        <Route path="staff" element={<HostelStaff.component />} />
         <Route path="furniture" element={<HostelFurniture.component />} />
         <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
         <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />
