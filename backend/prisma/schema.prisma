@@ -50,7 +50,6 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
-  staffAttendance   StaffAttendance[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -93,6 +92,7 @@ model Hostel {
   users        User[]
   blocks       Block[]
   wardens      Warden[]
+  staff        Staff[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -419,16 +419,32 @@ model Notice {
 }
 
 // ==========================================
-// 10. Staff Management
+// 10. Staff Management (Non-system staff directory)
 // ==========================================
+
+// Physical staff (cleaners, maintenance, etc.) — no system login
+model Staff {
+  id          Int              @id @default(autoincrement())
+  name        String
+  phone       String?
+  designation String           // e.g., "Cleaning", "Maintenance", "Cook", "Guard"
+  hostelId    Int
+  hostel      Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  status      String           @default("active") // "active", "inactive"
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  attendance  StaffAttendance[]
+
+  @@index([hostelId])
+}
 
 model StaffAttendance {
   id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffId   Int
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
   date      DateTime
   present   Boolean
   remarks   String?
 
-  @@index([userId])
+  @@index([staffId])
 }
