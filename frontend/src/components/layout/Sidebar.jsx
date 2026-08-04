@@ -10,7 +10,8 @@ import { InventorySidebar } from "@/components/inventory/InventorySidebar";
 
 export function Sidebar() {
   const { user } = useAuth();
-  const role = user?.role?.toLowerCase() || "";
+  const rawRole = typeof user?.role === "string" ? user.role : (user?.role?.name || "");
+  const role = rawRole.toLowerCase();
 
   switch (role) {
     case "superadmin":

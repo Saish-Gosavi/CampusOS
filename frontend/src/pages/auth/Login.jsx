@@ -35,7 +35,8 @@ function LoginPage() {
         login(user, tokens.accessToken);
         toast.success("Signed in successfully");
 
-        const role = user.role?.toLowerCase();
+        const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
+        const role = rawRole.toLowerCase();
         if (role === "superadmin") navigate("/super-admin");
         else if (role === "admin") navigate("/hostel-admin");
         else if (role === "warden") navigate("/warden");
