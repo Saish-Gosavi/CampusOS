@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useEffect, useMemo, useState } from "react";
 import {
   Users,
@@ -319,10 +319,12 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
   const selectedCollege = colleges.find((c) => c.id === selectedCollegeId || c.id === Number(selectedCollegeId));
 
   /* Rebuild available roles whenever the college changes */
-  const availableRoles = [];
-  if (selectedCollege?.hasHostel)    availableRoles.push({ name: "admin",     label: "Hostel Admin" });
-  if (selectedCollege?.hasLibrary)   availableRoles.push({ name: "librarian", label: "Library Admin" });
-  if (selectedCollege?.hasInventory) availableRoles.push({ name: "store",     label: "Inventory Admin" });
+  /* Always provide all roles so they can be assigned regardless of facility toggles */
+  const availableRoles = [
+    { name: "admin",     label: "Hostel Admin" },
+    { name: "librarian", label: "Library Admin" },
+    { name: "store",     label: "Inventory Admin" }
+  ];
 
   /* Auto-select first role when college or its facilities change */
   useEffect(() => {
@@ -341,10 +343,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
       toast.error("Please select a college");
       return;
     }
-    if (availableRoles.length === 0) {
-      toast.error("No facilities are enabled for this college. Enable facilities from the Colleges page first.");
-      return;
-    }
+    // Removed the check for empty facilities so admins can always be created
 
     setSubmitting(true);
     try {
@@ -419,30 +418,7 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
             </select>
           </div>
 
-          {/* Enabled facilities indicator */}
-          {selectedCollege && (
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-xs text-muted-foreground font-medium">Enabled Facilities:</span>
-              {selectedCollege.hasHostel && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-purple-500/10 px-2 py-0.5 text-xs font-medium text-purple-600">
-                  <Home className="h-3 w-3" /> Hostel
-                </span>
-              )}
-              {selectedCollege.hasLibrary && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 px-2 py-0.5 text-xs font-medium text-blue-600">
-                  <BookOpen className="h-3 w-3" /> Library
-                </span>
-              )}
-              {selectedCollege.hasInventory && (
-                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600">
-                  <Package className="h-3 w-3" /> Inventory
-                </span>
-              )}
-              {!selectedCollege.hasHostel && !selectedCollege.hasLibrary && !selectedCollege.hasInventory && (
-                <span className="text-xs text-amber-500">⚠ No facilities enabled — enable from Colleges page</span>
-              )}
-            </div>
-          )}
+
 
           {/* Credentials form — 2-col grid like colleges modal */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

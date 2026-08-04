@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import {
   Building2,
   Users,
@@ -253,16 +253,11 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
   );
   const [submitting, setSubmitting] = useState(false);
 
-  const availableRoles = [];
-  if (hasHostel) {
-    availableRoles.push({ name: "admin", label: "Hostel Admin" });
-  }
-  if (hasLibrary) {
-    availableRoles.push({ name: "librarian", label: "Library Admin" });
-  }
-  if (hasInventory) {
-    availableRoles.push({ name: "store", label: "Inventory Admin" });
-  }
+  const availableRoles = [
+    { name: "admin", label: "Hostel Admin" },
+    { name: "librarian", label: "Library Admin" },
+    { name: "store", label: "Inventory Admin" }
+  ];
 
   async function toggleFacility(facility, value) {
     try {
