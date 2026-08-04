@@ -1,14 +1,11 @@
 import { createFileRoute } from "@/routes/compat";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Building2,
   Plus,
   Search,
-  MapPin,
-  UserCog,
   Pencil,
   Trash2,
-  Filter,
   Layers,
   DoorClosed,
   Bed,
@@ -22,11 +19,14 @@ import {
   ChevronDown,
   ChevronRight,
   Eye,
-  EyeOff
+  EyeOff,
+  MoreVertical,
+  ArrowRight,
+  Check,
+  Building
 } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { hostelApi, blockApi, floorApi, roomApi, wardenApi } from "@/services/api";
@@ -41,6 +41,15 @@ function HostelsPage() {
   const [blocks, setBlocks] = useState([]);
   const [wardens, setWardens] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Searchable Hostel Dropdown state
+  const [hostelDropdownOpen, setHostelDropdownOpen] = useState(false);
+  const [hostelSearchQuery, setHostelSearchQuery] = useState("");
+  const dropdownRef = useRef(null);
+
+  // Actions menu state
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const actionsRef = useRef(null);
 
   // Modals state
   const [hostelModalOpen, setHostelModalOpen] = useState(false);
@@ -61,12 +70,26 @@ function HostelsPage() {
   // Active expanded block IDs
   const [expandedBlocks, setExpandedBlocks] = useState({});
 
+  // Close popovers on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setHostelDropdownOpen(false);
+      }
+      if (actionsRef.current && !actionsRef.current.contains(event.target)) {
+        setActionsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // 1. Fetch All Hostels
   const fetchHostels = async () => {
     try {
       setLoading(true);
       const res = await hostelApi.getAll();
-      const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+      const list = Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
       setHostels(list);
 
       if (list.length > 0 && !selectedHostelId) {
@@ -85,10 +108,9 @@ function HostelsPage() {
     if (!hostelId) return;
     try {
       const res = await blockApi.getAll(hostelId);
-      const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+      const list = Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
       setBlocks(list);
 
-      // Auto expand first block if none expanded
       if (list.length > 0) {
         setExpandedBlocks((prev) => ({ ...prev, [list[0].id]: true }));
       }
@@ -103,7 +125,7 @@ function HostelsPage() {
     if (!hostelId) return;
     try {
       const res = await wardenApi.getAll(hostelId);
-      const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+      const list = Array.isArray(res.data) ? res.data : Array.isArray(res) ? res : [];
       setWardens(list);
     } catch (err) {
       console.error("Failed to load wardens:", err);
@@ -125,6 +147,17 @@ function HostelsPage() {
     () => hostels.find((h) => h.id === Number(selectedHostelId) || h.id === selectedHostelId),
     [hostels, selectedHostelId]
   );
+
+  // Filtered hostels for searchable dropdown
+  const filteredHostels = useMemo(() => {
+    const q = hostelSearchQuery.toLowerCase().trim();
+    if (!q) return hostels;
+    return hostels.filter(
+      (h) =>
+        h.name.toLowerCase().includes(q) ||
+        (h.city && h.city.toLowerCase().includes(q))
+    );
+  }, [hostels, hostelSearchQuery]);
 
   // Compute live capacity & stats for active hostel
   const hostelStats = useMemo(() => {
@@ -223,128 +256,197 @@ function HostelsPage() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-4 p-2 sm:p-4">
+      {/* 1. Compact Header */}
       <HostelPageHeader
         title="Hostel & Hierarchy Management"
-        description="Configure hostel blocks, floors, rooms, student capacities, and warden logins."
+        description="Configure building blocks, floors, room student capacities, and warden logins."
         icon={Building2}
         tint="#2563EB"
-        breadcrumbs={[{ label: "Hostel Management" }]}
+        breadcrumbs={[{ label: "Hostels" }]}
         action={
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => {
-                setEditingHostel(null);
-                setHostelModalOpen(true);
-              }}
-              className="bg-primary hover:bg-primary/90"
-            >
-              <Plus className="mr-1.5 h-4 w-4" /> Add Hostel
-            </Button>
-            <Button
-              onClick={() => setWardenModalOpen(true)}
-              variant="outline"
-              className="gap-2"
-            >
-              <UserPlus className="h-4 w-4 text-purple-600" /> Create Warden Login
-            </Button>
-          </div>
+          <Button
+            onClick={() => {
+              setEditingHostel(null);
+              setHostelModalOpen(true);
+            }}
+            className="bg-primary hover:bg-primary/90 text-white font-medium text-xs sm:text-sm h-9 px-3.5 shadow-sm"
+          >
+            <Plus className="mr-1.5 h-4 w-4" /> Add Hostel
+          </Button>
         }
       />
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center rounded-xl border border-border bg-card">
-          <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
-          <span className="text-muted-foreground">Loading hostel records...</span>
+        <div className="flex h-36 items-center justify-center rounded-xl border border-border bg-card">
+          <Loader2 className="h-5 w-5 animate-spin text-primary mr-2" />
+          <span className="text-xs text-muted-foreground">Loading records...</span>
         </div>
       ) : hostels.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card p-12 text-center">
+        /* Empty Hostels State */
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-card p-10 text-center">
           <Building2 className="h-10 w-10 text-muted-foreground" />
-          <h3 className="text-lg font-bold text-foreground">No Hostels Registered Yet</h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
+          <h3 className="text-base font-bold text-foreground">No Hostels Registered Yet</h3>
+          <p className="text-xs text-muted-foreground max-w-xs">
             Get started by registering your institute's first hostel building.
           </p>
-          <Button onClick={() => setHostelModalOpen(true)} className="mt-2">
+          <Button onClick={() => setHostelModalOpen(true)} size="sm" className="mt-1">
             <Plus className="mr-1.5 h-4 w-4" /> Register Hostel
           </Button>
         </div>
       ) : (
         <>
-          {/* Hostel Switcher & Overview Header */}
-          <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3">
-                <span className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
-                  <Building2 className="h-6 w-6" />
-                </span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Select Active Hostel:
-                    </label>
-                    <StatusPill status={activeHostel?.status || "Active"} />
-                  </div>
-                  <select
-                    value={selectedHostelId}
-                    onChange={(e) => setSelectedHostelId(e.target.value)}
-                    className="mt-1 rounded-lg border border-border bg-background px-3 py-1.5 text-base font-bold text-foreground outline-none focus:border-primary"
+          {/* 2 & 3. Hostel Selector & Compact Action Group Card */}
+          <div className="rounded-xl border border-border bg-card p-3.5 shadow-xs">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {/* Searchable Hostel Selector */}
+              <div className="flex items-center gap-3 relative" ref={dropdownRef}>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Current Hostel
+                  </span>
+
+                  {/* Dropdown Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setHostelDropdownOpen(!hostelDropdownOpen)}
+                    className="mt-0.5 inline-flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-bold text-foreground transition-colors hover:border-primary focus:outline-none"
                   >
-                    {hostels.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.name} {h.city ? `— ${h.city}` : ""}
-                      </option>
-                    ))}
-                  </select>
+                    <Building2 className="h-4 w-4 text-primary" />
+                    <span>
+                      {activeHostel?.name} {activeHostel?.city ? `— ${activeHostel.city}` : ""}
+                    </span>
+                    <StatusPill status={activeHostel?.status || "Active"} />
+                    <ChevronDown className="h-4 w-4 text-muted-foreground ml-1" />
+                  </button>
                 </div>
+
+                {/* Popover Dropdown Menu with Search */}
+                {hostelDropdownOpen && (
+                  <div className="absolute top-full left-0 z-50 mt-1.5 w-72 rounded-xl border border-border bg-card p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-150">
+                    <div className="relative mb-2">
+                      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        type="text"
+                        autoFocus
+                        value={hostelSearchQuery}
+                        onChange={(e) => setHostelSearchQuery(e.target.value)}
+                        placeholder="Search hostel..."
+                        className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-3 text-xs outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto space-y-1">
+                      {filteredHostels.length === 0 ? (
+                        <div className="py-3 text-center text-xs text-muted-foreground">
+                          No hostels found
+                        </div>
+                      ) : (
+                        filteredHostels.map((h) => {
+                          const isSelected = h.id === activeHostel?.id;
+                          return (
+                            <button
+                              key={h.id}
+                              onClick={() => {
+                                setSelectedHostelId(h.id);
+                                setHostelDropdownOpen(false);
+                                setHostelSearchQuery("");
+                              }}
+                              className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs text-left transition ${
+                                isSelected
+                                  ? "bg-primary/10 font-bold text-primary"
+                                  : "text-foreground hover:bg-muted"
+                              }`}
+                            >
+                              <div className="truncate">
+                                <p className="font-semibold">{h.name}</p>
+                                {h.city && <p className="text-[10px] text-muted-foreground">{h.city}</p>}
+                              </div>
+                              {isSelected && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Grouped Actions CTA */}
+              <div className="flex items-center gap-2 self-end sm:self-auto" ref={actionsRef}>
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => {
-                    setEditingHostel(activeHostel);
-                    setHostelModalOpen(true);
-                  }}
-                  className="gap-1.5"
+                  onClick={() => setWardenModalOpen(true)}
+                  className="h-8 text-xs gap-1.5 border-purple-200 text-purple-700 hover:bg-purple-50"
                 >
-                  <Pencil className="h-3.5 w-3.5" /> Edit Hostel Details
+                  <UserPlus className="h-3.5 w-3.5 text-purple-600" /> Create Warden Login
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleDeleteHostel(selectedHostelId)}
-                  className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                >
-                  <Trash2 className="h-3.5 w-3.5" /> Delete
-                </Button>
+
+                {/* More Actions Menu */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setActionsOpen(!actionsOpen)}
+                    className="grid h-8 w-8 place-items-center rounded-lg border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
+                    title="Hostel Options"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </button>
+
+                  {actionsOpen && (
+                    <div className="absolute right-0 top-full z-50 mt-1 w-44 rounded-xl border border-border bg-card p-1 shadow-lg">
+                      <button
+                        onClick={() => {
+                          setActionsOpen(false);
+                          setEditingHostel(activeHostel);
+                          setHostelModalOpen(true);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-foreground hover:bg-muted font-medium"
+                      >
+                        <Pencil className="h-3.5 w-3.5 text-slate-500" /> Edit Hostel
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActionsOpen(false);
+                          handleDeleteHostel(selectedHostelId);
+                        }}
+                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs text-red-600 hover:bg-red-50 font-medium"
+                      >
+                        <Trash2 className="h-3.5 w-3.5 text-red-500" /> Delete Hostel
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Hostel KPI Metrics */}
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 border-t border-border pt-4">
-              <KPIItem label="Blocks / Wings" value={hostelStats.blocksCount} icon={Building2} color="#2563EB" />
-              <KPIItem label="Total Floors" value={hostelStats.floorsCount} icon={Layers} color="#7B4CED" />
-              <KPIItem label="Total Rooms" value={hostelStats.roomsCount} icon={DoorClosed} color="#0D9488" />
-              <KPIItem label="Student Capacity" value={hostelStats.totalCapacity} icon={Bed} color="#EAB308" />
-              <KPIItem label="Occupied Beds" value={hostelStats.totalOccupied} icon={Shield} color="#EA580C" />
-              <KPIItem label="Available Beds" value={hostelStats.totalAvailable} icon={Bed} color="#22C55E" />
+            {/* 4. Compact Statistics Row */}
+            <div className="mt-3.5 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6 border-t border-border pt-3">
+              <CompactMetric label="Blocks" value={hostelStats.blocksCount} icon={Building2} color="#2563EB" />
+              <CompactMetric label="Floors" value={hostelStats.floorsCount} icon={Layers} color="#7B4CED" />
+              <CompactMetric label="Rooms" value={hostelStats.roomsCount} icon={DoorClosed} color="#0D9488" />
+              <CompactMetric label="Student Capacity" value={`${hostelStats.totalCapacity} Beds`} icon={Bed} color="#EAB308" />
+              <CompactMetric
+                label="Occupied Beds"
+                value={`${hostelStats.totalOccupied} / ${hostelStats.totalCapacity}`}
+                icon={Shield}
+                color="#EA580C"
+              />
+              <CompactMetric label="Available Beds" value={`${hostelStats.totalAvailable} Beds`} icon={Bed} color="#22C55E" />
             </div>
           </div>
 
-          {/* Section Split: Blocks & Room Hierarchy vs Wardens */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {/* Left 2 Cols: Block -> Floor -> Room Hierarchy */}
-            <div className="flex flex-col gap-4 lg:col-span-2">
-              <div className="flex items-center justify-between">
+          {/* 5. Aligned 2-Column Layout */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            {/* Left Column (2 Cols): Hierarchy Section */}
+            <div className="flex flex-col gap-3 lg:col-span-2">
+              <div className="flex items-center justify-between px-1">
                 <div>
-                  <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <Layers className="h-5 w-5 text-primary" />
-                    Blocks, Floors & Rooms Layout
+                  <h2 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <Layers className="h-4 w-4 text-primary" />
+                    Blocks & Hierarchy
                   </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Manage building blocks, floors, room student capacities, and rent.
-                  </p>
                 </div>
                 <Button
                   size="sm"
@@ -352,18 +454,29 @@ function HostelsPage() {
                     setEditingBlock(null);
                     setBlockModalOpen(true);
                   }}
-                  className="gap-1.5"
+                  className="h-8 text-xs gap-1 bg-primary hover:bg-primary/90 text-white"
                 >
-                  <Plus className="h-4 w-4" /> Add Block / Wing
+                  <Plus className="h-3.5 w-3.5" /> Add Block
                 </Button>
               </div>
 
+              {/* 6. Empty Hierarchy Visual State */}
               {blocks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-card p-10 text-center">
-                  <Layers className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-semibold text-foreground">No Blocks Configured for this Hostel</p>
-                  <p className="text-xs text-muted-foreground">
-                    Create a block (e.g. "Wing A", "Block 1") to start adding floors and rooms.
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-8 text-center shadow-xs">
+                  {/* Visual Hierarchy Diagram */}
+                  <div className="flex items-center gap-2 mb-3 px-4 py-2 rounded-full bg-muted/50 border border-border text-xs font-semibold text-muted-foreground">
+                    <span className="flex items-center gap-1"><Building className="h-3.5 w-3.5 text-primary" /> Hostel</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                    <span className="flex items-center gap-1"><Layers className="h-3.5 w-3.5 text-purple-600" /> Wing</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                    <span className="flex items-center gap-1"><Layers className="h-3.5 w-3.5 text-teal-600" /> Floor</span>
+                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                    <span className="flex items-center gap-1"><DoorClosed className="h-3.5 w-3.5 text-amber-600" /> Room</span>
+                  </div>
+
+                  <h4 className="text-sm font-bold text-foreground">No hierarchy has been created yet.</h4>
+                  <p className="text-xs text-muted-foreground mt-0.5 max-w-xs">
+                    Start by creating a block/wing (e.g. "Wing A") to configure floors and student room capacity.
                   </p>
                   <Button
                     size="sm"
@@ -371,17 +484,17 @@ function HostelsPage() {
                       setEditingBlock(null);
                       setBlockModalOpen(true);
                     }}
-                    className="mt-2"
+                    className="mt-3 text-xs gap-1"
                   >
-                    <Plus className="mr-1.5 h-4 w-4" /> Add First Block
+                    <Plus className="h-3.5 w-3.5" /> Add First Block
                   </Button>
                 </div>
               ) : (
+                /* Block List Cards */
                 blocks.map((block) => {
                   const isExpanded = !!expandedBlocks[block.id];
                   const floors = block.floors || [];
 
-                  // Calculate block capacity
                   let blockCap = 0;
                   let blockOcc = 0;
                   let blockRoomsCount = 0;
@@ -400,35 +513,35 @@ function HostelsPage() {
                   return (
                     <div
                       key={block.id}
-                      className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all"
+                      className="overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-all"
                     >
                       {/* Block Header */}
-                      <div className="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3.5">
+                      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-2.5">
                         <div
-                          className="flex items-center gap-3 cursor-pointer select-none"
+                          className="flex items-center gap-2 cursor-pointer select-none"
                           onClick={() => toggleBlockExpand(block.id)}
                         >
                           <span className="text-muted-foreground hover:text-foreground">
                             {isExpanded ? (
-                              <ChevronDown className="h-5 w-5" />
+                              <ChevronDown className="h-4 w-4" />
                             ) : (
-                              <ChevronRight className="h-5 w-5" />
+                              <ChevronRight className="h-4 w-4" />
                             )}
                           </span>
                           <div>
-                            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                               {block.name}
-                              <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
+                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
                                 {floors.length} Floors · {blockRoomsCount} Rooms
                               </span>
                             </h3>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-[11px] text-muted-foreground">
                               Capacity: {blockCap} Beds · Occupied: {blockOcc} · Available: {Math.max(0, blockCap - blockOcc)}
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1">
                           <Button
                             size="sm"
                             variant="outline"
@@ -436,35 +549,35 @@ function HostelsPage() {
                               setTargetBlockId(block.id);
                               setFloorModalOpen(true);
                             }}
-                            className="h-8 text-xs gap-1"
+                            className="h-7 text-[11px] gap-1 px-2"
                           >
-                            <Plus className="h-3.5 w-3.5" /> Add Floor
+                            <Plus className="h-3 w-3" /> Add Floor
                           </Button>
                           <button
                             onClick={() => {
                               setEditingBlock(block);
                               setBlockModalOpen(true);
                             }}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                            className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
                             title="Edit Block"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteBlock(block.id)}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                            className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-red-50 hover:text-red-600"
                             title="Delete Block"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>
 
-                      {/* Expanded Floors & Rooms */}
+                      {/* Floors & Rooms Detail */}
                       {isExpanded && (
-                        <div className="p-5 flex flex-col gap-5 bg-background/50">
+                        <div className="p-3 flex flex-col gap-3 bg-background/50">
                           {floors.length === 0 ? (
-                            <div className="py-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                            <div className="py-4 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
                               No floors added to {block.name} yet. Click "Add Floor" above.
                             </div>
                           ) : (
@@ -473,17 +586,17 @@ function HostelsPage() {
                               return (
                                 <div
                                   key={floor.id}
-                                  className="rounded-xl border border-border bg-card p-4 shadow-sm"
+                                  className="rounded-lg border border-border bg-card p-3 shadow-2xs"
                                 >
-                                  <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
+                                  <div className="flex items-center justify-between mb-2 border-b border-border pb-1.5">
                                     <div className="flex items-center gap-2">
-                                      <span className="grid h-7 w-7 place-items-center rounded-md bg-purple-500/10 text-xs font-bold text-purple-700">
+                                      <span className="grid h-6 w-6 place-items-center rounded bg-purple-500/10 text-[10px] font-bold text-purple-700">
                                         F{floor.number}
                                       </span>
-                                      <h4 className="text-sm font-semibold text-foreground">
+                                      <h4 className="text-xs font-semibold text-foreground">
                                         Floor {floor.number}
                                       </h4>
-                                      <span className="text-xs text-muted-foreground">
+                                      <span className="text-[11px] text-muted-foreground">
                                         ({rooms.length} Rooms)
                                       </span>
                                     </div>
@@ -497,25 +610,25 @@ function HostelsPage() {
                                           setEditingRoom(null);
                                           setRoomModalOpen(true);
                                         }}
-                                        className="h-7 text-xs gap-1 px-2.5"
+                                        className="h-6 text-[10px] gap-1 px-2"
                                       >
-                                        <Plus className="h-3.5 w-3.5" /> Add Room
+                                        <Plus className="h-3 w-3" /> Add Room
                                       </Button>
                                       <button
                                         onClick={() => handleDeleteFloor(floor.id)}
-                                        className="text-xs text-red-500 hover:underline"
+                                        className="text-[10px] text-red-500 hover:underline"
                                       >
-                                        Delete Floor
+                                        Delete
                                       </button>
                                     </div>
                                   </div>
 
                                   {rooms.length === 0 ? (
-                                    <p className="text-xs text-muted-foreground py-2 text-center">
-                                      No rooms on Floor {floor.number}. Click "Add Room" to create rooms and set student capacity.
+                                    <p className="text-[11px] text-muted-foreground py-1 text-center">
+                                      No rooms on Floor {floor.number}. Click "Add Room" to configure beds and rent.
                                     </p>
                                   ) : (
-                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
                                       {rooms.map((room) => {
                                         const beds = room.beds || [];
                                         const roomOcc = beds.filter((b) => b.allocations && b.allocations.length > 0).length;
@@ -525,10 +638,10 @@ function HostelsPage() {
                                         return (
                                           <div
                                             key={room.id}
-                                            className="rounded-lg border border-border bg-background p-3 hover:border-primary/50 transition"
+                                            className="rounded-md border border-border bg-background p-2 hover:border-primary/50 transition"
                                           >
                                             <div className="flex items-center justify-between">
-                                              <span className="text-sm font-bold text-foreground">
+                                              <span className="text-xs font-bold text-foreground">
                                                 Room {room.number}
                                               </span>
                                               <div className="flex items-center gap-1">
@@ -541,33 +654,33 @@ function HostelsPage() {
                                                   className="text-muted-foreground hover:text-foreground"
                                                   title="Edit Room"
                                                 >
-                                                  <Pencil className="h-3.5 w-3.5" />
+                                                  <Pencil className="h-3 w-3" />
                                                 </button>
                                                 <button
                                                   onClick={() => handleDeleteRoom(room.id)}
                                                   className="text-muted-foreground hover:text-red-600"
                                                   title="Delete Room"
                                                 >
-                                                  <Trash2 className="h-3.5 w-3.5" />
+                                                  <Trash2 className="h-3 w-3" />
                                                 </button>
                                               </div>
                                             </div>
 
-                                            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-                                              <span>Student Capacity:</span>
+                                            <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
+                                              <span>Capacity:</span>
                                               <span className="font-semibold text-foreground">
                                                 {roomCap} Beds
                                               </span>
                                             </div>
 
-                                            <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
+                                            <div className="mt-0.5 flex items-center justify-between text-[11px] text-muted-foreground">
                                               <span>Occupancy:</span>
                                               <span className="font-medium text-foreground">
                                                 {roomOcc} / {roomCap} ({occPct}%)
                                               </span>
                                             </div>
 
-                                            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
                                               <div
                                                 className="h-full rounded-full"
                                                 style={{
@@ -579,8 +692,8 @@ function HostelsPage() {
                                             </div>
 
                                             {room.rent > 0 && (
-                                              <p className="mt-2 text-right text-[11px] font-medium text-muted-foreground">
-                                                ₹{Number(room.rent).toLocaleString()} / month
+                                              <p className="mt-1 text-right text-[10px] font-medium text-muted-foreground">
+                                                ₹{Number(room.rent).toLocaleString()}/mo
                                               </p>
                                             )}
                                           </div>
@@ -600,59 +713,56 @@ function HostelsPage() {
               )}
             </div>
 
-            {/* Right Column: Warden Logins & Shifts */}
-            <div className="flex flex-col gap-4">
-              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
+            {/* Right Column (1 Col): Compact Assigned Wardens Card */}
+            <div className="flex flex-col gap-3">
+              <div className="rounded-xl border border-border bg-card p-4 shadow-xs">
+                <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
                   <div>
-                    <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-                      <UserCog className="h-5 w-5 text-purple-600" />
+                    <h3 className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <UserPlus className="h-4 w-4 text-purple-600" />
                       Assigned Wardens
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      Warden user accounts with day/night shift assignments.
-                    </p>
                   </div>
                   <Button
                     size="sm"
                     onClick={() => setWardenModalOpen(true)}
-                    className="h-8 text-xs gap-1 bg-purple-600 hover:bg-purple-700 text-white"
+                    className="h-7 text-[11px] gap-1 bg-purple-600 hover:bg-purple-700 text-white px-2.5"
                   >
-                    <UserPlus className="h-3.5 w-3.5" /> Add Warden
+                    <Plus className="h-3 w-3" /> Add Warden
                   </Button>
                 </div>
 
                 {wardens.length === 0 ? (
-                  <div className="py-8 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
+                  <div className="py-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
                     No warden logins created for this hostel yet. Click "Add Warden" to generate warden credentials.
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
                     {wardens.map((w) => (
                       <div
                         key={w.id}
-                        className="flex items-center justify-between rounded-lg border border-border bg-background p-3 shadow-xs"
+                        className="flex items-center justify-between rounded-lg border border-border bg-background p-2.5 shadow-2xs"
                       >
-                        <div className="flex items-center gap-3">
-                          <span className="grid h-9 w-9 place-items-center rounded-full bg-purple-600 text-xs font-bold text-white">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-purple-600 text-xs font-bold text-white">
                             {w.fullName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                           </span>
-                          <div>
-                            <div className="font-semibold text-sm text-foreground">{w.fullName}</div>
-                            <div className="text-xs text-muted-foreground">{w.user?.email}</div>
-                            <div className="mt-1 flex items-center gap-2">
+                          <div className="min-w-0">
+                            <p className="font-semibold text-xs text-foreground truncate">{w.fullName}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">{w.user?.email}</p>
+                            <div className="mt-0.5 flex items-center gap-1.5">
                               <ShiftBadge shift={w.shift} />
-                              <span className="text-[11px] text-muted-foreground">📞 {w.phone}</span>
+                              <span className="text-[10px] text-muted-foreground">📞 {w.phone}</span>
                             </div>
                           </div>
                         </div>
 
                         <button
                           onClick={() => handleDeleteWarden(w.id)}
-                          className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                          className="rounded p-1 text-muted-foreground hover:bg-red-50 hover:text-red-600 shrink-0"
                           title="Remove Warden"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
                     ))}
@@ -664,7 +774,7 @@ function HostelsPage() {
         </>
       )}
 
-      {/* ── MODALS ── */}
+      {/* ── MODALS (INTACT FUNCTIONALITY) ── */}
 
       {/* Hostel Add / Edit Modal */}
       {hostelModalOpen && (
@@ -732,18 +842,18 @@ function HostelsPage() {
   );
 }
 
-// ── SUBCOMPONENTS & MODALS ──
+// ── COMPACT SUBCOMPONENTS & MODALS ──
 
-function KPIItem({ label, value, icon: Icon, color }) {
+function CompactMetric({ label, value, icon: Icon, color }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-3">
+    <div className="rounded-lg border border-border bg-background px-3 py-2">
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
-        <Icon className="h-4 w-4" style={{ color }} />
+        <Icon className="h-3.5 w-3.5" style={{ color }} />
       </div>
-      <div className="mt-1.5 text-xl font-bold" style={{ color }}>
+      <div className="mt-1 text-base font-extrabold" style={{ color }}>
         {value}
       </div>
     </div>
@@ -754,21 +864,21 @@ function ShiftBadge({ shift }) {
   const s = (shift || "Day").toLowerCase();
   if (s.includes("night")) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold text-indigo-600">
-        <Moon className="h-3 w-3" /> Night Shift
+      <span className="inline-flex items-center gap-0.5 rounded bg-indigo-500/10 px-1.5 py-0.2 text-[9px] font-semibold text-indigo-600">
+        <Moon className="h-2.5 w-2.5" /> Night Shift
       </span>
     );
   }
   if (s.includes("rotational")) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600">
-        <Clock className="h-3 w-3" /> Rotational Shift
+      <span className="inline-flex items-center gap-0.5 rounded bg-amber-500/10 px-1.5 py-0.2 text-[9px] font-semibold text-amber-600">
+        <Clock className="h-2.5 w-2.5" /> Rotational
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">
-      <Sun className="h-3 w-3" /> Day Shift
+    <span className="inline-flex items-center gap-0.5 rounded bg-emerald-500/10 px-1.5 py-0.2 text-[9px] font-semibold text-emerald-600">
+      <Sun className="h-2.5 w-2.5" /> Day Shift
     </span>
   );
 }
@@ -803,7 +913,7 @@ function HostelModal({ initial, onClose, onSaved }) {
 
   return (
     <ModalLayout title={initial ? "Edit Hostel Details" : "Register New Hostel"} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Hostel / Building Name</label>
           <input
@@ -811,17 +921,17 @@ function HostelModal({ initial, onClose, onSaved }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. VPPCOE Main Hostel Wing A"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1">City / Location</label>
             <input
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="e.g. Mumbai"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
           <div>
@@ -829,7 +939,7 @@ function HostelModal({ initial, onClose, onSaved }) {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             >
               <option value="Active">Active</option>
               <option value="Under Maintenance">Under Maintenance</option>
@@ -843,12 +953,12 @@ function HostelModal({ initial, onClose, onSaved }) {
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Campus address details..."
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={submitting}>
             {submitting ? "Saving..." : initial ? "Save Changes" : "Register Hostel"}
           </Button>
         </div>
@@ -884,7 +994,7 @@ function BlockModal({ hostelId, initial, onClose, onSaved }) {
 
   return (
     <ModalLayout title={initial ? "Edit Block Name" : "Add Hostel Block / Wing"} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Block / Wing Name</label>
           <input
@@ -892,12 +1002,12 @@ function BlockModal({ hostelId, initial, onClose, onSaved }) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Block A, Wing 1, Boys Hostel Block"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={submitting}>
             {submitting ? "Saving..." : initial ? "Save Changes" : "Add Block"}
           </Button>
         </div>
@@ -927,7 +1037,7 @@ function FloorModal({ blockId, onClose, onSaved }) {
 
   return (
     <ModalLayout title="Add Floor to Block" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Floor Number</label>
           <input
@@ -937,12 +1047,12 @@ function FloorModal({ blockId, onClose, onSaved }) {
             value={floorNumber}
             onChange={(e) => setFloorNumber(e.target.value)}
             placeholder="e.g. 1, 2, 3"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={submitting}>
             {submitting ? "Adding..." : "Add Floor"}
           </Button>
         </div>
@@ -989,7 +1099,7 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
 
   return (
     <ModalLayout title={initial ? "Edit Room Details" : "Add Room & Student Capacity"} onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Room Number / ID</label>
           <input
@@ -997,11 +1107,11 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
             value={number}
             onChange={(e) => setNumber(e.target.value)}
             placeholder="e.g. 101, 102A"
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1">Student Capacity (Beds)</label>
             <input
@@ -1011,7 +1121,7 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
               required
               value={capacity}
               onChange={(e) => setCapacity(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
 
@@ -1023,14 +1133,14 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
               value={rent}
               onChange={(e) => setRent(e.target.value)}
               placeholder="e.g. 5000"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={submitting}>
             {submitting ? "Saving..." : initial ? "Save Changes" : "Create Room"}
           </Button>
         </div>
@@ -1076,13 +1186,13 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
 
   return (
     <ModalLayout title="Create Warden Login Credentials" onClose={onClose}>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground block mb-1">Hostel Assignment</label>
           <select
             value={selectedHostelId}
             onChange={(e) => setSelectedHostelId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           >
             {hostels.map((h) => (
               <option key={h.id} value={h.id}>
@@ -1092,7 +1202,7 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
           </select>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1">Warden Full Name</label>
             <input
@@ -1100,7 +1210,7 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="e.g. Dr. Rajesh Sharma"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
 
@@ -1110,21 +1220,21 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+91 98765 43210"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-1">Email / Login Username</label>
+            <label className="text-xs font-medium text-muted-foreground block mb-1">Email / Username</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="warden@hostel.edu"
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             />
           </div>
 
@@ -1133,7 +1243,7 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
             <select
               value={shift}
               onChange={(e) => setShift(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
             >
               <option value="Day">Day Shift (08:00 - 16:00)</option>
               <option value="Night">Night Shift (16:00 - 00:00)</option>
@@ -1150,23 +1260,23 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Set login password for warden"
-              className="w-full rounded-lg border border-border bg-background py-2 pl-3 pr-10 text-sm outline-none focus:border-primary"
+              placeholder="Set password"
+              className="w-full rounded-lg border border-border bg-background py-1.5 pl-3 pr-9 text-xs outline-none focus:border-primary"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit" disabled={submitting} className="bg-purple-600 hover:bg-purple-700 text-white">
+          <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button type="submit" size="sm" disabled={submitting} className="bg-purple-600 hover:bg-purple-700 text-white">
             {submitting ? "Creating..." : "Create Warden Account"}
           </Button>
         </div>
@@ -1175,7 +1285,7 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
   );
 }
 
-// Helper Layout Modal
+// Modal Container
 function ModalLayout({ title, onClose, children }) {
   return (
     <div
@@ -1183,11 +1293,11 @@ function ModalLayout({ title, onClose, children }) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl overflow-hidden"
+        className="w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4 border-b border-border pb-3">
-          <h3 className="text-lg font-bold text-foreground">{title}</h3>
+        <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
+          <h3 className="text-sm font-bold text-foreground">{title}</h3>
           <button onClick={onClose} className="rounded p-1 text-muted-foreground hover:bg-muted">
             <X className="h-4 w-4" />
           </button>
