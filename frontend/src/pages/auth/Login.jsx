@@ -24,7 +24,11 @@ function LoginPage() {
   const onSubmit = async (values) => {
     setSubmitting(true);
     try {
-      const response = await authApi.login(values);
+      const payload = {
+        ...values,
+        email: (values.email || "").trim(),
+      };
+      const response = await authApi.login(payload);
       if (response.success && response.data) {
         const { user, tokens } = response.data;
         tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
@@ -43,7 +47,8 @@ function LoginPage() {
         toast.error(response.message || "Invalid credentials");
       }
     } catch (err) {
-      toast.error(err.message || "Unable to sign in. Please try again.");
+      const errMsg = err.errors?.[0]?.message || err.message || "Unable to sign in. Please try again.";
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }
