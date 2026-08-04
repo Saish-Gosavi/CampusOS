@@ -23,7 +23,10 @@ import {
   MoreVertical,
   ArrowRight,
   Check,
-  Building
+  Building,
+  CheckCircle2,
+  Info,
+  User
 } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
@@ -67,8 +70,9 @@ function HostelsPage() {
 
   const [wardenModalOpen, setWardenModalOpen] = useState(false);
 
-  // Active expanded block IDs
+  // Active expanded block & bed details state
   const [expandedBlocks, setExpandedBlocks] = useState({});
+  const [expandedRooms, setExpandedRooms] = useState({});
 
   // Close popovers on outside click
   useEffect(() => {
@@ -197,6 +201,11 @@ function HostelsPage() {
   // Toggle Block Expansion
   const toggleBlockExpand = (id) => {
     setExpandedBlocks((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Toggle Room Bed Detail Expansion
+  const toggleRoomExpand = (id) => {
+    setExpandedRooms((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   // Delete Handlers
@@ -454,7 +463,7 @@ function HostelsPage() {
                     setEditingBlock(null);
                     setBlockModalOpen(true);
                   }}
-                  className="h-8 text-xs gap-1 bg-primary hover:bg-primary/90 text-white"
+                  className="h-8 text-xs gap-1 bg-primary hover:bg-primary/90 text-white shadow-xs"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add Block
                 </Button>
@@ -515,10 +524,10 @@ function HostelsPage() {
                       key={block.id}
                       className="overflow-hidden rounded-xl border border-border bg-card shadow-xs transition-all"
                     >
-                      {/* Block Header */}
-                      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-2.5">
+                      {/* Block Header Bar */}
+                      <div className="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-3">
                         <div
-                          className="flex items-center gap-2 cursor-pointer select-none"
+                          className="flex items-center gap-2.5 cursor-pointer select-none"
                           onClick={() => toggleBlockExpand(block.id)}
                         >
                           <span className="text-muted-foreground hover:text-foreground">
@@ -531,17 +540,17 @@ function HostelsPage() {
                           <div>
                             <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                               {block.name}
-                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                                {floors.length} Floors · {blockRoomsCount} Rooms
+                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                                {floors.length} {floors.length === 1 ? "Floor" : "Floors"} · {blockRoomsCount} {blockRoomsCount === 1 ? "Room" : "Rooms"}
                               </span>
                             </h3>
-                            <p className="text-[11px] text-muted-foreground">
-                              Capacity: {blockCap} Beds · Occupied: {blockOcc} · Available: {Math.max(0, blockCap - blockOcc)}
+                            <p className="text-[11px] font-medium text-muted-foreground mt-0.5">
+                              Capacity: <span className="font-bold text-foreground">{blockCap} Beds</span> · Occupied: <span className="font-bold text-amber-600">{blockOcc}</span> · Available: <span className="font-bold text-emerald-600">{Math.max(0, blockCap - blockOcc)}</span>
                             </p>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1.5">
                           <Button
                             size="sm"
                             variant="outline"
@@ -549,7 +558,7 @@ function HostelsPage() {
                               setTargetBlockId(block.id);
                               setFloorModalOpen(true);
                             }}
-                            className="h-7 text-[11px] gap-1 px-2"
+                            className="h-7 text-[11px] gap-1 px-2.5 border-primary/30 text-primary hover:bg-primary/5 font-semibold"
                           >
                             <Plus className="h-3 w-3" /> Add Floor
                           </Button>
@@ -558,14 +567,14 @@ function HostelsPage() {
                               setEditingBlock(block);
                               setBlockModalOpen(true);
                             }}
-                            className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+                            className="grid h-7 w-7 place-items-center rounded border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground"
                             title="Edit Block"
                           >
                             <Pencil className="h-3.5 w-3.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteBlock(block.id)}
-                            className="grid h-7 w-7 place-items-center rounded text-muted-foreground hover:bg-red-50 hover:text-red-600"
+                            className="grid h-7 w-7 place-items-center rounded border border-border bg-background text-muted-foreground hover:bg-red-50 hover:text-red-600"
                             title="Delete Block"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -575,29 +584,40 @@ function HostelsPage() {
 
                       {/* Floors & Rooms Detail */}
                       {isExpanded && (
-                        <div className="p-3 flex flex-col gap-3 bg-background/50">
+                        <div className="p-3.5 flex flex-col gap-3.5 bg-background/40">
                           {floors.length === 0 ? (
-                            <div className="py-4 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg">
-                              No floors added to {block.name} yet. Click "Add Floor" above.
+                            <div className="py-5 text-center text-xs text-muted-foreground border border-dashed border-border rounded-lg bg-card/50">
+                              No floors added to {block.name} yet. Click <span className="font-semibold text-primary">"Add Floor"</span> above to build your hierarchy.
                             </div>
                           ) : (
                             floors.map((floor) => {
                               const rooms = floor.rooms || [];
+                              let floorCap = 0;
+                              let floorOcc = 0;
+
+                              rooms.forEach((r) => {
+                                floorCap += r.capacity || 0;
+                                (r.beds || []).forEach((b) => {
+                                  if (b.allocations && b.allocations.length > 0) floorOcc += 1;
+                                });
+                              });
+
                               return (
                                 <div
                                   key={floor.id}
-                                  className="rounded-lg border border-border bg-card p-3 shadow-2xs"
+                                  className="rounded-xl border border-border bg-card p-3 shadow-2xs"
                                 >
-                                  <div className="flex items-center justify-between mb-2 border-b border-border pb-1.5">
+                                  {/* Floor Subheader Bar */}
+                                  <div className="flex items-center justify-between mb-3 border-b border-border/80 pb-2">
                                     <div className="flex items-center gap-2">
-                                      <span className="grid h-6 w-6 place-items-center rounded bg-purple-500/10 text-[10px] font-bold text-purple-700">
+                                      <span className="grid h-6 w-6 place-items-center rounded bg-purple-600/10 text-[11px] font-extrabold text-purple-700">
                                         F{floor.number}
                                       </span>
-                                      <h4 className="text-xs font-semibold text-foreground">
+                                      <h4 className="text-xs font-bold text-foreground">
                                         Floor {floor.number}
                                       </h4>
-                                      <span className="text-[11px] text-muted-foreground">
-                                        ({rooms.length} Rooms)
+                                      <span className="text-[11px] font-medium text-muted-foreground">
+                                        ({rooms.length} {rooms.length === 1 ? "Room" : "Rooms"} · {floorCap} Beds Capacity)
                                       </span>
                                     </div>
 
@@ -610,40 +630,49 @@ function HostelsPage() {
                                           setEditingRoom(null);
                                           setRoomModalOpen(true);
                                         }}
-                                        className="h-6 text-[10px] gap-1 px-2"
+                                        className="h-6 text-[10px] gap-1 px-2.5 font-bold border-teal-300 text-teal-700 hover:bg-teal-50"
                                       >
                                         <Plus className="h-3 w-3" /> Add Room
                                       </Button>
                                       <button
                                         onClick={() => handleDeleteFloor(floor.id)}
-                                        className="text-[10px] text-red-500 hover:underline"
+                                        className="text-[10px] font-semibold text-red-500 hover:underline hover:text-red-700"
                                       >
-                                        Delete
+                                        Delete Floor
                                       </button>
                                     </div>
                                   </div>
 
+                                  {/* Rooms Cards Grid */}
                                   {rooms.length === 0 ? (
-                                    <p className="text-[11px] text-muted-foreground py-1 text-center">
-                                      No rooms on Floor {floor.number}. Click "Add Room" to configure beds and rent.
+                                    <p className="text-[11px] text-muted-foreground py-2 text-center border border-dashed border-border/60 rounded-md">
+                                      No rooms configured on Floor {floor.number}. Click <span className="font-semibold text-teal-700">"Add Room"</span> to set student capacity and beds.
                                     </p>
                                   ) : (
-                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+                                    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 md:grid-cols-3">
                                       {rooms.map((room) => {
                                         const beds = room.beds || [];
                                         const roomOcc = beds.filter((b) => b.allocations && b.allocations.length > 0).length;
                                         const roomCap = room.capacity || beds.length || 1;
                                         const occPct = Math.round((roomOcc / roomCap) * 100);
+                                        const isRoomExpanded = !!expandedRooms[room.id];
 
                                         return (
                                           <div
                                             key={room.id}
-                                            className="rounded-md border border-border bg-background p-2 hover:border-primary/50 transition"
+                                            className="rounded-lg border border-border bg-background p-3 hover:border-primary/40 transition shadow-2xs"
                                           >
-                                            <div className="flex items-center justify-between">
-                                              <span className="text-xs font-bold text-foreground">
-                                                Room {room.number}
-                                              </span>
+                                            {/* Room Card Title & Quick Actions */}
+                                            <div className="flex items-center justify-between pb-1.5 border-b border-border/60">
+                                              <div className="flex items-center gap-1.5">
+                                                <span className="text-xs font-bold text-foreground">
+                                                  Room {room.number}
+                                                </span>
+                                                <span className="rounded bg-muted px-1.5 py-0.2 text-[9px] font-semibold text-muted-foreground">
+                                                  {roomCap}-Bed
+                                                </span>
+                                              </div>
+
                                               <div className="flex items-center gap-1">
                                                 <button
                                                   onClick={() => {
@@ -651,14 +680,14 @@ function HostelsPage() {
                                                     setEditingRoom(room);
                                                     setRoomModalOpen(true);
                                                   }}
-                                                  className="text-muted-foreground hover:text-foreground"
+                                                  className="p-1 rounded text-muted-foreground hover:bg-muted hover:text-foreground"
                                                   title="Edit Room"
                                                 >
                                                   <Pencil className="h-3 w-3" />
                                                 </button>
                                                 <button
                                                   onClick={() => handleDeleteRoom(room.id)}
-                                                  className="text-muted-foreground hover:text-red-600"
+                                                  className="p-1 rounded text-muted-foreground hover:bg-red-50 hover:text-red-600"
                                                   title="Delete Room"
                                                 >
                                                   <Trash2 className="h-3 w-3" />
@@ -666,36 +695,98 @@ function HostelsPage() {
                                               </div>
                                             </div>
 
-                                            <div className="mt-1 flex items-center justify-between text-[11px] text-muted-foreground">
-                                              <span>Capacity:</span>
-                                              <span className="font-semibold text-foreground">
-                                                {roomCap} Beds
-                                              </span>
+                                            {/* Room Metrics & Progress */}
+                                            <div className="mt-2 space-y-1">
+                                              <div className="flex items-center justify-between text-[11px]">
+                                                <span className="text-muted-foreground">Student Capacity:</span>
+                                                <span className="font-bold text-foreground">
+                                                  {roomCap} Beds
+                                                </span>
+                                              </div>
+
+                                              <div className="flex items-center justify-between text-[11px]">
+                                                <span className="text-muted-foreground">Occupancy:</span>
+                                                <span className="font-semibold text-foreground">
+                                                  {roomOcc} / {roomCap} ({occPct}%)
+                                                </span>
+                                              </div>
+
+                                              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted mt-1">
+                                                <div
+                                                  className="h-full rounded-full transition-all"
+                                                  style={{
+                                                    width: `${Math.min(100, occPct)}%`,
+                                                    backgroundColor:
+                                                      occPct >= 100 ? "#EF4444" : occPct > 0 ? "#22C55E" : "#94A3B8"
+                                                  }}
+                                                />
+                                              </div>
+
+                                              {room.rent > 0 && (
+                                                <div className="mt-1 flex items-center justify-between text-[11px]">
+                                                  <span className="text-muted-foreground">Monthly Rent:</span>
+                                                  <span className="font-bold text-primary">
+                                                    ₹{Number(room.rent).toLocaleString()}
+                                                  </span>
+                                                </div>
+                                              )}
                                             </div>
 
-                                            <div className="mt-0.5 flex items-center justify-between text-[11px] text-muted-foreground">
-                                              <span>Occupancy:</span>
-                                              <span className="font-medium text-foreground">
-                                                {roomOcc} / {roomCap} ({occPct}%)
-                                              </span>
-                                            </div>
+                                            {/* Expandable Bed Breakdown Chips */}
+                                            <div className="mt-2.5 pt-2 border-t border-border/50">
+                                              <button
+                                                type="button"
+                                                onClick={() => toggleRoomExpand(room.id)}
+                                                className="w-full flex items-center justify-between text-[10px] font-semibold text-muted-foreground hover:text-foreground"
+                                              >
+                                                <span>Bed Allocations ({beds.length})</span>
+                                                {isRoomExpanded ? (
+                                                  <ChevronDown className="h-3 w-3" />
+                                                ) : (
+                                                  <ChevronRight className="h-3 w-3" />
+                                                )}
+                                              </button>
 
-                                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-                                              <div
-                                                className="h-full rounded-full"
-                                                style={{
-                                                  width: `${Math.min(100, occPct)}%`,
-                                                  backgroundColor:
-                                                    occPct >= 100 ? "#EF4444" : occPct > 0 ? "#22C55E" : "#94A3B8"
-                                                }}
-                                              />
-                                            </div>
+                                              {isRoomExpanded && (
+                                                <div className="mt-1.5 space-y-1">
+                                                  {beds.length === 0 ? (
+                                                    <p className="text-[10px] text-muted-foreground italic">No beds generated</p>
+                                                  ) : (
+                                                    beds.map((bed, idx) => {
+                                                      const activeAlloc = (bed.allocations || []).find((a) => a.status === "active");
+                                                      const isOccupied = !!activeAlloc;
+                                                      const studentName = activeAlloc?.student?.fullName || "Occupied";
 
-                                            {room.rent > 0 && (
-                                              <p className="mt-1 text-right text-[10px] font-medium text-muted-foreground">
-                                                ₹{Number(room.rent).toLocaleString()}/mo
-                                              </p>
-                                            )}
+                                                      return (
+                                                        <div
+                                                          key={bed.id}
+                                                          className={`flex items-center justify-between px-2 py-1 rounded text-[10px] font-medium border ${
+                                                            isOccupied
+                                                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-700"
+                                                              : "bg-muted/40 border-border text-muted-foreground"
+                                                          }`}
+                                                        >
+                                                          <span className="flex items-center gap-1">
+                                                            <Bed className="h-3 w-3" />
+                                                            {bed.number || `Bed ${idx + 1}`}
+                                                          </span>
+                                                          <span className="font-semibold">
+                                                            {isOccupied ? (
+                                                              <span className="inline-flex items-center gap-1">
+                                                                <User className="h-2.5 w-2.5" />
+                                                                {studentName}
+                                                              </span>
+                                                            ) : (
+                                                              "Available"
+                                                            )}
+                                                          </span>
+                                                        </div>
+                                                      );
+                                                    })
+                                                  )}
+                                                </div>
+                                              )}
+                                            </div>
                                           </div>
                                         );
                                       })}
@@ -774,7 +865,7 @@ function HostelsPage() {
         </>
       )}
 
-      {/* ── MODALS (INTACT FUNCTIONALITY) ── */}
+      {/* ── MODALS (INTACT & ENHANCED FUNCTIONALITY) ── */}
 
       {/* Hostel Add / Edit Modal */}
       {hostelModalOpen && (
@@ -1061,33 +1152,52 @@ function FloorModal({ blockId, onClose, onSaved }) {
   );
 }
 
-// Room Modal
+// Smart Room Modal (Supports Single or Batch Multi-Room creation!)
 function RoomModal({ floorId, initial, onClose, onSaved }) {
-  const [number, setNumber] = useState(initial?.number ?? "");
+  const [numberInput, setNumberInput] = useState(initial?.number ?? "");
   const [capacity, setCapacity] = useState(initial?.capacity ?? 3);
   const [rent, setRent] = useState(initial?.rent ?? 5000);
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!number.toString().trim()) return toast.error("Room number is required");
+    const rawVal = numberInput.toString().trim();
+    if (!rawVal) return toast.error("Room number is required");
+
     setSubmitting(true);
     try {
       if (initial) {
+        // Single Edit
         await roomApi.update(initial.id, {
-          number: number.toString().trim(),
+          number: rawVal,
           capacity: Number(capacity),
           rent: Number(rent)
         });
         toast.success("Room updated");
       } else {
-        await roomApi.create({
-          number: number.toString().trim(),
-          floorId: Number(floorId),
-          capacity: Number(capacity),
-          rent: Number(rent)
-        });
-        toast.success("Room created with beds");
+        // Multi-room parsing (e.g. "101, 102, 103" or "101-105")
+        let roomNumbers = [];
+        if (rawVal.includes(",")) {
+          roomNumbers = rawVal.split(",").map((s) => s.trim()).filter(Boolean);
+        } else if (rawVal.includes("-") && !isNaN(rawVal.split("-")[0]) && !isNaN(rawVal.split("-")[1])) {
+          const [start, end] = rawVal.split("-").map(Number);
+          for (let i = start; i <= end; i++) roomNumbers.push(String(i));
+        } else {
+          roomNumbers = [rawVal];
+        }
+
+        let createdCount = 0;
+        for (const num of roomNumbers) {
+          await roomApi.create({
+            number: num,
+            floorId: Number(floorId),
+            capacity: Number(capacity),
+            rent: Number(rent)
+          });
+          createdCount++;
+        }
+
+        toast.success(createdCount > 1 ? `${createdCount} rooms created successfully` : `Room ${roomNumbers[0]} created with beds`);
       }
       onSaved();
     } catch (err) {
@@ -1101,14 +1211,22 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
     <ModalLayout title={initial ? "Edit Room Details" : "Add Room & Student Capacity"} onClose={onClose}>
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div>
-          <label className="text-xs font-medium text-muted-foreground block mb-1">Room Number / ID</label>
+          <label className="text-xs font-medium text-muted-foreground block mb-1">
+            Room Number(s) / ID
+          </label>
           <input
             required
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-            placeholder="e.g. 101, 102A"
+            value={numberInput}
+            onChange={(e) => setNumberInput(e.target.value)}
+            placeholder={initial ? "e.g. 101" : "e.g. 101 or 101, 102, 103 or 101-105"}
             className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-primary"
           />
+          {!initial && (
+            <p className="mt-1 text-[10px] text-muted-foreground flex items-center gap-1">
+              <Info className="h-3 w-3 text-primary shrink-0" />
+              Enter a single room (101) or multiple comma-separated (101, 102, 103) or range (101-105) to batch create.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2">
@@ -1141,7 +1259,7 @@ function RoomModal({ floorId, initial, onClose, onSaved }) {
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
           <Button type="submit" size="sm" disabled={submitting}>
-            {submitting ? "Saving..." : initial ? "Save Changes" : "Create Room"}
+            {submitting ? "Saving..." : initial ? "Save Changes" : "Create Room(s)"}
           </Button>
         </div>
       </form>
