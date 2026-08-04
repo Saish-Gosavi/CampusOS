@@ -2,8 +2,9 @@ import { prisma } from "../../../config/prisma.js";
 
 export class AuthRepository {
   static async findUserByEmail(email) {
+    const normalized = (email || "").trim().toLowerCase();
     return prisma.user.findUnique({
-      where: { email },
+      where: { email: normalized },
       include: { role: true },
     });
   }

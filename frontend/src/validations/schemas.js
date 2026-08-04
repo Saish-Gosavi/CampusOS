@@ -13,8 +13,9 @@ export const VALIDATION_MESSAGES = {
 // Reusable login validation schema
 export const loginSchema = z.object({
   email: z.string().min(1, VALIDATION_MESSAGES.required("Email or College ID")).refine((val) => {
-    if (!val.includes("@")) return true;
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    const trimmed = (val || "").trim();
+    if (!trimmed.includes("@")) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
   }, {
     message: VALIDATION_MESSAGES.invalidEmail,
   }),

@@ -13,8 +13,10 @@ export class WardenService {
   }
 
   static async create(data) {
+    const normalizedEmail = data.email.trim().toLowerCase();
+
     // 1. Check if email is already taken
-    const existingUser = await prisma.user.findUnique({ where: { email: data.email } });
+    const existingUser = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
       throw new AppError("A user account with this email address already exists.", 400);
     }
@@ -35,7 +37,7 @@ export class WardenService {
     const result = await prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
         data: {
-          email: data.email,
+          email: normalizedEmail,
           password: hashedPassword,
           name: data.fullName,
           roleId: wardenRole.id,
