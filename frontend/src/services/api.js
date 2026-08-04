@@ -236,6 +236,12 @@ export const auditLogApi = {
   }
 };
 
+export const rolesApi = {
+  async getAll() {
+    return apiClient.get("/roles");
+  }
+};
+
 export const reportsApi = {
   async getSummary(hostelId = null) {
     const params = hostelId ? { hostelId } : {};

@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@/routes/compat";
 import { useState, useEffect, useRef } from "react";
 import {
   Users, Building2, BedDouble, AlertCircle,
