@@ -173,7 +173,8 @@ const RootNavigator = () => {
   
   if (!user) return <Navigate to="/login" replace />;
   
-  const role = user.role?.toLowerCase();
+  const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
+  const role = rawRole.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
   if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;

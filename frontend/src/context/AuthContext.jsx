@@ -11,7 +11,11 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem('user');
       const storedToken = localStorage.getItem('token');
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        if (parsed && typeof parsed.role === 'object' && parsed.role?.name) {
+          parsed.role = parsed.role.name;
+        }
+        setUser(parsed);
       }
     } catch (e) {
       console.error("Failed to parse stored user session", e);
@@ -23,9 +27,13 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (userData, token) => {
-    setUser(userData);
+    const normalizedUser = {
+      ...userData,
+      role: typeof userData?.role === 'object' ? (userData.role?.name || "") : (userData?.role || "")
+    };
+    setUser(normalizedUser);
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('user', JSON.stringify(normalizedUser));
   };
 
   const logout = () => {
@@ -37,7 +45,8 @@ export const AuthProvider = ({ children }) => {
 
   const hasRole = (roles) => {
     if (!user || !user.role) return false;
-    const userRole = user.role.toLowerCase();
+    const rawRole = typeof user.role === "string" ? user.role : (user.role.name || "");
+    const userRole = rawRole.toLowerCase();
     return roles.map(r => r.toLowerCase()).includes(userRole);
   };
 

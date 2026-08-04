@@ -25,6 +25,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 const catalogItems = [
   { title: "Dashboard", url: "/library-admin", icon: LayoutDashboard, exact: true },
   { title: "Book Management", url: "/library-admin/books", icon: BookOpen },

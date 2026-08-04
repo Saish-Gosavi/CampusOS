@@ -18,7 +18,9 @@ import {
   UserPlus,
   Home,
   BookOpen,
-  Package
+  Package,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { toast } from "sonner";
 import { userApi, collegeApi } from "@/services/api";
@@ -29,22 +31,22 @@ const Route = createFileRoute("/senior-admin/admins")({
 });
 
 const MODULE_META = {
-  Admin:     { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
-  admin:     { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
+  Admin: { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
+  admin: { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
   Librarian: { bg: "#3B82F61A", fg: "#3B82F6", label: "Library" },
   librarian: { bg: "#3B82F61A", fg: "#3B82F6", label: "Library" },
-  Store:     { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
-  store:     { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
-  General:   { bg: "#64748B1A", fg: "#64748B", label: "General" }
+  Store: { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
+  store: { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
+  General: { bg: "#64748B1A", fg: "#64748B", label: "General" }
 };
 
 function AdminsPage() {
   const { user: currentUser } = useAuth();   // logged-in Senior Admin
-  const [admins, setAdmins]       = useState([]);
-  const [colleges, setColleges]   = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState(null);
-  const [query, setQuery]         = useState("");
+  const [admins, setAdmins] = useState([]);
+  const [colleges, setColleges] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [query, setQuery] = useState("");
   const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -53,25 +55,25 @@ function AdminsPage() {
     try {
       setLoading(true);
       setError(null);
-      const res  = await userApi.getAll();
+      const res = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
 
       // Filter out the currently logged-in Senior Admin so they never appear in their own list
       const mapped = list
         .filter((u) => u.id !== currentUser?.id)
         .map((u) => {
-        const rawRole = u.role?.name || "General";
-        return {
-          id:     u.id,
-          name:   u.name || u.email?.split("@")[0] || "User",
-          email:  u.email || "",
-          module: rawRole,
-          campus: u.college?.name
-            ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
-            : "—",
-          raw:    u
-        };
-      });
+          const rawRole = u.role?.name || "General";
+          return {
+            id: u.id,
+            name: u.name || u.email?.split("@")[0] || "User",
+            email: u.email || "",
+            module: rawRole,
+            campus: u.college?.name
+              ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+              : "—",
+            raw: u
+          };
+        });
 
       setAdmins(mapped);
     } catch (err) {
@@ -107,7 +109,7 @@ function AdminsPage() {
   }, [admins, query, moduleFilter]);
 
   const counts = useMemo(() => ({
-    total:   admins.length,
+    total: admins.length,
     modules: new Set(admins.map((a) => a.module)).size
   }), [admins]);
 
@@ -167,8 +169,8 @@ function AdminsPage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <KPI label="Total Admins"    value={counts.total}   icon={UserCog} tint="#2563EB" />
-        <KPI label="Modules Covered" value={counts.modules} icon={Shield}  tint="#7B4CED" />
+        <KPI label="Total Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
+        <KPI label="Modules Covered" value={counts.modules} icon={Shield} tint="#7B4CED" />
       </div>
 
       {/* Filters */}
@@ -309,11 +311,12 @@ function KPI({ label, value, icon: Icon, tint }) {
 /* ------------------------------------------------------------------ */
 function CreateAdminModal({ colleges, onClose, onCreated }) {
   const [selectedCollegeId, setSelectedCollegeId] = useState(colleges[0]?.id ?? "");
-  const [adminName,     setAdminName]     = useState("");
-  const [adminEmail,    setAdminEmail]    = useState("");
+  const [adminName, setAdminName] = useState("");
+  const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
-  const [sectorRole,    setSectorRole]    = useState("");
-  const [submitting,    setSubmitting]    = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [sectorRole, setSectorRole] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   /* Derive the selected college object */
   const selectedCollege = colleges.find((c) => c.id === selectedCollegeId || c.id === Number(selectedCollegeId));
@@ -321,9 +324,9 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
   /* Rebuild available roles whenever the college changes */
   /* Always provide all roles so they can be assigned regardless of facility toggles */
   const availableRoles = [
-    { name: "admin",     label: "Hostel Admin" },
+    { name: "admin", label: "Hostel Admin" },
     { name: "librarian", label: "Library Admin" },
-    { name: "store",     label: "Inventory Admin" }
+    { name: "store", label: "Inventory Admin" }
   ];
 
   /* Auto-select first role when college or its facilities change */
@@ -349,8 +352,8 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
     try {
       /* ✅ Same API call as colleges.jsx — goes to the same backend endpoint */
       const res = await collegeApi.addAdmin(selectedCollegeId, {
-        name:     adminName.trim(),
-        email:    adminEmail.trim(),
+        name: adminName.trim(),
+        email: adminEmail.trim(),
         password: adminPassword,
         roleName: sectorRole,
       });
@@ -445,14 +448,24 @@ function CreateAdminModal({ colleges, onClose, onCreated }) {
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground block mb-1">Initial Password</label>
-              <input
-                type="password"
-                required
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                placeholder="Set initial password"
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="Set initial password"
+                  className="w-full rounded-lg border border-border bg-background py-2 pl-3 pr-10 text-sm outline-none focus:border-primary"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground block mb-1">Sector Facility Role</label>
