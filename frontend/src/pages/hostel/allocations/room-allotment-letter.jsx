@@ -189,15 +189,6 @@ function HostelRoomAllotmentLetterPage() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                onClick={handleOpenFormatModal}
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-                Edit Format
-              </Button>
-              <Button
                 variant="ghost"
                 size="sm"
                 className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
