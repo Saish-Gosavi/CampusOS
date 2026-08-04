@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Wrench, CheckCircle2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { StatusPill } from "@/components/hostel/StatusPill";

@@ -1,25 +1,20 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
+  Building2,
+  UserCheck,
+  FileText,
   Users,
-  DoorClosed,
-  BedDouble,
   UserCog,
   IndianRupee,
-  MessageSquareWarning,
-  Megaphone,
-  BarChart3,
-  Settings,
-  UserCircle2,
-  LogOut,
-  Building2,
-  Blocks,
-  Layers,
   CalendarDays,
   UserRoundCheck,
   DoorOpen,
-  Armchair,
-  FileText
+  MessageSquareWarning,
+  Megaphone,
+  BarChart3,
+  LogOut,
+  GraduationCap
 } from "lucide-react";
 import {
   Sidebar,
@@ -39,85 +34,70 @@ import { useAuth } from "@/context/AuthContext";
 
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
-  { title: "Hostel Management", url: "/hostel-admin/hostels", icon: Building2 },
-  { title: "Block Management", url: "/hostel-admin/blocks", icon: Blocks },
-  { title: "Floor Management", url: "/hostel-admin/floors", icon: Layers },
+  { title: "Hostel", url: "/hostel-admin/hostels", icon: Building2 },
+  { title: "New Admission Approval", url: "/hostel-admin/admission-approval", icon: UserCheck },
+  { title: "Room Allocation Letter", url: "/hostel-admin/allocation-letter", icon: FileText },
   { title: "Student Management", url: "/hostel-admin/students", icon: Users },
-  { title: "Room Management", url: "/hostel-admin/rooms", icon: DoorClosed },
-  { title: "Bed Management", url: "/hostel-admin/beds", icon: BedDouble },
-  { title: "Room Allocation", url: "/hostel-admin/allocation", icon: BedDouble },
-  { title: "Allotment Letters", url: "/hostel-admin/allocation/allotment-letter", icon: FileText },
   { title: "Staff Management", url: "/hostel-admin/staff", icon: UserCog }
 ];
+
 const opsItems = [
-  { title: "Fee Management", url: "/hostel-admin/fees", icon: IndianRupee },
+  { title: "Fees Management", url: "/hostel-admin/fees", icon: IndianRupee },
   { title: "Leave Management", url: "/hostel-admin/leaves", icon: CalendarDays },
   { title: "Visitor Management", url: "/hostel-admin/visitors", icon: UserRoundCheck },
-  { title: "In-Out Register", url: "/hostel-admin/in-out", icon: DoorOpen },
-  { title: "Furniture", url: "/hostel-admin/furniture", icon: Armchair },
+  { title: "In Out Register", url: "/hostel-admin/in-out", icon: DoorOpen },
   { title: "Complaints", url: "/hostel-admin/complaints", icon: MessageSquareWarning },
   { title: "Notice Board", url: "/hostel-admin/notices", icon: Megaphone },
   { title: "Reports", url: "/hostel-admin/reports", icon: BarChart3 }
 ];
-const accountItems = [
-  { title: "Profile", url: "/hostel-admin/profile", icon: UserCircle2 },
-  { title: "Settings", url: "/hostel-admin/settings", icon: Settings }
-];
+
 function HostelSidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const allItems = [...mainItems, ...opsItems, ...accountItems];
-  const hasExactMatch = allItems.some((item) => item.url === pathname);
-
-  const isActive = (url) => {
-    if (hasExactMatch) {
-      return pathname === url;
-    }
-    if (!pathname.startsWith(url + "/")) return false;
-    const matchingUrls = allItems
-      .map((i) => i.url)
-      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
-    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
-    return url === longestMatch;
-  };
+  const pathname = location.pathname;
+  const isActive = (url, exact) => (exact ? pathname === url : pathname === url || pathname.startsWith(url + "/"));
 
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
-    return <SidebarMenuItem key={item.title}>
+        const active = isActive(item.url, item.exact);
+        return (
+          <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-      asChild
-      tooltip={item.title}
-      className={cn(
-        "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
-        active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
-      )}
-    >
+              asChild
+              tooltip={item.title}
+              className={cn(
+                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
+              )}
+            >
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>;
-  })}
+          </SidebarMenuItem>
+        );
+      })}
     </SidebarMenu>
   );
-  return <Sidebar collapsible="icon" className="border-r-0">
+
+  return (
+    <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white/10 text-white backdrop-blur shadow-sm">
-              <Building2 className="h-6 w-6" />
+              <GraduationCap className="h-6 w-6" />
             </div>
             {!collapsed && (
               <div className="flex flex-col justify-center min-w-0">
@@ -130,18 +110,21 @@ function HostelSidebar() {
 
         <SidebarContent className="px-3 py-4 space-y-4">
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Overview</SidebarGroupLabel>}
+            {!collapsed && (
+              <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">
+                Overview
+              </SidebarGroupLabel>
+            )}
             <SidebarGroupContent>{renderMenu(mainItems)}</SidebarGroupContent>
           </SidebarGroup>
 
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Operations</SidebarGroupLabel>}
+            {!collapsed && (
+              <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">
+                Operations
+              </SidebarGroupLabel>
+            )}
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
 
@@ -160,8 +143,8 @@ function HostelSidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
-export {
-  HostelSidebar
-};
+
+export { HostelSidebar };

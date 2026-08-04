@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import {
   UserCog,
   Building2,
@@ -30,6 +30,7 @@ import {
 import { StatCard } from "@/components/admin/StatCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { reportsApi } from "@/services/api";
+import { jsPDF } from "jspdf";
 
 const Route = createFileRoute("/super-admin/reports")({
   component: ReportsPage
@@ -92,18 +93,107 @@ function ReportsPage() {
   const handleDownloadReport = async () => {
     try {
       setExporting(true);
-      const blob = await reportsApi.downloadSuperAdminReport(selectedCollege);
+      const doc = new jsPDF();
       
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", `campusos_system_report_${Date.now()}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
+      // Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(22);
+      doc.setTextColor(37, 99, 235); // primary color
+      doc.text("CampusOS System Summary Report", 14, 25);
+      
+      // Subtitle / Date
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 32);
+      
+      // Divider
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(14, 38, 196, 38);
+      
+      // Core Statistics Section
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Core Platform Statistics", 14, 48);
+      
+      // Grid items
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(51, 65, 85);
+      
+      const metrics = [
+        ["Total Registered Colleges:", `${stats?.totalColleges || colleges.length}`],
+        ["Total Core Administrators:", `${stats?.totalAdmins || 0}`],
+        ["Total Campus Hostels:", `${stats?.hostels || 0}`],
+        ["Total Enrolled Students:", `${stats?.students || 0}`],
+        ["Total Library Books:", `${stats?.library?.books || 0}`],
+        ["Active Library Issues:", `${stats?.library?.activeIssues || 0}`],
+        ["Total Inventory Items:", `${stats?.inventory?.items || 0}`],
+        ["Pending Inventory Requests:", `${stats?.inventory?.pendingRequests || 0}`]
+      ];
+      
+      let y = 58;
+      metrics.forEach(([label, val]) => {
+        doc.setFont("helvetica", "bold");
+        doc.text(label, 14, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(val, 80, y);
+        y += 8;
+      });
+      
+      // Divider
+      doc.line(14, y + 2, 196, y + 2);
+      y += 12;
+      
+      // Colleges List Section
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.setTextColor(15, 23, 42);
+      doc.text("Registered Campuses & Footprint", 14, y);
+      y += 10;
+      
+      // Headers
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text("No.", 14, y);
+      doc.text("Campus Name", 25, y);
+      doc.text("Location / City", 120, y);
+      doc.text("Resident Students", 160, y);
+      
+      doc.line(14, y + 3, 196, y + 3);
+      y += 9;
+      
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(51, 65, 85);
+      
+      colleges.forEach((c, idx) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+          doc.setFont("helvetica", "bold");
+          doc.text("Campus Name", 25, y);
+          doc.text("Location / City", 120, y);
+          doc.text("Resident Students", 160, y);
+          doc.line(14, y + 3, 196, y + 3);
+          y += 9;
+          doc.setFont("helvetica", "normal");
+        }
+        
+        doc.text(`${idx + 1}`, 14, y);
+        doc.text(c.name || "N/A", 25, y);
+        doc.text(c.city || "Mumbai", 120, y);
+        doc.text(`${c.students || 0}`, 160, y);
+        y += 8;
+      });
+      
+      // Save PDF
+      doc.save(`CampusOS_Summary_Report_${Date.now()}.pdf`);
+      toast.success("PDF report downloaded successfully!");
     } catch (err) {
       console.error("Export failed", err);
-      alert("Failed to export report CSV.");
+      toast.error("Failed to generate PDF report");
     } finally {
       setExporting(false);
     }
@@ -191,7 +281,7 @@ function ReportsPage() {
             </>
           ) : (
             <>
-              <Download className="mr-2 h-4 w-4" /> Export CSV Report
+              <Download className="mr-2 h-4 w-4" /> Export PDF Report
             </>
           )}
         </button>

@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Building2,
@@ -7,11 +7,11 @@ import {
   BarChart3,
   Megaphone,
   ScrollText,
-  Activity,
-  Settings,
-  UserCircle2,
-  LogOut,
-  GraduationCap
+  Activity, LogOut,
+  GraduationCap,
+  Home,
+  BookOpen,
+  Package
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +34,7 @@ function AdminSidebar() {
   const collapsed = state === "collapsed";
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isSeniorAdmin = user?.role?.toLowerCase() === "senioradmin";
   const userRoleLabel = isSeniorAdmin ? "Senior Admin" : "Super Admin";
@@ -41,13 +42,15 @@ function AdminSidebar() {
   const mainItems = isSeniorAdmin
     ? [
         { title: "Dashboard", url: "/senior-admin", exact: true, icon: LayoutDashboard },
-        { title: "Colleges", url: "/senior-admin/colleges", icon: Building2 },
-        { title: "Admins", url: "/senior-admin/admins", icon: Users }
+        { title: "Admins", url: "/senior-admin/admins", icon: Users },
+        { title: "Hostel Management", url: "/senior-admin/hostel", icon: Home },
+        { title: "Library Management", url: "/senior-admin/library", icon: BookOpen },
+        { title: "Inventory Management", url: "/senior-admin/inventory", icon: Package }
       ]
     : [
         { title: "Dashboard", url: "/super-admin", exact: true, icon: LayoutDashboard },
         { title: "Colleges", url: "/super-admin/colleges", icon: Building2 },
-        { title: "Admins", url: "/super-admin/admins", icon: Users }
+        { title: "Senior Admin", url: "/super-admin/admins", icon: Users }
       ];
 
   const insightItems = isSeniorAdmin
@@ -58,41 +61,20 @@ function AdminSidebar() {
         { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
       ];
 
-  const accountItems = isSeniorAdmin
-    ? [
-        { title: "Settings", url: "/senior-admin/settings", icon: Settings },
-        { title: "Profile", url: "/senior-admin/profile", icon: UserCircle2 }
-      ]
-    : [
-        { title: "Settings", url: "/super-admin/settings", icon: Settings },
-        { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
-      ];
+  
 
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const allItems = [...mainItems, ...insightItems, ...accountItems];
-  const hasExactMatch = allItems.some((item) => item.url === pathname);
-
-  const isActive = (url) => {
-    if (hasExactMatch) {
-      return pathname === url;
-    }
-    if (!pathname.startsWith(url + "/")) return false;
-    const matchingUrls = allItems
-      .map((i) => i.url)
-      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
-    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
-    return url === longestMatch;
-  };
+  const pathname = location.pathname;
+  const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
+        const active = isActive(item.url, item.exact);
         return (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
@@ -144,10 +126,7 @@ function AdminSidebar() {
             </SidebarGroup>
           )}
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
+          
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">

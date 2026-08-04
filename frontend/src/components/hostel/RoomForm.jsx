@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ function RoomForm({ mode, room }) {
   }));
   const onSubmit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/rooms" });
+    navigate("/hostel-admin/rooms");
   };
   const Field = ({ label, children }) => <div className="flex flex-col gap-1.5">
       <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</label>

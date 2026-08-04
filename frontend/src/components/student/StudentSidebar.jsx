@@ -1,8 +1,6 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard,
-  UserCircle2,
-  BedDouble,
+  LayoutDashboard, BedDouble,
   CalendarDays,
   MessageSquareWarning,
   UserRoundCheck,
@@ -14,9 +12,7 @@ import {
   BookMarked,
   History,
   Bell,
-  FileText,
-  Settings,
-  LogOut,
+  FileText, LogOut,
   GraduationCap,
   Search,
   Library
@@ -35,9 +31,10 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
 const overviewItems = [
-  { title: "Dashboard", url: "/student", icon: LayoutDashboard, exact: true },
-  { title: "My Profile", url: "/student/profile", icon: UserCircle2 }
+  { title: "Dashboard", url: "/student", icon: LayoutDashboard, exact: true }
 ];
 const hostelItems = [
   { title: "My Room", url: "/student/room", icon: BedDouble },
@@ -56,42 +53,25 @@ const libraryItems = [
   { title: "Fines & Payments", url: "/student/library-fines", icon: IndianRupee },
   { title: "Library Notices", url: "/student/library-notices", icon: BookUp }
 ];
-const accountItems = [
-  { title: "Notifications", url: "/student/notifications", icon: Bell },
-  { title: "Documents", url: "/student/documents", icon: FileText },
-  { title: "Settings", url: "/student/settings", icon: Settings }
-];
+
 function StudentSidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const allItems = [...mainItems, ...hostelItems, ...libraryItems, ...accountItems];
-  const hasExactMatch = allItems.some((item) => item.url === pathname);
-
-  const isActive = (url) => {
-    if (hasExactMatch) {
-      return pathname === url;
-    }
-    if (!pathname.startsWith(url + "/")) return false;
-    const matchingUrls = allItems
-      .map((i) => i.url)
-      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
-    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
-    return url === longestMatch;
-  };
+  const { pathname } = useLocation();
+  const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
+        const active = isActive(item.url, item.exact);
         return (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
@@ -112,7 +92,9 @@ function StudentSidebar() {
       })}
     </SidebarMenu>
   );
-  return <Sidebar collapsible="icon" className="border-r-0">
+
+  return (
+    <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
@@ -135,22 +117,17 @@ function StudentSidebar() {
           </SidebarGroup>
 
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="flex items-center gap-1.5 text-slate-500">
-                <BedDouble className="h-3 w-3" /> Hostel Services
+            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">
+                Hostel Services
               </SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(hostelItems)}</SidebarGroupContent>
           </SidebarGroup>
 
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="flex items-center gap-1.5 text-slate-500">
-                <Library className="h-3 w-3" /> Library Services
+            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">
+                Library Services
               </SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(libraryItems)}</SidebarGroupContent>
-          </SidebarGroup>
-
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
 
@@ -169,8 +146,8 @@ function StudentSidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
-export {
-  StudentSidebar
-};
+
+export { StudentSidebar };

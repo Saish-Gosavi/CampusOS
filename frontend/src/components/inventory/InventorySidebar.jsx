@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
@@ -7,10 +7,7 @@ import {
   Truck,
   Boxes,
   ArrowRightLeft,
-  BarChart3,
-  Settings,
-  UserCircle2,
-  LogOut,
+  BarChart3, LogOut,
   Warehouse
 } from "lucide-react";
 import {
@@ -43,41 +40,25 @@ const opsItems = [
   { title: "Borrow & Return", url: "/inventory-admin/borrowing", icon: ArrowRightLeft },
   { title: "Reports", url: "/inventory-admin/reports", icon: BarChart3 }
 ];
-const accountItems = [
-  { title: "Profile", url: "/inventory-admin/profile", icon: UserCircle2 },
-  { title: "Settings", url: "/inventory-admin/settings", icon: Settings }
-];
+
 function InventorySidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const allItems = [...mainItems, ...procurementItems, ...opsItems, ...accountItems];
-  const hasExactMatch = allItems.some((item) => item.url === pathname);
-
-  const isActive = (url) => {
-    if (hasExactMatch) {
-      return pathname === url;
-    }
-    if (!pathname.startsWith(url + "/")) return false;
-    const matchingUrls = allItems
-      .map((i) => i.url)
-      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
-    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
-    return url === longestMatch;
-  };
+  const { pathname } = useLocation();
+  const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
+        const active = isActive(item.url, item.exact);
         return (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
@@ -98,7 +79,9 @@ function InventorySidebar() {
       })}
     </SidebarMenu>
   );
-  return <Sidebar collapsible="icon" className="border-r-0">
+
+  return (
+    <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
@@ -129,11 +112,6 @@ function InventorySidebar() {
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Operations</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
-
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">
@@ -151,8 +129,8 @@ function InventorySidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
-export {
-  InventorySidebar
-};
+
+export { InventorySidebar };

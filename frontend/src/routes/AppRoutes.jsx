@@ -1,5 +1,6 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
@@ -27,7 +28,9 @@ import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 // Senior Admin Pages
 import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
 import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
-import { Route as SeniorAdminColleges } from "@/pages/senior-admin/colleges";
+import { Route as SeniorAdminHostel } from "@/pages/senior-admin/hostel";
+import { Route as SeniorAdminLibrary } from "@/pages/senior-admin/library";
+import { Route as SeniorAdminInventory } from "@/pages/senior-admin/inventory";
 import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
@@ -137,6 +140,32 @@ import { Route as InventoryStock } from "@/pages/inventory/stock/index";
 import { Route as Error403 } from "@/pages/errors/403";
 import { Route as Error404 } from "@/pages/errors/404";
 
+function SeniorAdminTypoRedirect() {
+  const location = useLocation();
+  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
+  return <Navigate to={cleanPath + location.search} replace />;
+}
+
+function GenericModuleShell({ title, description }) {
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Building2 className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-sm">
+        <p className="text-base font-semibold text-foreground">{title} Module Active</p>
+        <p className="mt-1 text-sm text-muted-foreground">This module section is configured and ready for operational records.</p>
+      </div>
+    </div>
+  );
+}
+
 // Root navigator helper
 const RootNavigator = () => {
   const { user } = useAuth();
@@ -198,10 +227,18 @@ export default function AppRoutes() {
       >
         <Route index element={<SeniorAdminIndex.component />} />
         <Route path="admins" element={<SeniorAdminAdmins.component />} />
-        <Route path="colleges" element={<SeniorAdminColleges.component />} />
+        <Route path="hostel" element={<SeniorAdminHostel.component />} />
+        <Route path="library" element={<SeniorAdminLibrary.component />} />
+        <Route path="inventory" element={<SeniorAdminInventory.component />} />
         <Route path="settings" element={<SeniorAdminSettings.component />} />
         <Route path="profile" element={<SeniorAdminProfile.component />} />
       </Route>
+
+      {/* Graceful redirects for senior admin spacing typos */}
+      <Route path="/senior admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior admin/*" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin/*" element={<SeniorAdminTypoRedirect />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route
@@ -220,9 +257,11 @@ export default function AppRoutes() {
         <Route path="rooms/add" element={<HostelRoomAdd.component />} />
         <Route path="allocation" element={<HostelAllocations.component />} />
         <Route path="allocation/allotment-letter" element={<HostelRoomAllotmentLetter.component />} />
+        <Route path="allocation-letter" element={<HostelRoomAllotmentLetter.component />} />
         <Route path="allocation/new" element={<HostelAllocationNew.component />} />
         <Route path="allocation/change" element={<HostelAllocationChange.component />} />
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
+        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
         <Route path="complaints" element={<HostelComplaints.component />} />
         <Route path="fees" element={<HostelFees.component />} />
         <Route path="visitors" element={<HostelVisitors.component />} />
@@ -230,6 +269,7 @@ export default function AppRoutes() {
         <Route path="leaves" element={<HostelLeaves.component />} />
         <Route path="notices" element={<HostelIndex.component />} />
         <Route path="staff" element={<HostelIndex.component />} />
+        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
         <Route path="furniture" element={<HostelFurniture.component />} />
         <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
         <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />

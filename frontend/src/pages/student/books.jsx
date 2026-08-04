@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useMemo, useState } from "react";
 import { Search, BookOpen, BookMarked } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";

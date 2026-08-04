@@ -1,9 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useEffect, useMemo, useState } from "react";
 import {
   Users,
   Search,
-  Pencil,
   Trash2,
   X,
   Mail,
@@ -13,70 +12,64 @@ import {
   XCircle,
   UserCog,
   Shield,
-  Loader2
+  Loader2,
+  Plus,
+  KeyRound,
+  UserPlus,
+  Home,
+  BookOpen,
+  Package
 } from "lucide-react";
-import { userApi, rolesApi } from "@/services/api";
+import { toast } from "sonner";
+import { userApi, collegeApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
 
 const Route = createFileRoute("/senior-admin/admins")({
   component: AdminsPage
 });
 
-const CAMPUSES = [
-  "VPPCOE — Mumbai",
-  "Nova Institute — Pune",
-  "Meridian College — Delhi",
-  "Aurora Tech — Bengaluru"
-];
-
-const STATUS_META = {
-  Active: { bg: "#22C55E1A", fg: "#16A34A", icon: CheckCircle2 },
-  Pending: { bg: "#EAB3081A", fg: "#B45309", icon: Clock },
-  Inactive: { bg: "#EF44441A", fg: "#DC2626", icon: XCircle }
-};
-
 const MODULE_META = {
-  Hostel: { bg: "#7B4CED1A", fg: "#7B4CED" },
-  Library: { bg: "#3B82F61A", fg: "#3B82F6" },
-  Inventory: { bg: "#22C55E1A", fg: "#16A34A" },
-  Admin: { bg: "#7B4CED1A", fg: "#7B4CED" },
-  Librarian: { bg: "#3B82F61A", fg: "#3B82F6" },
-  Store: { bg: "#22C55E1A", fg: "#16A34A" },
-  General: { bg: "#64748B1A", fg: "#64748B" }
+  Admin:     { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
+  admin:     { bg: "#7B4CED1A", fg: "#7B4CED", label: "Hostel" },
+  Librarian: { bg: "#3B82F61A", fg: "#3B82F6", label: "Library" },
+  librarian: { bg: "#3B82F61A", fg: "#3B82F6", label: "Library" },
+  Store:     { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
+  store:     { bg: "#22C55E1A", fg: "#16A34A", label: "Inventory" },
+  General:   { bg: "#64748B1A", fg: "#64748B", label: "General" }
 };
 
 function AdminsPage() {
-  const [admins, setAdmins] = useState([]);
-  const [rolesList, setRolesList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const { user: currentUser } = useAuth();   // logged-in Senior Admin
+  const [admins, setAdmins]       = useState([]);
+  const [colleges, setColleges]   = useState([]);
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [query, setQuery]         = useState("");
   const [moduleFilter, setModuleFilter] = useState("All");
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState(null);
 
+  /* ---------- data fetching ---------- */
   const fetchAdmins = async () => {
     try {
       setLoading(true);
       setError(null);
-      // Fetch all users. The backend logic automatically limits Senior Admins to see only standard Admins
-      const res = await userApi.getAll();
+      const res  = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-      
-      const mapped = list.map((u) => {
-        const rawRole = u.role?.name || "General";
-        const formattedRole = rawRole.charAt(0).toUpperCase() + rawRole.slice(1);
-        const rawStatus = u.status || "Active";
-        const formattedStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1).toLowerCase();
 
+      // Filter out the currently logged-in Senior Admin so they never appear in their own list
+      const mapped = list
+        .filter((u) => u.id !== currentUser?.id)
+        .map((u) => {
+        const rawRole = u.role?.name || "General";
         return {
-          id: u.id,
-          name: u.name || u.email?.split("@")[0] || "User",
-          email: u.email || "",
-          module: formattedRole,
-          campus: u.campus || "VPPCOE — Mumbai",
-          status: formattedStatus,
-          raw: u,
+          id:     u.id,
+          name:   u.name || u.email?.split("@")[0] || "User",
+          email:  u.email || "",
+          module: rawRole,
+          campus: u.college?.name
+            ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+            : "—",
+          raw:    u
         };
       });
 
@@ -89,92 +82,58 @@ function AdminsPage() {
     }
   };
 
-  useEffect(() => {
-    async function loadRoles() {
-      try {
-        const res = await rolesApi.getAll();
-        const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-        setRolesList(list);
-      } catch (err) {
-        console.error("Failed to load roles:", err);
-      }
+  const fetchColleges = async () => {
+    try {
+      const res = await collegeApi.getAll();
+      if (res.success && res.data) setColleges(res.data);
+    } catch (err) {
+      console.error("Failed to load colleges:", err);
     }
-    loadRoles();
+  };
+
+  useEffect(() => {
+    fetchColleges();
     fetchAdmins();
   }, []);
 
+  /* ---------- derived ---------- */
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return admins.filter((a) => {
-      const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || a.campus.toLowerCase().includes(q);
-      const mS = statusFilter === "All" || a.status.toLowerCase() === statusFilter.toLowerCase();
+      const mQ = !q || a.name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q);
       const mM = moduleFilter === "All" || a.module.toLowerCase() === moduleFilter.toLowerCase();
-      return mQ && mS && mM;
+      return mQ && mM;
     });
-  }, [admins, query, statusFilter, moduleFilter]);
+  }, [admins, query, moduleFilter]);
 
-  const counts = useMemo(
-    () => ({
-      total: admins.length,
-      active: admins.filter((a) => a.status.toLowerCase() === "active").length,
-      pending: admins.filter((a) => a.status.toLowerCase() === "pending").length,
-      modules: new Set(admins.map((a) => a.module)).size
-    }),
-    [admins]
-  );
+  const counts = useMemo(() => ({
+    total:   admins.length,
+    modules: new Set(admins.map((a) => a.module)).size
+  }), [admins]);
 
-  function openEdit(a) {
-    setEditing(a);
-    setModalOpen(true);
-  }
-
+  /* ---------- actions ---------- */
   async function remove(id) {
-    if (confirm("Remove this sector admin?")) {
-      try {
-        await userApi.delete(id);
-        setAdmins((prev) => prev.filter((a) => a.id !== id));
-      } catch (err) {
-        console.error("Failed to delete admin:", err);
-        toast.error("Failed to delete admin credentials.");
-      }
+    if (!confirm("Remove this sector admin?")) return;
+    try {
+      await userApi.delete(id);
+      setAdmins((prev) => prev.filter((a) => a.id !== id));
+      toast.success("Admin removed.");
+    } catch (err) {
+      console.error("Failed to delete admin:", err);
+      toast.error("Failed to remove admin.");
     }
   }
 
-  async function save(data) {
-    if (editing) {
-      setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
-    } else {
-      try {
-        // Look up standard admin role ID dynamically
-        const adminRole = rolesList.find(r => r.name.toLowerCase() === data.module.toLowerCase()) || 
-                          rolesList.find(r => r.name.toLowerCase() === "admin");
-        const roleId = adminRole ? adminRole.id : 3;
-
-        const res = await userApi.create({
-          name: data.name,
-          email: data.email,
-          password: "Password@123",
-          roleId,
-          status: data.status.toLowerCase(),
-        });
-        const created = res.data || res;
-        setAdmins((prev) => [{
-          id: created.id || `a${Date.now()}`,
-          name: created.name || data.name,
-          email: created.email || data.email,
-          module: data.module,
-          campus: data.campus,
-          status: data.status,
-        }, ...prev]);
-      } catch (err) {
-        console.error("Failed to create admin:", err);
-      }
-    }
+  /* Called after AdminModal successfully creates an admin */
+  async function onAdminCreated() {
     setModalOpen(false);
+    await fetchAdmins();   // refresh from server so the new row appears immediately
   }
 
+  /* ---------- render ---------- */
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mt-3 flex items-center gap-3">
@@ -192,14 +151,24 @@ function AdminsPage() {
             </div>
           </div>
         </div>
+
+        {/* Add Admin Button — upper-right corner */}
+        <div className="mt-3 flex shrink-0 items-start">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #7B4CED, #5B33CC)" }}
+          >
+            <Plus className="h-4 w-4" />
+            Add Admin
+          </button>
+        </div>
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <KPI label="Total Admins" value={counts.total} icon={UserCog} tint="#2563EB" />
-        <KPI label="Active" value={counts.active} icon={CheckCircle2} tint="#22C55E" />
-        <KPI label="Pending" value={counts.pending} icon={Clock} tint="#EAB308" />
-        <KPI label="Modules Covered" value={counts.modules} icon={Shield} tint="#7B4CED" />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <KPI label="Total Admins"    value={counts.total}   icon={UserCog} tint="#2563EB" />
+        <KPI label="Modules Covered" value={counts.modules} icon={Shield}  tint="#7B4CED" />
       </div>
 
       {/* Filters */}
@@ -209,7 +178,7 @@ function AdminsPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name, email or campus..."
+            placeholder="Search by name or email..."
             className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
         </div>
@@ -220,21 +189,10 @@ function AdminsPage() {
             className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
           >
             <option value="All">All Modules</option>
-            <option value="Admin">Hostel</option>
-            <option value="Librarian">Library</option>
-            <option value="Store">Inventory</option>
+            <option value="admin">Hostel</option>
+            <option value="librarian">Library</option>
+            <option value="store">Inventory</option>
           </select>
-          <div className="flex rounded-lg border border-border bg-muted p-1">
-            {["All", "Active", "Pending", "Inactive"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setStatusFilter(s)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${statusFilter === s ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
@@ -246,15 +204,13 @@ function AdminsPage() {
               <tr>
                 <th className="px-4 py-3 font-medium">Admin</th>
                 <th className="px-4 py-3 font-medium">Module / Role</th>
-                <th className="px-4 py-3 font-medium">Campus</th>
-                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border text-foreground">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={3} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     <div className="flex items-center justify-center gap-2">
                       <Loader2 className="h-5 w-5 animate-spin text-primary" />
                       Loading live data...
@@ -263,15 +219,13 @@ function AdminsPage() {
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-muted-foreground">
+                  <td colSpan={3} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     {error || "No admins match your filters."}
                   </td>
                 </tr>
               ) : (
                 filtered.map((a) => {
-                  const s = STATUS_META[a.status] || STATUS_META.Active;
-                  const m = MODULE_META[a.module] || { bg: "#64748B1A", fg: "#64748B" };
-                  const StatusIcon = s.icon || CheckCircle2;
+                  const m = MODULE_META[a.module] || { bg: "#64748B1A", fg: "#64748B", label: a.module };
                   return (
                     <tr key={a.id} className="hover:bg-muted/30">
                       <td className="px-4 py-3">
@@ -295,22 +249,7 @@ function AdminsPage() {
                           className="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
                           style={{ backgroundColor: m.bg, color: m.fg }}
                         >
-                          {a.module}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-1.5 text-foreground">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          {a.campus}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium"
-                          style={{ backgroundColor: s.bg, color: s.fg }}
-                        >
-                          <StatusIcon className="h-3 w-3" />
-                          {a.status}
+                          {m.label}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -333,17 +272,21 @@ function AdminsPage() {
         </div>
       </div>
 
+      {/* Modal */}
       {modalOpen && (
-        <AdminModal
-          initial={editing}
+        <CreateAdminModal
+          colleges={colleges}
           onClose={() => setModalOpen(false)}
-          onSave={save}
+          onCreated={onAdminCreated}
         />
       )}
     </div>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  KPI card                                                            */
+/* ------------------------------------------------------------------ */
 function KPI({ label, value, icon: Icon, tint }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
@@ -361,114 +304,195 @@ function KPI({ label, value, icon: Icon, tint }) {
   );
 }
 
-function AdminModal({ initial, onClose, onSave }) {
-  const [name, setName] = useState(initial?.name ?? "");
-  const [email, setEmail] = useState(initial?.email ?? "");
-  const [module, setModule] = useState(initial?.module ?? "Admin");
-  const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
-  const [status, setStatus] = useState(initial?.status ?? "Pending");
+/* ------------------------------------------------------------------ */
+/*  Create Admin Modal — same form & same API as the Colleges modal    */
+/* ------------------------------------------------------------------ */
+function CreateAdminModal({ colleges, onClose, onCreated }) {
+  const [selectedCollegeId, setSelectedCollegeId] = useState(colleges[0]?.id ?? "");
+  const [adminName,     setAdminName]     = useState("");
+  const [adminEmail,    setAdminEmail]    = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [sectorRole,    setSectorRole]    = useState("");
+  const [submitting,    setSubmitting]    = useState(false);
 
-  function submit(e) {
+  /* Derive the selected college object */
+  const selectedCollege = colleges.find((c) => c.id === selectedCollegeId || c.id === Number(selectedCollegeId));
+
+  /* Rebuild available roles whenever the college changes */
+  /* Always provide all roles so they can be assigned regardless of facility toggles */
+  const availableRoles = [
+    { name: "admin",     label: "Hostel Admin" },
+    { name: "librarian", label: "Library Admin" },
+    { name: "store",     label: "Inventory Admin" }
+  ];
+
+  /* Auto-select first role when college or its facilities change */
+  useEffect(() => {
+    if (availableRoles.length > 0 && !availableRoles.find((r) => r.name === sectorRole)) {
+      setSectorRole(availableRoles[0].name);
+    }
+  }, [selectedCollegeId, selectedCollege?.hasHostel, selectedCollege?.hasLibrary, selectedCollege?.hasInventory]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
-    onSave({ name: name.trim(), email: email.trim(), module, campus, status });
+    if (!adminName.trim() || !adminEmail.trim() || !adminPassword.trim()) {
+      toast.error("Please fill all fields");
+      return;
+    }
+    if (!selectedCollegeId) {
+      toast.error("Please select a college");
+      return;
+    }
+    // Removed the check for empty facilities so admins can always be created
+
+    setSubmitting(true);
+    try {
+      /* ✅ Same API call as colleges.jsx — goes to the same backend endpoint */
+      const res = await collegeApi.addAdmin(selectedCollegeId, {
+        name:     adminName.trim(),
+        email:    adminEmail.trim(),
+        password: adminPassword,
+        roleName: sectorRole,
+      });
+
+      if (res.success) {
+        toast.success(`Admin credentials created for ${selectedCollege?.name}`);
+        onCreated();   // refresh the list and close
+      } else {
+        toast.error(res.message || "Failed to create admin");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || "Failed to create admin");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-      <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">
-            {initial ? "Edit Admin" : "Add Admin"}
-          </h3>
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-xl border border-border bg-card shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-border px-5 py-4 bg-muted/30">
+          <div>
+            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Create Sector Admin Credentials
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Select a college and assign a sector administrator.
+            </p>
+          </div>
           <button
-            type="button"
             onClick={onClose}
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-muted"
+            className="grid h-8 w-8 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
-        <div className="flex flex-col gap-3">
-          <Field label="Full Name">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              required
-            />
-          </Field>
-          <Field label="Email">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              required
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Module">
-              <select
-                value={module}
-                onChange={(e) => setModule(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              >
-                <option value="Admin">Hostel</option>
-                <option value="Librarian">Library</option>
-                <option value="Store">Inventory</option>
-              </select>
-            </Field>
-            <Field label="Status">
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-              >
-                <option>Active</option>
-                <option>Pending</option>
-                <option>Inactive</option>
-              </select>
-            </Field>
-          </div>
-          <Field label="Campus">
+
+        {/* Body */}
+        <form onSubmit={handleSubmit} className="p-5 flex flex-col gap-5 overflow-y-auto">
+
+          {/* College selector */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-muted-foreground">Select College</label>
             <select
-              value={campus}
-              onChange={(e) => setCampus(e.target.value)}
+              value={selectedCollegeId}
+              onChange={(e) => setSelectedCollegeId(e.target.value)}
               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
             >
-              {CAMPUSES.map((c) => (
-                <option key={c}>{c}</option>
+              {colleges.length === 0 && (
+                <option value="">No colleges found</option>
+              )}
+              {colleges.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}{c.city ? ` — ${c.city}` : ""}
+                </option>
               ))}
             </select>
-          </Field>
-        </div>
-        <div className="mt-5 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
-          >
-            {initial ? "Save Changes" : "Create Admin"}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
-}
+          </div>
 
-function Field({ label, children }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      {children}
-    </label>
+
+
+          {/* Credentials form — 2-col grid like colleges modal */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Admin Full Name</label>
+              <input
+                required
+                value={adminName}
+                onChange={(e) => setAdminName(e.target.value)}
+                placeholder="e.g. Rahul Sharma"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Email / Login Username</label>
+              <input
+                type="email"
+                required
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="admin@campusos.com"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Initial Password</label>
+              <input
+                type="password"
+                required
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="Set initial password"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground block mb-1">Sector Facility Role</label>
+              {availableRoles.length === 0 ? (
+                <p className="text-xs text-amber-500 mt-2">No facilities enabled</p>
+              ) : (
+                <select
+                  value={sectorRole}
+                  onChange={(e) => setSectorRole(e.target.value)}
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                >
+                  {availableRoles.map((r) => (
+                    <option key={r.name} value={r.name}>{r.label}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+
+          {/* Submit row */}
+          <div className="flex justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting || availableRoles.length === 0}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary/90 disabled:opacity-50"
+            >
+              <KeyRound className="h-4 w-4" />
+              {submitting ? "Creating..." : "Create Admin Credentials"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Armchair } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";

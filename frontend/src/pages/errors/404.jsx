@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@/routes/compat";
 import { Compass } from "lucide-react";
 const Route = createFileRoute("/404")({
   head: () => ({

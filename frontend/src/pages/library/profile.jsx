@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { UserCircle2 } from "lucide-react";
 import { LibraryPagePlaceholder } from "@/components/library/LibraryPagePlaceholder";
 const Route = createFileRoute("/library-admin/profile")({

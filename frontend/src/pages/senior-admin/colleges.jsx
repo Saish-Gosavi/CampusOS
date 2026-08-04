@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import {
   Building2,
   Users,
@@ -31,7 +31,6 @@ function CollegesPage() {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
 
   // Admins modal management state
   const [selectedCollegeForAdmins, setSelectedCollegeForAdmins] = useState(null);
@@ -67,11 +66,9 @@ function CollegesPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
     return colleges.filter((c) => {
-      const matchQuery = !q || c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q);
-      const matchStatus = statusFilter === "All" || c.status === statusFilter;
-      return matchQuery && matchStatus;
+      return !q || c.name.toLowerCase().includes(q) || c.city.toLowerCase().includes(q);
     });
-  }, [colleges, query, statusFilter]);
+  }, [colleges, query]);
 
   function openManageAdmins(c) {
     setSelectedCollegeForAdmins(c);
@@ -124,7 +121,7 @@ function CollegesPage() {
 
       {/* Toolbar */}
       <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-grow">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             value={query}
@@ -132,19 +129,6 @@ function CollegesPage() {
             placeholder="Search by name or city…"
             className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-[#2563EB]/20"
           />
-        </div>
-        <div className="flex gap-1 rounded-lg border border-border bg-background p-1">
-          {["All", "Active", "Inactive"].map((s) => (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                statusFilter === s ? "bg-primary text-white" : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {s}
-            </button>
-          ))}
         </div>
       </div>
 
@@ -158,20 +142,19 @@ function CollegesPage() {
                 <th className="px-4 py-3 font-medium">City</th>
                 <th className="px-4 py-3 font-medium">Enabled Facilities</th>
                 <th className="px-4 py-3 font-medium">College Admins</th>
-                <th className="px-4 py-3 font-medium">Status</th>
                 <th className="px-4 py-3 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     Loading colleges from database...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-12 text-center text-sm text-muted-foreground">
                     No colleges found in database.
                   </td>
                 </tr>
@@ -224,15 +207,7 @@ function CollegesPage() {
                           <span>{c.users?.length || 0} Admin(s)</span>
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                          style={{ backgroundColor: meta.bg, color: meta.fg }}
-                        >
-                          <meta.icon className="h-3 w-3" />
-                          {c.status}
-                        </span>
-                      </td>
+
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
                           <button
@@ -270,20 +245,50 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
   const [adminName, setAdminName] = useState("");
   const [adminEmail, setAdminEmail] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
+  const [hasHostel, setHasHostel] = useState(college.hasHostel);
+  const [hasLibrary, setHasLibrary] = useState(college.hasLibrary);
+  const [hasInventory, setHasInventory] = useState(college.hasInventory);
   const [sectorRole, setSectorRole] = useState(
     college.hasHostel ? "admin" : college.hasLibrary ? "librarian" : "store"
   );
   const [submitting, setSubmitting] = useState(false);
 
-  const availableRoles = [];
-  if (college.hasHostel) {
-    availableRoles.push({ name: "admin", label: "Hostel Admin" });
-  }
-  if (college.hasLibrary) {
-    availableRoles.push({ name: "librarian", label: "Library Admin" });
-  }
-  if (college.hasInventory) {
-    availableRoles.push({ name: "store", label: "Inventory Admin" });
+  const availableRoles = [
+    { name: "admin", label: "Hostel Admin" },
+    { name: "librarian", label: "Library Admin" },
+    { name: "store", label: "Inventory Admin" }
+  ];
+
+  async function toggleFacility(facility, value) {
+    try {
+      const updatedData = {
+        name: college.name,
+        city: college.city,
+        status: college.status,
+        hasHostel: facility === "hostel" ? value : hasHostel,
+        hasLibrary: facility === "library" ? value : hasLibrary,
+        hasInventory: facility === "inventory" ? value : hasInventory,
+      };
+      const res = await collegeApi.update(college.id, updatedData);
+      if (res.success) {
+        toast.success("College facilities updated successfully");
+        if (facility === "hostel") {
+          setHasHostel(value);
+          if (value && !sectorRole) setSectorRole("admin");
+        }
+        if (facility === "library") {
+          setHasLibrary(value);
+          if (value && !sectorRole) setSectorRole("librarian");
+        }
+        if (facility === "inventory") {
+          setHasInventory(value);
+          if (value && !sectorRole) setSectorRole("store");
+        }
+        onRefresh();
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to update facilities");
+    }
   }
 
   async function handleCreateAdmin(e) {
@@ -343,7 +348,7 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
               Manage Sector Admins for {college.name}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Create and manage credentials for Hostel, Library, and Inventory sector administrators.
+              Configure enabled facilities and manage credentials for Hostel, Library, and Inventory administrators.
             </p>
           </div>
           <button
@@ -355,6 +360,46 @@ function ManageCollegeAdminsModal({ college, onClose, onRefresh }) {
         </div>
 
         <div className="p-5 overflow-y-auto flex flex-col gap-6">
+          {/* Section: Enable / Disable College Facilities */}
+          <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
+              <Building2 className="h-4 w-4 text-primary" />
+              Enable College Facilities
+            </h3>
+            <div className="flex flex-wrap gap-5">
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasHostel}
+                  onChange={(e) => toggleFacility("hostel", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <Home className="h-4 w-4 text-purple-500" />
+                <span>Hostel Management System</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasLibrary}
+                  onChange={(e) => toggleFacility("library", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <BookOpen className="h-4 w-4 text-blue-500" />
+                <span>Library Management System</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasInventory}
+                  onChange={(e) => toggleFacility("inventory", e.target.checked)}
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-[#2563EB]"
+                />
+                <Package className="h-4 w-4 text-emerald-500" />
+                <span>Inventory Management System</span>
+              </label>
+            </div>
+          </div>
+
           <div className="rounded-xl border border-border bg-background p-4 shadow-sm">
             <h3 className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
               <UserPlus className="h-4 w-4 text-primary" />

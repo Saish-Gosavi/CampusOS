@@ -1,4 +1,4 @@
-import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   DoorOpen,
@@ -7,10 +7,7 @@ import {
   Ticket,
   ShieldAlert,
   ClipboardList,
-  Megaphone,
-  UserCircle2,
-  Settings,
-  LogOut,
+  Megaphone, LogOut,
   ShieldCheck
 } from "lucide-react";
 import {
@@ -27,6 +24,8 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
+
 const overview = [
   { title: "Dashboard", url: "/security", icon: LayoutDashboard, exact: true },
   { title: "Student In/Out", url: "/security/in-out", icon: DoorOpen },
@@ -39,41 +38,25 @@ const ops = [
   { title: "Daily Logs", url: "/security/logs", icon: ClipboardList },
   { title: "Notices", url: "/security/notices", icon: Megaphone }
 ];
-const account = [
-  { title: "Profile", url: "/security/profile", icon: UserCircle2 },
-  { title: "Settings", url: "/security/settings", icon: Settings }
-];
+
 function SecuritySidebar() {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/login" });
+    navigate("/login");
   };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const allItems = [...overview, ...ops, ...account];
-  const hasExactMatch = allItems.some((item) => item.url === pathname);
-
-  const isActive = (url) => {
-    if (hasExactMatch) {
-      return pathname === url;
-    }
-    if (!pathname.startsWith(url + "/")) return false;
-    const matchingUrls = allItems
-      .map((i) => i.url)
-      .filter((u) => pathname === u || pathname.startsWith(u + "/"));
-    const longestMatch = matchingUrls.reduce((a, b) => (a.length >= b.length ? a : b), "");
-    return url === longestMatch;
-  };
+  const { pathname } = useLocation();
+  const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
 
   const renderMenu = (items) => (
     <SidebarMenu>
       {items.map((item) => {
-        const active = isActive(item.url);
+        const active = isActive(item.url, item.exact);
         return (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
@@ -94,7 +77,9 @@ function SecuritySidebar() {
       })}
     </SidebarMenu>
   );
-  return <Sidebar collapsible="icon" className="border-r-0">
+
+  return (
+    <Sidebar collapsible="icon" className="border-r-0">
       <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
@@ -119,10 +104,6 @@ function SecuritySidebar() {
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Operations</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(ops)}</SidebarGroupContent>
           </SidebarGroup>
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(account)}</SidebarGroupContent>
-          </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">
@@ -140,8 +121,8 @@ function SecuritySidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
-export {
-  SecuritySidebar
-};
+
+export { SecuritySidebar };
