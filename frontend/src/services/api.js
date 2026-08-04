@@ -210,6 +210,9 @@ export const userApi = {
   async create(data) {
     return apiClient.post("/users", data);
   },
+  async update(id, data) {
+    return apiClient.put(`/users/${id}`, data);
+  },
   async delete(id) {
     return apiClient.delete(`/users/${id}`);
   },

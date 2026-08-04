@@ -13,7 +13,9 @@ import {
   XCircle,
   UserCog,
   Shield,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import { userApi, rolesApi, collegeApi } from "@/services/api";
 
@@ -132,19 +134,30 @@ function AdminsPage() {
 
   async function save(data) {
     if (editing) {
-      setAdmins((prev) => prev.map((a) => a.id === editing.id ? { ...editing, ...data } : a));
-      setModalOpen(false);
+      try {
+        await userApi.update(editing.id, {
+          name: data.name,
+          email: data.email,
+          ...(data.password ? { password: data.password } : {}),
+        });
+        await fetchAdmins();
+        setModalOpen(false);
+      } catch (err) {
+        console.error("Failed to update senior admin:", err);
+        alert(err?.message || err?.response?.data?.message || "Failed to update Senior Admin.");
+      }
     } else {
       try {
-        // Resolve senioradmin role ID dynamically
+        // Resolve senioradmin role ID dynamically (fallback to 8 for senioradmin)
         const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
-        const roleId = seniorRole ? seniorRole.id : 2;
+        const roleId = seniorRole ? seniorRole.id : 8;
 
         await userApi.create({
           name: data.name,
           email: data.email,
           password: data.password || "Password@123",
           roleId,
+          roleName: "senioradmin",
           status: "active",
         });
 
@@ -153,7 +166,7 @@ function AdminsPage() {
         setModalOpen(false);
       } catch (err) {
         console.error("Failed to create senior admin:", err);
-        alert(err?.response?.data?.message || "Failed to create Senior Admin.");
+        alert(err?.message || err?.response?.data?.message || "Failed to create Senior Admin.");
       }
     }
   }
@@ -277,9 +290,18 @@ function AdminsPage() {
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1">
                           <button
+                            onClick={() => openEdit(a)}
+                            className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                            aria-label="Edit"
+                            title="Edit Senior Admin"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
                             onClick={() => remove(a.id)}
                             className="rounded-md p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-600"
                             aria-label="Delete"
+                            title="Delete Senior Admin"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -327,6 +349,7 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [campus, setCampus] = useState(initial?.campus ?? (colleges[0]?.name || ""));
 
   function submit(e) {
@@ -372,18 +395,26 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
               required
             />
           </Field>
-          {!initial && (
-            <Field label="Password">
+          <Field label={initial ? "New Password (Optional)" : "Password"}>
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Set login password"
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
-                required
+                placeholder={initial ? "Leave blank to keep existing password" : "Set login password"}
+                className="w-full rounded-lg border border-slate-200 py-2 pl-3 pr-10 text-sm outline-none focus:border-primary"
+                required={!initial}
               />
-            </Field>
-          )}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </Field>
           <Field label="Campus">
             <select
               value={campus}
