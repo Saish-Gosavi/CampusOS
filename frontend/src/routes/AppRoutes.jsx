@@ -35,6 +35,7 @@ import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
 // Hostel Pages
+import HostelDashboardPage from "@/modules/hostel/HostelDashboardPage";
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
 import { Route as HostelAdd } from "@/pages/hostel/hostel/add";
@@ -248,8 +249,8 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelIndex.component />} />
-        <Route path="hostels" element={<GenericModuleShell title="Hostel" description="Manage hostel buildings, blocks, floors and rooms." />} />
+        <Route index element={<HostelDashboardPage />} />
+        <Route path="hostels" element={<HostelIndex.component />} />
         <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
         <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
         <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
