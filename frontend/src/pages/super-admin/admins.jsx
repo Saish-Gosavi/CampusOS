@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useEffect, useMemo, useState } from "react";
 import {
   Users,
@@ -15,18 +15,13 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import { userApi, rolesApi } from "@/services/api";
+import { userApi, rolesApi, collegeApi } from "@/services/api";
 
 const Route = createFileRoute("/super-admin/admins")({
   component: AdminsPage
 });
 
-const CAMPUSES = [
-  "VPPCOE — Mumbai",
-  "Nova Institute — Pune",
-  "Meridian College — Delhi",
-  "Aurora Tech — Bengaluru"
-];
+
 
 const STATUS_META = {
   Active: { bg: "#22C55E1A", fg: "#16A34A", icon: CheckCircle2 },
@@ -45,6 +40,7 @@ const MODULE_META = {
 function AdminsPage() {
   const [admins, setAdmins] = useState([]);
   const [rolesList, setRolesList] = useState([]);
+  const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [query, setQuery] = useState("");
@@ -86,16 +82,21 @@ function AdminsPage() {
   };
 
   useEffect(() => {
-    async function loadRoles() {
+    async function loadRolesAndColleges() {
       try {
-        const res = await rolesApi.getAll();
-        const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
-        setRolesList(list);
+        const [resRoles, resColleges] = await Promise.all([
+          rolesApi.getAll(),
+          collegeApi.getAll()
+        ]);
+        const rolesData = Array.isArray(resRoles.data) ? resRoles.data : (Array.isArray(resRoles) ? resRoles : []);
+        setRolesList(rolesData);
+        const collegesData = Array.isArray(resColleges.data) ? resColleges.data : (Array.isArray(resColleges) ? resColleges : []);
+        setColleges(collegesData);
       } catch (err) {
-        console.error("Failed to load roles:", err);
+        console.error("Failed to load roles or colleges:", err);
       }
     }
-    loadRoles();
+    loadRolesAndColleges();
     fetchAdmins();
   }, []);
 
@@ -298,6 +299,7 @@ function AdminsPage() {
           initial={editing}
           onClose={() => setModalOpen(false)}
           onSave={save}
+          colleges={colleges}
         />
       )}
     </div>
@@ -321,11 +323,11 @@ function KPI({ label, value, icon: Icon, tint }) {
   );
 }
 
-function AdminModal({ initial, onClose, onSave }) {
+function AdminModal({ initial, onClose, onSave, colleges }) {
   const [name, setName] = useState(initial?.name ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [password, setPassword] = useState("");
-  const [campus, setCampus] = useState(initial?.campus ?? CAMPUSES[0]);
+  const [campus, setCampus] = useState(initial?.campus ?? (colleges[0]?.name || ""));
 
   function submit(e) {
     e.preventDefault();
@@ -388,9 +390,15 @@ function AdminModal({ initial, onClose, onSave }) {
               onChange={(e) => setCampus(e.target.value)}
               className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-primary"
             >
-              {CAMPUSES.map((c) => (
-                <option key={c}>{c}</option>
-              ))}
+              {colleges.length === 0 ? (
+                <option value="">No colleges found</option>
+              ) : (
+                colleges.map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}{c.city ? ` — ${c.city}` : ""}
+                  </option>
+                ))
+              )}
             </select>
           </Field>
         </div>

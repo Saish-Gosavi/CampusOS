@@ -12,10 +12,7 @@ import {
   DoorOpen,
   MessageSquareWarning,
   Megaphone,
-  BarChart3,
-  Settings,
-  UserCircle2,
-  LogOut,
+  BarChart3, LogOut,
   GraduationCap
 } from "lucide-react";
 import {
@@ -53,10 +50,7 @@ const opsItems = [
   { title: "Reports", url: "/hostel-admin/reports", icon: BarChart3 }
 ];
 
-const accountItems = [
-  { title: "Profile", url: "/hostel-admin/profile", icon: UserCircle2 },
-  { title: "Settings", url: "/hostel-admin/settings", icon: Settings }
-];
+
 
 function HostelSidebar() {
   const { logout } = useAuth();

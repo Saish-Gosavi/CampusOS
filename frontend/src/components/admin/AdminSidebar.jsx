@@ -7,10 +7,7 @@ import {
   BarChart3,
   Megaphone,
   ScrollText,
-  Activity,
-  Settings,
-  UserCircle2,
-  LogOut,
+  Activity, LogOut,
   GraduationCap,
   Home,
   BookOpen,
@@ -64,15 +61,7 @@ function AdminSidebar() {
         { title: "Audit Logs", url: "/super-admin/audit-logs", icon: ScrollText }
       ];
 
-  const accountItems = isSeniorAdmin
-    ? [
-        { title: "Settings", url: "/senior-admin/settings", icon: Settings },
-        { title: "Profile", url: "/senior-admin/profile", icon: UserCircle2 }
-      ]
-    : [
-        { title: "Settings", url: "/super-admin/settings", icon: Settings },
-        { title: "Profile", url: "/super-admin/profile", icon: UserCircle2 }
-      ];
+  
 
   const pathname = location.pathname;
   const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
@@ -137,10 +126,7 @@ function AdminSidebar() {
             </SidebarGroup>
           )}
 
-          <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Account</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(accountItems)}</SidebarGroupContent>
-          </SidebarGroup>
+          
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">
