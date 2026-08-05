@@ -357,3 +357,22 @@ export const reportsApi = {
     return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
   }
 };
+
+export const complaintApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/admin/complaints", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/admin/complaints/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/admin/complaints", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/admin/complaints/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/admin/complaints/${id}`);
+  }
+};
+

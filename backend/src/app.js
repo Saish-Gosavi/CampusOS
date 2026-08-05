@@ -20,6 +20,7 @@ import settingsRouter from "./modules/settings/routes/settings.routes.js";
 import auditRouter from "./modules/audit/audit.routes.js";
 import noticeRouter from "./modules/notice/routes/notice.routes.js";
 import reportsRouter from "./modules/reports/routes/reports.routes.js";
+import complaintsRouter from "./modules/hostel/complaints/routes/complaint.routes.js";
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use("/api/super_admin/global-notice", noticeRouter);
 app.use("/api/global-notices", noticeRouter);
 app.use("/api/super_admin/reports", reportsRouter);
 app.use("/api/reports", reportsRouter);
+app.use("/api/admin/complaints", complaintsRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);
