@@ -371,21 +371,46 @@ export const admissionApi = {
   },
   // Admin (auth required)
   async listApplications(params = {}) {
-    return apiClient.get("/admin/admissions", { params });
+    return apiClient.get("/admission/admin/admissions", { params });
   },
   async getApplication(id) {
-    return apiClient.get(`/admin/admissions/${id}`);
+    return apiClient.get(`/admission/admin/admissions/${id}`);
   },
   async updateStatus(id, status, remarks = "") {
-    return apiClient.put(`/admin/admissions/${id}/status`, { status, remarks });
+    return apiClient.put(`/admission/admin/admissions/${id}/status`, { status, remarks });
   },
   async getAdminConfig(hostelId = null) {
     const params = hostelId ? { hostelId } : {};
-    return apiClient.get("/admin/admission-config", { params });
+    return apiClient.get("/admission/admin/admission-config", { params });
   },
   async updateAdminConfig(config, hostelId = null) {
     const params = hostelId ? { hostelId } : {};
-    return apiClient.put("/admin/admission-config", config, { params });
+    return apiClient.put("/admission/admin/admission-config", config, { params });
   }
 };
+
+export const leaveApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/hostel/leaves", { params });
+  },
+  async getStats() {
+    return apiClient.get("/hostel/leaves/stats");
+  },
+  async getById(id) {
+    return apiClient.get(`/hostel/leaves/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/hostel/leaves", data);
+  },
+  async updateStatus(id, status, remarks = "") {
+    return apiClient.put(`/hostel/leaves/${id}/status`, { status, remarks });
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/leaves/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/leaves/${id}`);
+  }
+};
+
 

@@ -260,7 +260,7 @@ export default function AppRoutes() {
         <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
         <Route path="staff" element={<GenericModuleShell title="Staff Management" description="Manage hostel staff members, roles and schedules." />} />
         <Route path="fees" element={<GenericModuleShell title="Fees Management" description="Track and manage hostel fee collection and dues." />} />
-        <Route path="leaves" element={<GenericModuleShell title="Leave Management" description="Review and approve student and staff leave requests." />} />
+        <Route path="leaves" element={<HostelLeaves.component />} />
         <Route path="visitors" element={<GenericModuleShell title="Visitor Management" description="Register and track all hostel visitor entries." />} />
         <Route path="in-out" element={<GenericModuleShell title="In Out Register" description="Monitor student and staff entry and exit logs." />} />
         <Route path="complaints" element={<GenericModuleShell title="Complaints" description="Receive and resolve hostel complaints and grievances." />} />

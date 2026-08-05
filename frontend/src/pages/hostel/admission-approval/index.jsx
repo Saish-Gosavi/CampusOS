@@ -3,7 +3,7 @@ import { createFileRoute } from "@/routes/compat";
 import {
   ClipboardList, Search, CheckCircle2, XCircle, Clock, Eye, Settings2,
   FileText, Download, X, Loader2, ToggleLeft, ToggleRight, Save, ChevronDown,
-  User, AlertCircle, RefreshCw
+  User, AlertCircle, RefreshCw, Plus
 } from "lucide-react";
 import { admissionApi } from "@/services/api";
 import { toast } from "sonner";
@@ -33,6 +33,11 @@ function AdmissionApprovalPage() {
   const [config, setConfig] = useState(null);
   const [configLoading, setConfigLoading] = useState(false);
   const [configSaving, setConfigSaving] = useState(false);
+  const [showAddDoc, setShowAddDoc] = useState(false);
+  const [newDocName, setNewDocName] = useState("");
+  const [showAddField, setShowAddField] = useState(false);
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldType, setNewFieldType] = useState("text");
 
   const fetchApplications = useCallback(async () => {
     setLoading(true);
@@ -74,8 +79,17 @@ function AdmissionApprovalPage() {
   const handleAction = async (id, status) => {
     setActionLoading(true);
     try {
-      await admissionApi.updateStatus(id, status, remarks);
-      toast.success(`Application ${status}`);
+      const res = await admissionApi.updateStatus(id, status, remarks);
+      const appData = res?.data || res;
+      if (status === "approved") {
+        if (appData?.generatedPassword) {
+          toast.success(`Application Approved! Account created & email sent. Password: ${appData.generatedPassword}`, { duration: 8000 });
+        } else {
+          toast.success("Application Approved! Notification email sent to student.", { duration: 5000 });
+        }
+      } else {
+        toast.success(`Application Rejected. Notification email sent to student.`);
+      }
       setSelectedApp(null);
       setRemarks("");
       fetchApplications();
@@ -93,6 +107,35 @@ function AdmissionApprovalPage() {
         item.key === key ? { ...item, [prop]: !item[prop] } : item
       )
     }));
+  };
+
+  const addDocument = () => {
+    if (!newDocName.trim()) return;
+    const key = newDocName.trim().toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + Date.now();
+    setConfig(prev => ({
+      ...prev,
+      documents: [
+        ...prev.documents,
+        { key, label: newDocName.trim(), type: "file", required: true, enabled: true }
+      ]
+    }));
+    setNewDocName("");
+    setShowAddDoc(false);
+  };
+
+  const addField = () => {
+    if (!newFieldLabel.trim()) return;
+    const key = newFieldLabel.trim().toLowerCase().replace(/[^a-z0-9]/g, "_") + "_" + Date.now();
+    setConfig(prev => ({
+      ...prev,
+      fields: [
+        ...prev.fields,
+        { key, label: newFieldLabel.trim(), type: newFieldType, required: true, enabled: true }
+      ]
+    }));
+    setNewFieldLabel("");
+    setNewFieldType("text");
+    setShowAddField(false);
   };
 
   const saveConfig = async () => {
@@ -298,12 +341,56 @@ function AdmissionApprovalPage() {
             <>
               {/* Fields config */}
               <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
-                  <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <User className="h-4 w-4 text-slate-500" /> Form Fields
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Control which personal information fields appear on the registration form</p>
+                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
+                  <div>
+                    <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                      <User className="h-4 w-4 text-slate-500" /> Form Fields
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Control which personal information fields appear on the registration form</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddField(!showAddField)}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Field
+                  </button>
                 </div>
+                {showAddField && (
+                  <div className="flex items-center gap-3 border-b border-slate-100 bg-blue-50/50 px-5 py-3">
+                    <input
+                      type="text"
+                      value={newFieldLabel}
+                      onChange={e => setNewFieldLabel(e.target.value)}
+                      placeholder="e.g. Father's Occupation"
+                      className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+                      onKeyDown={e => { if (e.key === "Enter") addField(); }}
+                    />
+                    <select
+                      value={newFieldType}
+                      onChange={e => setNewFieldType(e.target.value)}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+                    >
+                      <option value="text">Text Field</option>
+                      <option value="email">Email</option>
+                      <option value="tel">Phone</option>
+                      <option value="date">Date</option>
+                      <option value="textarea">Long Text</option>
+                    </select>
+                    <button
+                      onClick={addField}
+                      disabled={!newFieldLabel.trim()}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => { setShowAddField(false); setNewFieldLabel(""); setNewFieldType("text"); }}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
                 <div className="divide-y divide-slate-100">
                   {(config.fields || []).map(field => (
                     <div key={field.key} className="flex items-center gap-4 px-5 py-3">
@@ -313,21 +400,7 @@ function AdmissionApprovalPage() {
                       </div>
                       <div className="flex items-center gap-4">
                         <label className="flex items-center gap-2 text-xs text-slate-600">
-                          <span>Required</span>
-                          <button
-                            type="button"
-                            onClick={() => field.enabled && toggleField("fields", field.key, "required")}
-                            disabled={!field.enabled}
-                            className={`transition ${field.enabled ? "cursor-pointer" : "cursor-not-allowed opacity-40"}`}
-                          >
-                            {field.required
-                              ? <ToggleRight className="h-5 w-5 text-amber-500" />
-                              : <ToggleLeft className="h-5 w-5 text-slate-300" />
-                            }
-                          </button>
-                        </label>
-                        <label className="flex items-center gap-2 text-xs text-slate-600">
-                          <span>Enabled</span>
+                          <span className="font-medium">Active on Form</span>
                           <button type="button" onClick={() => toggleField("fields", field.key, "enabled")}>
                             {field.enabled
                               ? <ToggleRight className="h-5 w-5 text-primary" />
@@ -343,12 +416,45 @@ function AdmissionApprovalPage() {
 
               {/* Documents config */}
               <div className="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
-                  <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-slate-500" /> Document Uploads
-                  </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">Control which documents students must upload</p>
+                <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
+                  <div>
+                    <h2 className="font-semibold text-slate-800 flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-slate-500" /> Document Uploads
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Control which documents students must upload</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddDoc(!showAddDoc)}
+                    className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Document
+                  </button>
                 </div>
+                {showAddDoc && (
+                  <div className="flex items-center gap-3 border-b border-slate-100 bg-blue-50/50 px-5 py-3">
+                    <input
+                      type="text"
+                      value={newDocName}
+                      onChange={e => setNewDocName(e.target.value)}
+                      placeholder="e.g. Income Certificate"
+                      className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-primary"
+                      onKeyDown={e => { if (e.key === "Enter") addDocument(); }}
+                    />
+                    <button
+                      onClick={addDocument}
+                      disabled={!newDocName.trim()}
+                      className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      Add
+                    </button>
+                    <button
+                      onClick={() => { setShowAddDoc(false); setNewDocName(""); }}
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
                 <div className="divide-y divide-slate-100">
                   {(config.documents || []).map(doc => (
                     <div key={doc.key} className="flex items-center gap-4 px-5 py-3">
@@ -358,21 +464,7 @@ function AdmissionApprovalPage() {
                       </div>
                       <div className="flex items-center gap-4">
                         <label className="flex items-center gap-2 text-xs text-slate-600">
-                          <span>Required</span>
-                          <button
-                            type="button"
-                            onClick={() => doc.enabled && toggleField("documents", doc.key, "required")}
-                            disabled={!doc.enabled}
-                            className={`transition ${doc.enabled ? "cursor-pointer" : "cursor-not-allowed opacity-40"}`}
-                          >
-                            {doc.required
-                              ? <ToggleRight className="h-5 w-5 text-amber-500" />
-                              : <ToggleLeft className="h-5 w-5 text-slate-300" />
-                            }
-                          </button>
-                        </label>
-                        <label className="flex items-center gap-2 text-xs text-slate-600">
-                          <span>Enabled</span>
+                          <span className="font-medium">Active on Form</span>
                           <button type="button" onClick={() => toggleField("documents", doc.key, "enabled")}>
                             {doc.enabled
                               ? <ToggleRight className="h-5 w-5 text-primary" />
@@ -454,20 +546,35 @@ function AdmissionApprovalPage() {
                   <h4 className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Uploaded Documents</h4>
                   <div className="space-y-2">
                     {selectedApp.documents.map(doc => (
-                      <a
+                      <div
                         key={doc.key}
-                        href={`${BASE_URL}${doc.path}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center gap-3 rounded-lg border border-slate-200 p-3 hover:border-primary hover:bg-primary/5 transition"
+                        className="flex items-center gap-3 rounded-lg border border-slate-200 p-3"
                       >
                         <FileText className="h-5 w-5 text-slate-400" />
                         <div className="flex-1">
                           <p className="text-sm font-medium text-slate-800">{doc.label || doc.key}</p>
                           <p className="text-xs text-slate-400">{doc.filename}</p>
                         </div>
-                        <Download className="h-4 w-4 text-slate-400" />
-                      </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`${BASE_URL}${doc.path}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> View
+                          </a>
+                          <a
+                            href={`${BASE_URL}${doc.path}`}
+                            download={doc.filename}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                          >
+                            <Download className="h-3.5 w-3.5" /> Download
+                          </a>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
