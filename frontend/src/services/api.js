@@ -357,3 +357,35 @@ export const reportsApi = {
     return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
   }
 };
+
+export const admissionApi = {
+  // Public (no auth)
+  async getConfig(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/admission/config", { params });
+  },
+  async apply(formData) {
+    return apiClient.post("/admission/apply", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  },
+  // Admin (auth required)
+  async listApplications(params = {}) {
+    return apiClient.get("/admin/admissions", { params });
+  },
+  async getApplication(id) {
+    return apiClient.get(`/admin/admissions/${id}`);
+  },
+  async updateStatus(id, status, remarks = "") {
+    return apiClient.put(`/admin/admissions/${id}/status`, { status, remarks });
+  },
+  async getAdminConfig(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/admin/admission-config", { params });
+  },
+  async updateAdminConfig(config, hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.put("/admin/admission-config", config, { params });
+  }
+};
+

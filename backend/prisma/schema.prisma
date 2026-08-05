@@ -110,6 +110,7 @@ model Hostel {
   users        User[]
   blocks       Block[]
   wardens      Warden[]
+  admissionApplications AdmissionApplication[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -434,3 +435,30 @@ model Notice {
 
   @@index([createdById])
 }
+
+// ==========================================
+// 10. Student Registration & Admission
+// ==========================================
+
+model RegistrationConfig {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int?     // null = global default
+  config    Json     // { fields: [...], documents: [...] }
+  updatedAt DateTime @updatedAt
+}
+
+model AdmissionApplication {
+  id        Int      @id @default(autoincrement())
+  data      Json     // all field values submitted by student
+  documents Json     // list of uploaded file paths { key, label, path }
+  status    String   @default("pending") // pending | approved | rejected
+  remarks   String?
+  hostelId  Int?
+  hostel    Hostel?  @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hostelId])
+  @@index([status])
+}
+
