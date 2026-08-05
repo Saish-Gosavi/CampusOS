@@ -64,6 +64,7 @@ import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damage
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
 import { Route as HostelFurnitureReplacement } from "@/pages/hostel/furniture/replacement";
 import { Route as HostelFees } from "@/pages/hostel/fees/index";
+import { Route as HostelFeeManagement } from "@/pages/hostel/fee-management/index";
 import { Route as HostelStaff } from "@/pages/hostel/staff/index";
 
 // Warden Pages
@@ -263,6 +264,7 @@ export default function AppRoutes() {
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
         <Route path="complaints" element={<HostelComplaints.component />} />
         <Route path="fees" element={<HostelFees.component />} />
+        <Route path="fee-management" element={<HostelFeeManagement.component />} />
         <Route path="visitors" element={<HostelVisitors.component />} />
         <Route path="in-out" element={<HostelIndex.component />} />
         <Route path="leaves" element={<HostelLeaves.component />} />

@@ -189,7 +189,7 @@ function HostelDashboard() {
 
   const quickActions = [
     { title: "Add Student",      description: "Register a new resident",   icon: UserPlus,    url: "/hostel-admin/students",  tint: "#2563EB", gradient: "radial-gradient(circle at top left, #2563EB0F 0%, transparent 70%)" },
-    { title: "Generate Fee",     description: "Raise a fee for a student", icon: IndianRupee, url: "/hostel-admin/fees",      tint: "#10B981", gradient: "radial-gradient(circle at top left, #10B9810F 0%, transparent 70%)" },
+    { title: "Generate Fee",     description: "Raise a fee for a student", icon: IndianRupee, url: "/hostel-admin/fee-management",      tint: "#10B981", gradient: "radial-gradient(circle at top left, #10B9810F 0%, transparent 70%)" },
     { title: "Create Notice",    description: "Publish to all students",   icon: Megaphone,   url: "/hostel-admin/notices",   tint: "#F59E0B", gradient: "radial-gradient(circle at top left, #F59E0B0F 0%, transparent 70%)" },
     { title: "Hostel Management",description: "Manage hostel properties",  icon: Building2,   url: "/hostel-admin/hostels",   tint: "#7B4CED", gradient: "radial-gradient(circle at top left, #7B4CED0F 0%, transparent 70%)" },
   ];

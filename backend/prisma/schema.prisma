@@ -50,6 +50,8 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
+  verifiedPayments  FeePayment[]
+  generatedReceipts FeeReceipt[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -260,10 +262,51 @@ model Fee {
   student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   amount      Decimal   @db.Decimal(10, 2)
   dueDate     DateTime
-  status      String    @default("unpaid") // "unpaid", "paid", "overdue"
+  status      String    @default("unpaid") // "unpaid", "pending_verification", "paid", "overdue", "rejected"
   paymentDate DateTime?
 
+  // Relations
+  payments    FeePayment[]
+  receipts    FeeReceipt[]
+
   @@index([studentId])
+}
+
+model FeePayment {
+  id              Int      @id @default(autoincrement())
+  feeId           Int
+  fee             Fee      @relation(fields: [feeId], references: [id], onDelete: Cascade)
+  amountPaid      Decimal  @db.Decimal(10, 2)
+  paymentMethod   String   // e.g., "Bank Transfer", "UPI", "Cash"
+  transactionId   String?
+  proofUrl        String?  // Payment proof image/document
+  status          String   @default("pending_verification") // "pending_verification", "verified", "rejected"
+  rejectionReason String?
+  paymentDate     DateTime @default(now())
+  verifiedById    Int?
+  verifiedBy      User?    @relation(fields: [verifiedById], references: [id])
+  verifiedAt      DateTime?
+
+  receipt         FeeReceipt?
+
+  @@index([feeId])
+  @@index([verifiedById])
+}
+
+model FeeReceipt {
+  id            Int      @id @default(autoincrement())
+  feeId         Int
+  fee           Fee      @relation(fields: [feeId], references: [id], onDelete: Cascade)
+  paymentId     Int      @unique
+  payment       FeePayment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  receiptNumber String   @unique
+  generatedById Int
+  generatedBy   User     @relation(fields: [generatedById], references: [id])
+  generatedAt   DateTime @default(now())
+
+  @@index([feeId])
+  @@index([paymentId])
+  @@index([generatedById])
 }
 
 model Attendance {

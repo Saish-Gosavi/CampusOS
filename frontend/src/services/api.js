@@ -363,3 +363,30 @@ export const staffApi = {
     return apiClient.get(`/admin/staff-management/${id}/attendance`);
   }
 };
+
+export const feeApi = {
+  async getDashboardStats() {
+    return apiClient.get("/admin/fee-management/statistics");
+  },
+  async getAllFeeRecords() {
+    return apiClient.get("/admin/fee-management");
+  },
+  async getStudentFeeRecords(studentId) {
+    return apiClient.get(`/admin/fee-management/${studentId}`);
+  },
+  async verifyPayment(id) {
+    return apiClient.put(`/admin/fee-management/${id}/verify`);
+  },
+  async rejectPayment(id, reason) {
+    return apiClient.put(`/admin/fee-management/${id}/reject`, { reason });
+  },
+  async releaseReceipt(receiptId) {
+    return apiClient.put(`/admin/fee-management/${receiptId}/release-receipt`);
+  }
+};
+
+export const studentFeeApi = {
+  async getMyReceipts() {
+    return apiClient.get("/student/fees/my-receipts");
+  }
+};
