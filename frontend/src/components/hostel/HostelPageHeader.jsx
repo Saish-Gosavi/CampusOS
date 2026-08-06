@@ -3,10 +3,10 @@ function HostelPageHeader({ title, description, icon: Icon, tint, breadcrumbs, a
       <div>
         <div className="flex items-center gap-3">
           <span
-    className="grid h-11 w-11 shrink-0 place-items-center rounded-xl"
+    className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl"
     style={{ backgroundColor: `${tint}1A`, color: tint }}
   >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-7 w-7" />
           </span>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">{title}</h1>

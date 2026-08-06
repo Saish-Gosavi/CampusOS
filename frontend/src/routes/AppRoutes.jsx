@@ -68,6 +68,9 @@ import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/ma
 import { Route as HostelFurnitureReplacement } from "@/pages/hostel/furniture/replacement";
 import { Route as HostelFees } from "@/pages/hostel/fees/index";
 import { Route as HostelStaff } from "@/pages/hostel/staff/index";
+import { Route as HostelStudents } from "@/pages/hostel/students/index";
+import { Route as HostelInOut } from "@/pages/hostel/in-out/index";
+import { Route as HostelNotices } from "@/pages/hostel/notices/index";
 
 // Warden Pages
 import { Route as WardenIndex } from "@/pages/warden/index";
@@ -256,7 +259,7 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<HostelDashboardPage />} />
-        <Route path="students" element={<HostelIndex.component />} />
+        <Route path="students" element={<HostelStudents.component />} />
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
         <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
@@ -268,9 +271,9 @@ export default function AppRoutes() {
         <Route path="complaints" element={<HostelComplaints.component />} />
         <Route path="fees" element={<HostelFees.component />} />
         <Route path="visitors" element={<HostelVisitors.component />} />
-        <Route path="in-out" element={<HostelIndex.component />} />
+        <Route path="in-out" element={<HostelInOut.component />} />
         <Route path="leaves" element={<HostelLeaves.component />} />
-        <Route path="notices" element={<HostelIndex.component />} />
+        <Route path="notices" element={<HostelNotices.component />} />
         <Route path="staff" element={<HostelStaff.component />} />
         <Route path="furniture" element={<HostelFurniture.component />} />
         <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
@@ -290,6 +293,7 @@ export default function AppRoutes() {
         <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
         <Route path="admission-approval" element={<AdmissionApprovalRoute.component />} />
         <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
+
         <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 

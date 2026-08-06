@@ -14,6 +14,9 @@ import errorMiddleware from "./middleware/error.middleware.js";
 // Import Routers
 import authRouter from "./modules/auth/routes/auth.routes.js";
 import usersRouter from "./modules/users/routes/users.routes.js";
+import noticesRoutes from './routes/notices.routes.js';
+import inoutRoutes from './routes/inout.routes.js';
+import documentsRoutes from './routes/documents.routes.js';
 import hostelRouter from "./modules/hostel/routes.js";
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
 import settingsRouter from "./modules/settings/routes/settings.routes.js";
@@ -66,6 +69,9 @@ app.get("/api/health", (req, res) => {
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use('/api/notices', noticesRoutes);
+app.use('/api/inout', inoutRoutes);
+app.use('/api/documents', documentsRoutes);
 app.use("/api/hostel", hostelRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
