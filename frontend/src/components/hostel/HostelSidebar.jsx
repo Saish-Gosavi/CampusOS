@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard,
   Building2,
@@ -22,6 +23,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -54,10 +56,17 @@ const opsItems = [
 
 
 function HostelSidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = location.pathname;
+  const { pathname } = useLocation();
   const isActive = (url, exact) => (exact ? pathname === url : pathname === url || pathname.startsWith(url + "/"));
 
   const renderMenu = (items) => (
@@ -121,6 +130,21 @@ function HostelSidebar() {
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        <SidebarFooter className="border-t border-white/10 p-3">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={handleLogout}
+                tooltip="Logout"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       </div>
     </Sidebar>
   );
