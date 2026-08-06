@@ -14,6 +14,8 @@ import { Route as LoginRoute } from "@/pages/auth/Login";
 import { Route as ForgotPasswordRoute } from "@/pages/auth/ForgotPassword";
 import { Route as VerifyOtpRoute } from "@/pages/auth/VerifyOtp";
 import { Route as ResetPasswordRoute } from "@/pages/auth/ResetPassword";
+import { Route as RegisterRoute } from "@/pages/auth/Register";
+import { Route as AdmissionApprovalRoute } from "@/pages/hostel/admission-approval/index";
 
 // Super Admin Pages
 import { Route as SuperAdminIndex } from "@/pages/super-admin/index";
@@ -35,6 +37,7 @@ import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
 // Hostel Pages
+import { Route as HostelDashboard } from "@/pages/hostel/dashboard/index";
 import HostelDashboardPage from "@/modules/hostel/HostelDashboardPage";
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
@@ -53,17 +56,24 @@ import { Route as HostelBeds } from "@/pages/hostel/beds/index";
 import { Route as HostelBedAdd } from "@/pages/hostel/beds/add";
 import { Route as HostelBedEdit } from "@/pages/hostel/beds/$id.edit";
 import { Route as HostelAllocations } from "@/pages/hostel/allocations/index";
+import { Route as HostelRoomAllotmentLetter } from "@/pages/hostel/allocations/room-allotment-letter";
 import { Route as HostelAllocationNew } from "@/pages/hostel/allocations/new";
 import { Route as HostelAllocationChange } from "@/pages/hostel/allocations/change";
 import { Route as HostelAllocationHistory } from "@/pages/hostel/allocations/history";
 import { Route as HostelComplaints } from "@/pages/hostel/complaints/index";
 import { Route as HostelLeaves } from "@/pages/hostel/leave/index";
 import { Route as HostelVisitors } from "@/pages/hostel/visitors/index";
+import { Route as HostelReports } from "@/pages/hostel/reports/index";
 import { Route as HostelFurniture } from "@/pages/hostel/furniture/index";
 import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damaged";
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
 import { Route as HostelFurnitureReplacement } from "@/pages/hostel/furniture/replacement";
 import { Route as HostelFees } from "@/pages/hostel/fees/index";
+import { Route as HostelFeeManagement } from "@/pages/hostel/fee-management/index";
+import { Route as HostelStaff } from "@/pages/hostel/staff/index";
+import { Route as HostelStudents } from "@/pages/hostel/students/index";
+import { Route as HostelInOut } from "@/pages/hostel/in-out/index";
+import { Route as HostelNotices } from "@/pages/hostel/notices/index";
 
 // Warden Pages
 import { Route as WardenIndex } from "@/pages/warden/index";
@@ -194,6 +204,7 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordRoute.component /></PublicRoute>} />
       <Route path="/verify-otp" element={<PublicRoute><VerifyOtpRoute.component /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPasswordRoute.component /></PublicRoute>} />
+      <Route path="/register" element={<RegisterRoute.component />} />
 
       {/* Navigation Dispatcher */}
       <Route path="/" element={<RootNavigator />} />
@@ -251,18 +262,43 @@ export default function AppRoutes() {
         }
       >
         <Route index element={<HostelDashboardPage />} />
+        <Route path="students" element={<HostelStudents.component />} />
+        <Route path="rooms" element={<HostelRooms.component />} />
+        <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
+        <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
+        <Route path="rooms/add" element={<HostelRoomAdd.component />} />
+        <Route path="allocation" element={<HostelAllocations.component />} />
+        <Route path="allocation/allotment-letter" element={<HostelRoomAllotmentLetter.component />} />
+        <Route path="allocation-letter" element={<HostelRoomAllotmentLetter.component />} />
+        <Route path="allocation/new" element={<HostelAllocationNew.component />} />
+        <Route path="allocation/change" element={<HostelAllocationChange.component />} />
+        <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
+        <Route path="admission-approval" element={<AdmissionApprovalRoute.component />} />
+        <Route path="complaints" element={<HostelComplaints.component />} />
+        <Route path="fees" element={<HostelFees.component />} />
+        <Route path="fee-management" element={<HostelFeeManagement.component />} />
+        <Route path="visitors" element={<HostelVisitors.component />} />
+        <Route path="in-out" element={<HostelInOut.component />} />
+        <Route path="leaves" element={<HostelLeaves.component />} />
+        <Route path="notices" element={<HostelNotices.component />} />
+        <Route path="staff" element={<HostelStaff.component />} />
+        <Route path="reports" element={<HostelReports.component />} />
+        <Route path="furniture" element={<HostelFurniture.component />} />
+        <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
+        <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />
+        <Route path="furniture/replacement" element={<HostelFurnitureReplacement.component />} />
         <Route path="hostels" element={<HostelIndex.component />} />
-        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
-        <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
-        <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
-        <Route path="staff" element={<GenericModuleShell title="Staff Management" description="Manage hostel staff members, roles and schedules." />} />
-        <Route path="fees" element={<GenericModuleShell title="Fees Management" description="Track and manage hostel fee collection and dues." />} />
-        <Route path="leaves" element={<GenericModuleShell title="Leave Management" description="Review and approve student and staff leave requests." />} />
-        <Route path="visitors" element={<GenericModuleShell title="Visitor Management" description="Register and track all hostel visitor entries." />} />
-        <Route path="in-out" element={<GenericModuleShell title="In Out Register" description="Monitor student and staff entry and exit logs." />} />
-        <Route path="complaints" element={<GenericModuleShell title="Complaints" description="Receive and resolve hostel complaints and grievances." />} />
-        <Route path="notices" element={<GenericModuleShell title="Notice Board" description="Post and manage official hostel notices and announcements." />} />
-        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
+        <Route path="hostels/:id" element={<HostelDetail.component />} />
+        <Route path="hostels/add" element={<HostelAdd.component />} />
+        <Route path="beds" element={<HostelBeds.component />} />
+        <Route path="beds/add" element={<HostelBedAdd.component />} />
+        <Route path="beds/:id/edit" element={<HostelBedEdit.component />} />
+        <Route path="blocks" element={<HostelBlocks.component />} />
+        <Route path="blocks/add" element={<HostelBlockAdd.component />} />
+        <Route path="blocks/:id/edit" element={<HostelBlockEdit.component />} />
+        <Route path="floors" element={<HostelFloors.component />} />
+        <Route path="floors/add" element={<HostelFloorAdd.component />} />
+        <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
       </Route>
 
       {/* Warden Dashboard Routes */}

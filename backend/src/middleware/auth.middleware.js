@@ -41,6 +41,7 @@ export const authenticate = async (req, res, next) => {
       email: user.email,
       name: user.name,
       role: user.role.name,
+      hostelId: user.hostelId,
     };
 
     next();

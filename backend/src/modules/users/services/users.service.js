@@ -20,7 +20,7 @@ export class UsersService {
     if (roleName) {
       return prisma.user.findMany({
         where: { role: { name: roleName } },
-        include: { role: true },
+        include: { role: true, studentProfile: true },
       });
     }
     return UsersRepository.findAll();
@@ -64,16 +64,27 @@ export class UsersService {
       }
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(data.password, salt);
+    const { roleName, campus, ...userData } = data;
 
-    const { roleName, campus, ...createData } = data;
+    // Pre-check: ensure email is not already registered
+    const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
+    if (existingUser) {
+      throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
+    }
 
-    return UsersRepository.create({
-      ...createData,
-      roleId,
-      password: hashedPassword,
-    });
+    const hashedPassword = await bcrypt.hash(userData.password, salt);
+    try {
+      return await UsersRepository.create({
+        ...userData,
+        roleId,
+        password: hashedPassword,
+      });
+    } catch (err) {
+      if (err?.code === "P2002" || err?.message?.includes("Unique constraint")) {
+        throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
+      }
+      throw err;
+    }
   }
 
   static async deleteUser(creator, id) {

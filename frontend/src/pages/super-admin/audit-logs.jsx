@@ -176,6 +176,10 @@ function AuditLogsPage() {
 
   const getModuleIcon = (moduleName) => {
     switch (moduleName) {
+      case "Colleges":
+        return <Building className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />;
+      case "Admins":
+        return <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
       case "Hostel":
         return <Building className="h-4 w-4 text-purple-600 dark:text-purple-400" />;
       case "Library":
@@ -183,8 +187,9 @@ function AuditLogsPage() {
       case "Inventory":
         return <Box className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />;
       case "System":
-      default:
         return <Settings className="h-4 w-4 text-amber-600 dark:text-amber-400" />;
+      default:
+        return <Tag className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
@@ -310,6 +315,8 @@ function AuditLogsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="All">All Modules</SelectItem>
+                  <SelectItem value="Colleges">Colleges</SelectItem>
+                  <SelectItem value="Admins">Admins</SelectItem>
                   <SelectItem value="Hostel">Hostel</SelectItem>
                   <SelectItem value="Library">Library</SelectItem>
                   <SelectItem value="Inventory">Inventory</SelectItem>

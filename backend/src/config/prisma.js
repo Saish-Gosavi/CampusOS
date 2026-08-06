@@ -13,6 +13,7 @@ function parseDatabaseUrl(url) {
     database: parsed.pathname.replace("/", "") || "hostel_management",
     allowPublicKeyRetrieval: true,
     connectionLimit: 10,
+    allowPublicKeyRetrieval: true,
   };
 }
 

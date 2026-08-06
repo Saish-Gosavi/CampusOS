@@ -40,13 +40,15 @@ const MAP = {
 };
 function StatusPill({ status }) {
   const { bg, fg } = MAP[status] ?? { bg: "#6B72801A", fg: "#4B5563" };
-  return <span
-    className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-    style={{ backgroundColor: bg, color: fg }}
-  >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: fg }} />
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap shrink-0"
+      style={{ backgroundColor: bg, color: fg }}
+    >
+      <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ backgroundColor: fg }} />
       {status}
-    </span>;
+    </span>
+  );
 }
 export {
   StatusPill

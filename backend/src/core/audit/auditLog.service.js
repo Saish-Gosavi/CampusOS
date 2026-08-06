@@ -16,6 +16,12 @@ export class AuditLogService {
     newData = null,
   }) {
     try {
+      const formatDataStr = (val) => {
+        if (!val) return null;
+        const str = typeof val === "string" ? val : JSON.stringify(val);
+        return str.length > 500 ? str.slice(0, 497) + "..." : str;
+      };
+
       await prisma.auditLog.create({
         data: {
           userId: userId ? Number(userId) : null,
@@ -23,10 +29,10 @@ export class AuditLogService {
           action,
           description,
           status,
-          ipAddress,
-          userAgent,
-          oldData: oldData ? (typeof oldData === "string" ? oldData : JSON.stringify(oldData)) : null,
-          newData: newData ? (typeof newData === "string" ? newData : JSON.stringify(newData)) : null,
+          ipAddress: ipAddress ? String(ipAddress).slice(0, 45) : null,
+          userAgent: userAgent ? String(userAgent).slice(0, 255) : null,
+          oldData: formatDataStr(oldData),
+          newData: formatDataStr(newData),
         },
       });
     } catch (err) {

@@ -14,30 +14,12 @@ datasource db {
 // ==========================================
 
 model Role {
-  id          Int                 @id @default(autoincrement())
-  name        String              @unique
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
   description String?
   users       User[]
-  permissions RolesOnPermissions[]
 }
 
-model Permission {
-  id          Int                 @id @default(autoincrement())
-  name        String              @unique
-  description String?
-  roles       RolesOnPermissions[]
-}
-
-model RolesOnPermissions {
-  roleId       Int
-  permissionId Int
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-  @@index([roleId])
-  @@index([permissionId])
-}
 
 // ==========================================
 // 2. User & Core Profile Accounts
@@ -68,6 +50,11 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
+  inOutLogs         InOutLog[]
+  verifiedPayments  FeePayment[]
+  generatedReceipts FeeReceipt[]
+  allotmentTemplates AllotmentTemplate[]
+  generatedReports  GeneratedReport[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -110,6 +97,10 @@ model Hostel {
   users        User[]
   blocks       Block[]
   wardens      Warden[]
+  admissionApplications AdmissionApplication[]
+  notices      Notice[]
+  inOutLogs    InOutLog[]
+  staff        Staff[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -171,11 +162,11 @@ model Student {
   allocations Allocation[]
   leaves      LeaveRequest[]
   complaints  Complaint[]
-  visitors    Visitor[]
   fees        Fee[]
   bookIssues  BookIssue[]
   reservations Reservation[]
   attendance  Attendance[]
+  documents   StudentDocument[]
 
   @@index([userId])
 }
@@ -209,30 +200,57 @@ model SecurityStaff {
 // ==========================================
 
 model Allocation {
-  id        Int      @id @default(autoincrement())
-  bedId     Int
-  bed       Bed      @relation(fields: [bedId], references: [id], onDelete: Restrict)
-  studentId Int
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Restrict)
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("active") // "active", "completed", "cancelled"
+  id              Int                  @id @default(autoincrement())
+  bedId           Int
+  bed             Bed                  @relation(fields: [bedId], references: [id], onDelete: Restrict)
+  studentId       Int
+  student         Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  startDate       DateTime
+  endDate         DateTime
+  status          String               @default("active") // "active", "completed", "cancelled"
+  allotmentLetter RoomAllotmentLetter?
 
   @@index([bedId])
   @@index([studentId])
 }
 
+model RoomAllotmentLetter {
+  id           Int        @id @default(autoincrement())
+  allocationId Int        @unique
+  allocation   Allocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  referenceNo  String     @unique
+  issuedDate   DateTime   @default(now())
+  terms        String?    @db.Text
+  signedBy     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([allocationId])
+}
+
 model LeaveRequest {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  reason    String
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("pending") // "pending", "approved", "rejected"
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  leaveType     String   @default("Personal") // "Home Visit", "Medical", "Family Function", "Personal", "Emergency", "Academic"
+  reason        String   @db.Text
+  destination   String?
+  contactPhone  String?
+  parentContact String?
+  startDate     DateTime
+  endDate       DateTime
+  status        String   @default("pending") // "pending", "approved", "rejected"
+  remarks       String?  @db.Text
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 
   @@index([studentId])
+  @@index([status])
+  @@index([startDate])
 }
+
 
 model Complaint {
   id          Int      @id @default(autoincrement())
@@ -249,16 +267,23 @@ model Complaint {
 }
 
 model Visitor {
-  id           Int      @id @default(autoincrement())
-  studentId    Int
-  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  fullName     String
-  relationship String
-  checkIn      DateTime
-  checkOut     DateTime?
-  status       String   @default("pending") // "pending", "approved", "rejected", "checked-in", "checked-out"
+  id             Int       @id @default(autoincrement())
+  studentName    String
+  fullName       String
+  visitorPhone   String?
+  visitorIdProof String?
+  relationship   String
+  purpose        String?   @db.Text
+  checkIn        DateTime?
+  checkOut       DateTime?
+  status         String    @default("Pending") // "Pending", "Approved", "Rejected", "Checked-In", "Checked-Out"
+  remarks        String?   @db.Text
+  reviewedBy     String?
+  wardenRemarks  String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
 
-  @@index([studentId])
+  // @@index([studentId]) removed
 }
 
 model Furniture {
@@ -277,10 +302,51 @@ model Fee {
   student     Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
   amount      Decimal   @db.Decimal(10, 2)
   dueDate     DateTime
-  status      String    @default("unpaid") // "unpaid", "paid", "overdue"
+  status      String    @default("unpaid") // "unpaid", "pending_verification", "paid", "overdue", "rejected"
   paymentDate DateTime?
 
+  // Relations
+  payments    FeePayment[]
+  receipts    FeeReceipt[]
+
   @@index([studentId])
+}
+
+model FeePayment {
+  id              Int      @id @default(autoincrement())
+  feeId           Int
+  fee             Fee      @relation(fields: [feeId], references: [id], onDelete: Cascade)
+  amountPaid      Decimal  @db.Decimal(10, 2)
+  paymentMethod   String   // e.g., "Bank Transfer", "UPI", "Cash"
+  transactionId   String?
+  proofUrl        String?  // Payment proof image/document
+  status          String   @default("pending_verification") // "pending_verification", "verified", "rejected"
+  rejectionReason String?
+  paymentDate     DateTime @default(now())
+  verifiedById    Int?
+  verifiedBy      User?    @relation(fields: [verifiedById], references: [id])
+  verifiedAt      DateTime?
+
+  receipt         FeeReceipt?
+
+  @@index([feeId])
+  @@index([verifiedById])
+}
+
+model FeeReceipt {
+  id            Int      @id @default(autoincrement())
+  feeId         Int
+  fee           Fee      @relation(fields: [feeId], references: [id], onDelete: Cascade)
+  paymentId     Int      @unique
+  payment       FeePayment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
+  receiptNumber String   @unique
+  generatedById Int
+  generatedBy   User     @relation(fields: [generatedById], references: [id])
+  generatedAt   DateTime @default(now())
+
+  @@index([feeId])
+  @@index([paymentId])
+  @@index([generatedById])
 }
 
 model Attendance {
@@ -427,10 +493,153 @@ model Notice {
   isActive    Boolean   @default(true)
   scheduledAt DateTime?
   expiresAt   DateTime?
+  priority    String    @default("General") // "General", "Urgent", "Maintenance", "Event"
+  hostelId    Int?
+  hostel      Hostel?   @relation(fields: [hostelId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   createdById Int
   createdBy   User      @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
+  @@index([hostelId])
+}
+
+// ==========================================
+// 10. Document & Log Extensions
+// ==========================================
+
+model StudentDocument {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  documentType String   // "Aadhar", "Income", "Admission", "Custom"
+  name         String
+  fileUrl      String
+  uploadedAt   DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model InOutLog {
+  id          Int      @id @default(autoincrement())
+  userType    String   // "Student", "Staff", "Visitor"
+  direction   String   // "IN", "OUT"
+  name        String   // Can be name or ID
+  reason      String?
+  timestamp   DateTime @default(now())
+  hostelId    Int?
+  hostel      Hostel?  @relation(fields: [hostelId], references: [id])
+  loggedById  Int
+  loggedBy    User     @relation(fields: [loggedById], references: [id])
+
+  @@index([hostelId])
+  @@index([loggedById])
+}
+
+// 12. Staff Management (Non-system staff directory)
+// ==========================================
+
+// Physical staff (cleaners, maintenance, etc.) — no system login
+model Staff {
+  id          Int              @id @default(autoincrement())
+  name        String
+  phone       String?
+  designation String           // e.g., "Cleaning", "Maintenance", "Cook", "Guard"
+  hostelId    Int
+  hostel      Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+  status      String           @default("active") // "active", "inactive"
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  attendance  StaffAttendance[]
+
+  @@index([hostelId])
+}
+
+model StaffAttendance {
+  id        Int      @id @default(autoincrement())
+  staffId   Int
+  staff     Staff    @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  date      DateTime
+  present   Boolean
+  remarks   String?
+
+  @@index([staffId])
+}
+
+// 11. Student Registration & Admission
+// ==========================================
+
+model RegistrationConfig {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int?     // null = global default
+  config    Json     // { fields: [...], documents: [...] }
+  updatedAt DateTime @updatedAt
+}
+
+model AdmissionApplication {
+  id        Int      @id @default(autoincrement())
+  data      Json     // all field values submitted by student
+  documents Json     // list of uploaded file paths { key, label, path }
+  status    String   @default("pending") // pending | approved | rejected
+  remarks   String?
+  hostelId  Int?
+  hostel    Hostel?  @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hostelId])
+  @@index([status])
+}
+
+// ==========================================
+// Allotment Template Upload
+// ==========================================
+
+model AllotmentTemplate {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  description         String?  @db.Text
+  filePath            String
+  fileName            String
+  fileType            String   // "pdf" or "docx"
+  imagePath           String?
+  imageFileName       String?
+  isActive            Boolean  @default(true)
+  uploadedBy          Int?
+  user                User?    @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // PDF section uploads
+  headerPdfPath       String?
+  headerPdfName       String?
+  footerPdfPath       String?
+  footerPdfName       String?
+  mainPdfPath         String?
+  mainPdfName         String?
+  termsPdfPath        String?
+  termsPdfName        String?
+
+  @@index([uploadedBy])
+}
+
+// ==========================================
+// 10. Generated Reports History
+// ==========================================
+
+model GeneratedReport {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String   // "Student", "Allocation", "Fee", "Visitor", "Complaint", "Leave", "Staff", "Furniture"
+  format      String   // "Excel", "PDF", "CSV"
+  filters     String?  @db.Text // JSON metadata of applied filters
+  generatedBy String
+  createdById Int?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([createdById])
+  @@index([category])
+  @@index([createdAt])
 }

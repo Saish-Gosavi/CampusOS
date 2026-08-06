@@ -48,6 +48,7 @@ function AdminsPage() {
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
 
   const fetchAdmins = async () => {
     try {
@@ -87,8 +88,8 @@ function AdminsPage() {
     async function loadRolesAndColleges() {
       try {
         const [resRoles, resColleges] = await Promise.all([
-          rolesApi.getAll(),
-          collegeApi.getAll()
+          rolesApi.getAll().catch(() => ({ data: [] })),
+          collegeApi.getAll().catch(() => ({ data: [] }))
         ]);
         const rolesData = Array.isArray(resRoles.data) ? resRoles.data : (Array.isArray(resRoles) ? resRoles : []);
         setRolesList(rolesData);
@@ -147,32 +148,48 @@ function AdminsPage() {
         alert(err?.message || err?.response?.data?.message || "Failed to update Senior Admin.");
       }
     } else {
-      try {
-        // Resolve senioradmin role ID dynamically (fallback to 8 for senioradmin)
-        const seniorRole = rolesList.find((r) => r.name.toLowerCase() === "senioradmin");
-        const roleId = seniorRole ? seniorRole.id : 8;
+      // Resolve senioradmin role ID dynamically from the roles list
+      const seniorRole = rolesList.find((r) => r.name?.toLowerCase() === "senioradmin");
+      const roleId = seniorRole ? seniorRole.id : 8;
 
-        await userApi.create({
-          name: data.name,
-          email: data.email,
-          password: data.password || "Password@123",
-          roleId,
-          roleName: "senioradmin",
-          status: "active",
-        });
+      await userApi.create({
+        name: data.name,
+        email: data.email,
+        password: data.password || "Password@123",
+        roleId,
+        roleName: "senioradmin",
+        status: "active",
+      });
 
-        // ✅ Re-fetch from server so count and list are always accurate
-        await fetchAdmins();
-        setModalOpen(false);
-      } catch (err) {
-        console.error("Failed to create senior admin:", err);
-        alert(err?.message || err?.response?.data?.message || "Failed to create Senior Admin.");
-      }
+      // Re-fetch from server so count and list are always accurate
+      await fetchAdmins();
+      setModalOpen(false);
+      showToast("success", `Senior Admin "${data.name}" created successfully!`);
     }
+  }
+
+  function showToast(type, message) {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 5000);
   }
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-5 right-5 z-[100] flex items-center gap-3 rounded-xl px-5 py-3.5 shadow-2xl text-sm font-medium transition-all ${
+            toast.type === "success"
+              ? "bg-green-600 text-white"
+              : "bg-red-600 text-white"
+          }`}
+          style={{ minWidth: 280, maxWidth: 420 }}
+        >
+          <span className="text-lg">{toast.type === "success" ? "✅" : "❌"}</span>
+          <span>{toast.message}</span>
+          <button onClick={() => setToast(null)} className="ml-auto opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="mt-3 flex items-center gap-3">
@@ -351,15 +368,28 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [campus, setCampus] = useState(initial?.campus ?? (colleges[0]?.name || ""));
+  const [saving, setSaving] = useState(false);
+  const [inlineError, setInlineError] = useState("");
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
-    if (!initial && !password.trim()) {
-      alert("Password is required to create a new Senior Admin");
-      return;
+    setInlineError("");
+
+    if (!name.trim()) { setInlineError("Full Name is required."); return; }
+    if (!email.trim()) { setInlineError("Email is required."); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setInlineError("Please enter a valid email address."); return; }
+    if (!initial && !password.trim()) { setInlineError("Password is required to create a new Senior Admin."); return; }
+    if (!initial && password.trim().length < 8) { setInlineError("Password must be at least 8 characters."); return; }
+
+    setSaving(true);
+    try {
+      await onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "active" });
+    } catch (err) {
+      const msg = err?.message || err?.data?.message || "An unexpected error occurred. Please try again.";
+      setInlineError(msg);
+    } finally {
+      setSaving(false);
     }
-    onSave({ name: name.trim(), email: email.trim(), password: password.trim(), campus, status: "Active" });
   }
 
   return (
@@ -433,6 +463,13 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
             </select>
           </Field>
         </div>
+        {/* Inline error banner */}
+        {inlineError && (
+          <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-700">
+            <span className="mt-0.5 shrink-0">⚠️</span>
+            <span>{inlineError}</span>
+          </div>
+        )}
         <div className="mt-5 flex justify-end gap-2">
           <button
             type="button"
@@ -443,9 +480,11 @@ function AdminModal({ initial, onClose, onSave, colleges }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+            disabled={saving}
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {initial ? "Save Changes" : "Create Senior Admin"}
+            {saving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+            {saving ? "Creating..." : (initial ? "Save Changes" : "Create Senior Admin")}
           </button>
         </div>
       </form>

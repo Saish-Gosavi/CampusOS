@@ -7,19 +7,27 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Import Custom Middlewares
+// CampusOS Backend Entry App
 import notFoundMiddleware from "./middleware/notFound.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 
 // Import Routers
 import authRouter from "./modules/auth/routes/auth.routes.js";
 import usersRouter from "./modules/users/routes/users.routes.js";
-import rolesRouter from "./modules/roles/routes/roles.routes.js";
+import noticesRoutes from './routes/notices.routes.js';
+import inoutRoutes from './routes/inout.routes.js';
+import documentsRoutes from './routes/documents.routes.js';
 import hostelRouter from "./modules/hostel/routes.js";
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
 import settingsRouter from "./modules/settings/routes/settings.routes.js";
 import auditRouter from "./modules/audit/audit.routes.js";
 import noticeRouter from "./modules/notice/routes/notice.routes.js";
 import reportsRouter from "./modules/reports/routes/reports.routes.js";
+import rolesRouter from "./modules/roles/roles.routes.js";
+import staffRouter from "./modules/admin/staff/staff.routes.js";
+import complaintsRouter from "./modules/hostel/complaints/routes/complaint.routes.js";
+import admissionRouter from "./modules/admission/admission.routes.js";
+import feeRouter, { studentFeeRouter } from "./modules/admin/fee/fee.routes.js";
 
 const app = express();
 
@@ -49,6 +57,7 @@ app.use(cookieParser());
 
 // 6. Serve static files from uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -59,11 +68,19 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+import visitorsRouter from "./modules/hostel/visitors/routes/visitor.routes.js";
+
+import adminReportsRouter from "./modules/reports/routes/admin-reports.routes.js";
+
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/super_admin/roles-and-permissions", rolesRouter);
+app.use('/api/notices', noticesRoutes);
+app.use('/api/inout', inoutRoutes);
+app.use('/api/documents', documentsRoutes);
 app.use("/api/hostel", hostelRouter);
+app.use("/api/admin/visitor-management", visitorsRouter);
+app.use("/api/admin/reports", adminReportsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/audit-logs", auditRouter);
@@ -72,6 +89,12 @@ app.use("/api/super_admin/global-notice", noticeRouter);
 app.use("/api/global-notices", noticeRouter);
 app.use("/api/super_admin/reports", reportsRouter);
 app.use("/api/reports", reportsRouter);
+app.use("/api/roles", rolesRouter);
+app.use("/api/admin/staff-management", staffRouter);
+app.use("/api/admin/complaints", complaintsRouter);
+app.use("/api/admission", admissionRouter);
+app.use("/api/admin/fee-management", feeRouter);
+app.use("/api/student/fees", studentFeeRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);
