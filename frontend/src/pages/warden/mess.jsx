@@ -181,7 +181,7 @@ function WardenMessManagement() {
           <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-1 scrollbar-none">
             {[
               { id: "menu", label: "Weekly Meal Menu", icon: Calendar, badge: null },
-              { id: "rebates", label: "Mess Off-Day Requests", icon: Clock, badge: stats.pendingRebatesCount },
+              { id: "rebates", label: "Mess Off-Day Notifications", icon: Clock, badge: `${rebates.length} Not Coming` },
               { id: "attendance", label: "Meal Attendance Logs", icon: Users, badge: null },
               { id: "feedback", label: "Food Quality & Ratings", icon: Star, badge: null }
             ].map((tab) => {
@@ -326,13 +326,19 @@ function WardenMessManagement() {
             </div>
           )}
 
-          {/* Tab 2: Mess Off-Day Requests */}
+          {/* Tab 2: Mess Off-Day Notifications */}
           {activeTab === "rebates" && (
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
-              <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border pb-3">
                 <div>
-                  <h3 className="text-base font-semibold text-foreground">Student Mess Off-Day Requests</h3>
-                  <p className="text-xs text-muted-foreground">Approve or reject student mess off-days during authorized leave</p>
+                  <h3 className="text-base font-semibold text-foreground">Student Mess Off-Day Notifications</h3>
+                  <p className="text-xs text-muted-foreground">List of students who notified they will not be attending mess meals</p>
+                </div>
+                <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2 shadow-xs">
+                  <span className="text-xs font-medium text-amber-800">Total Not Coming Today:</span>
+                  <span className="text-sm font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-md">
+                    {rebates.length} Students
+                  </span>
                 </div>
               </div>
 
@@ -342,11 +348,10 @@ function WardenMessManagement() {
                     <tr>
                       <th className="p-3 font-semibold">Student Name</th>
                       <th className="p-3 font-semibold">Room</th>
-                      <th className="p-3 font-semibold">Leave Period</th>
+                      <th className="p-3 font-semibold">Off-Day Period</th>
                       <th className="p-3 font-semibold">Total Days</th>
-                      <th className="p-3 font-semibold">Reason</th>
-                      <th className="p-3 font-semibold">Status</th>
-                      <th className="p-3 font-semibold text-right">Actions</th>
+                      <th className="p-3 font-semibold">Reason / Note</th>
+                      <th className="p-3 font-semibold text-right">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
@@ -357,29 +362,20 @@ function WardenMessManagement() {
                         <td className="p-3 text-muted-foreground">{r.startDate} → {r.endDate}</td>
                         <td className="p-3 font-medium text-foreground">{r.totalDays} Days</td>
                         <td className="p-3 text-muted-foreground max-w-xs truncate">{r.reason}</td>
-                        <td className="p-3"><StatusPill status={r.status} /></td>
                         <td className="p-3 text-right">
-                          {r.status === "pending" ? (
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                onClick={() => handleUpdateRebateStatus(r.id, "approved")}
-                                className="flex items-center gap-1 rounded bg-emerald-50 px-2 py-1 text-[11px] font-medium text-emerald-600 hover:bg-emerald-100"
-                              >
-                                <CheckCircle2 className="h-3 w-3" /> Approve
-                              </button>
-                              <button
-                                onClick={() => handleUpdateRebateStatus(r.id, "rejected")}
-                                className="flex items-center gap-1 rounded bg-red-50 px-2 py-1 text-[11px] font-medium text-red-600 hover:bg-red-100"
-                              >
-                                <XCircle className="h-3 w-3" /> Reject
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-[11px] text-muted-foreground">Actioned</span>
-                          )}
+                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+                            ● Notified (Not Coming)
+                          </span>
                         </td>
                       </tr>
                     ))}
+                    {rebates.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                          All students are attending mess today (0 off-days logged)
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
