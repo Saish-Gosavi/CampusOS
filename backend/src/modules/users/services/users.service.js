@@ -27,12 +27,29 @@ export class UsersService {
   }
 
   static async createUser(creator, data) {
-    const targetRole = await prisma.role.findUnique({ where: { id: data.roleId } });
-    if (!targetRole) {
-      throw new AppError("Invalid role ID specified", 400);
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existing) {
+      throw new AppError("A user with this email address already exists.", 400);
     }
 
-    const creatorRoleName = creator.role.toLowerCase();
+    let roleId = data.roleId;
+    if (!roleId && data.roleName) {
+      const roleObj = await prisma.role.findFirst({
+        where: { name: { equals: data.roleName.toLowerCase() } }
+      });
+      if (roleObj) roleId = roleObj.id;
+    }
+
+    if (!roleId) {
+      throw new AppError("Role ID or valid roleName must be specified", 400);
+    }
+
+    const targetRole = await prisma.role.findUnique({ where: { id: roleId } });
+    if (!targetRole) {
+      throw new AppError("Invalid role specified", 400);
+    }
+
+    const creatorRoleName = typeof creator.role === "string" ? creator.role.toLowerCase() : (creator.role?.name?.toLowerCase() || "");
     const targetRoleName = targetRole.name.toLowerCase();
 
     // Enforce hierarchical controls
@@ -47,9 +64,7 @@ export class UsersService {
       }
     }
 
-    const salt = await bcrypt.genSalt(10);
-    // Strip fields not present in the Prisma User model (e.g. campus)
-    const { campus, ...userData } = data;
+    const { roleName, campus, ...userData } = data;
 
     // Pre-check: ensure email is not already registered
     const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
@@ -61,10 +76,10 @@ export class UsersService {
     try {
       return await UsersRepository.create({
         ...userData,
+        roleId,
         password: hashedPassword,
       });
     } catch (err) {
-      // Handle Prisma unique constraint violation (P2002) gracefully
       if (err?.code === "P2002" || err?.message?.includes("Unique constraint")) {
         throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
       }
@@ -95,5 +110,28 @@ export class UsersService {
     }
 
     return UsersRepository.delete(id);
+  }
+
+  static async updateUser(creator, id, data) {
+    const userId = Number(id);
+    const existing = await UsersRepository.findById(userId);
+    if (!existing) {
+      throw new AppError("User not found", 404);
+    }
+
+    if (data.email && data.email !== existing.email) {
+      const emailTaken = await prisma.user.findUnique({ where: { email: data.email } });
+      if (emailTaken) {
+        throw new AppError("A user with this email address already exists.", 400);
+      }
+    }
+
+    const { roleName, campus, password, ...updateData } = data;
+    if (password && password.trim()) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password.trim(), salt);
+    }
+
+    return UsersRepository.updateProfile(userId, updateData);
   }
 }

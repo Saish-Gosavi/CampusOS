@@ -24,15 +24,19 @@ function LoginPage() {
   const onSubmit = async (values) => {
     setSubmitting(true);
     try {
-      const response = await authApi.login(values);
+      const payload = {
+        ...values,
+        email: (values.email || "").trim(),
+      };
+      const response = await authApi.login(payload);
       if (response.success && response.data) {
         const { user, tokens } = response.data;
         tokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
         login(user, tokens.accessToken);
         toast.success("Signed in successfully");
 
-        const roleStr = typeof user.role === "string" ? user.role : user.role?.name;
-        const role = roleStr?.toLowerCase();
+        const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
+        const role = rawRole.toLowerCase();
         if (role === "superadmin") navigate("/super-admin");
         else if (role === "senioradmin") navigate("/senior-admin");
         else if (role === "admin") navigate("/hostel-admin");
@@ -45,7 +49,8 @@ function LoginPage() {
         toast.error(response.message || "Invalid credentials");
       }
     } catch (err) {
-      toast.error(err.message || "Unable to sign in. Please try again.");
+      const errMsg = err.errors?.[0]?.message || err.message || "Unable to sign in. Please try again.";
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }

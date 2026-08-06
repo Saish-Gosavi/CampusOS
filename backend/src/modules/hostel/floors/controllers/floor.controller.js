@@ -4,7 +4,8 @@ import { apiResponse } from "../../../../helpers/response.helper.js";
 export class FloorController {
   static async getAll(req, res, next) {
     try {
-      const data = await FloorService.getAll();
+      const { blockId } = req.query;
+      const data = await FloorService.getAll(blockId);
       return apiResponse.success(res, data, "Records retrieved successfully");
     } catch (error) {
       next(error);

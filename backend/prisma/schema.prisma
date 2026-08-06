@@ -187,6 +187,7 @@ model Warden {
   user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName String
   phone    String
+  shift    String? @default("Day") // "Day", "Night", "Rotational"
   hostelId Int
   hostel   Hostel @relation(fields: [hostelId], references: [id])
 

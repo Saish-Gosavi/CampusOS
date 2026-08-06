@@ -181,6 +181,88 @@ export const collegeApi = {
   }
 };
 
+export const hostelApi = collegeApi;
+
+export const blockApi = {
+  async getAll(hostelId) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/hostel/blocks", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/blocks", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/blocks/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/blocks/${id}`);
+  }
+};
+
+export const floorApi = {
+  async getAll(blockId) {
+    const params = blockId ? { blockId } : {};
+    return apiClient.get("/hostel/floors", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/floors", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/floors/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/floors/${id}`);
+  }
+};
+
+export const roomApi = {
+  async getAll(floorId) {
+    const params = floorId ? { floorId } : {};
+    return apiClient.get("/hostel/rooms", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/rooms", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/rooms/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/rooms/${id}`);
+  }
+};
+
+export const bedApi = {
+  async getAll(roomId) {
+    const params = roomId ? { roomId } : {};
+    return apiClient.get("/hostel/beds", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/beds", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/beds/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/beds/${id}`);
+  }
+};
+
+export const wardenApi = {
+  async getAll(hostelId) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/hostel/wardens", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/wardens", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/wardens/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/wardens/${id}`);
+  }
+};
+
 export const rolesApi = {
   async getAll() {
     return apiClient.get("/super_admin/roles-and-permissions");
@@ -209,6 +291,9 @@ export const userApi = {
   },
   async create(data) {
     return apiClient.post("/users", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/users/${id}`, data);
   },
   async delete(id) {
     return apiClient.delete(`/users/${id}`);

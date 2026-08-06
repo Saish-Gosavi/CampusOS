@@ -13,6 +13,8 @@ import visitorsRouter from "./visitors/routes/visitor.routes.js";
 import furnitureRouter from "./furniture/routes/furniture.routes.js";
 import feesRouter from "./fees/routes/fee.routes.js";
 
+import wardenRouter from "./wardens/routes/warden.routes.js";
+
 const router = Router();
 
 router.use("/hostels", hostelRouter);
@@ -20,6 +22,7 @@ router.use("/blocks", blocksRouter);
 router.use("/floors", floorsRouter);
 router.use("/rooms", roomsRouter);
 router.use("/beds", bedsRouter);
+router.use("/wardens", wardenRouter);
 router.use("/allocations", allocationsRouter);
 router.use("/room-allotment-letters", allotmentRouter);
 router.use("/room-allotment-letter", allotmentRouter);

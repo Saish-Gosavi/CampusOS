@@ -1,8 +1,8 @@
 import { RoomRepository } from "../repository/room.repository.js";
 
 export class RoomService {
-  static async getAll() {
-    return RoomRepository.findAll();
+  static async getAll(floorId) {
+    return RoomRepository.findAll(floorId);
   }
 
   static async getById(id) {

@@ -35,6 +35,7 @@ import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
 import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
 
 // Hostel Pages
+import HostelDashboardPage from "@/modules/hostel/HostelDashboardPage";
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
 import { Route as HostelAdd } from "@/pages/hostel/hostel/add";
@@ -173,8 +174,8 @@ const RootNavigator = () => {
   
   if (!user) return <Navigate to="/login" replace />;
   
-  const roleStr = typeof user.role === "string" ? user.role : user.role?.name;
-  const role = roleStr?.toLowerCase();
+  const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
+  const role = rawRole.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
   if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
@@ -251,7 +252,7 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelIndex.component />} />
+        <Route index element={<HostelDashboardPage />} />
         <Route path="students" element={<HostelIndex.component />} />
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
@@ -263,6 +264,7 @@ export default function AppRoutes() {
         <Route path="allocation/new" element={<HostelAllocationNew.component />} />
         <Route path="allocation/change" element={<HostelAllocationChange.component />} />
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
+        <Route path="hostels" element={<HostelIndex.component />} />
         <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
         <Route path="complaints" element={<HostelComplaints.component />} />
         <Route path="fees" element={<HostelFees.component />} />

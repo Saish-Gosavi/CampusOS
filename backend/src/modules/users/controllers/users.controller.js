@@ -66,6 +66,15 @@ export class UsersController {
     }
   }
 
+  static async updateUser(req, res, next) {
+    try {
+      const user = await UsersService.updateUser(req.user, req.params.id, req.body);
+      return apiResponse.success(res, user, "User updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async deleteUser(req, res, next) {
     try {
       await UsersService.deleteUser(req.user, req.params.id);
