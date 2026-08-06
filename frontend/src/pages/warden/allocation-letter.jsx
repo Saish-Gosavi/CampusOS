@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@/routes/compat";
 import {
   FileText,
@@ -8,22 +8,49 @@ import {
   Download,
   RefreshCw,
   Search,
-  Filter,
-  AlertTriangle,
-  Building,
-  User,
-  BedDouble,
-  ShieldCheck,
-  Printer,
-  Sparkles
+  Sparkles,
+  Users,
+  Loader2,
+  Check,
+  X
 } from "lucide-react";
-import { toast } from "sonner";
+import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { wardenLetterApi } from "@/services/api";
+import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 const Route = createFileRoute("/warden/allocation-letter")({
+  head: () => ({
+    meta: [
+      { title: "Letter Allocation Management — Warden · CampusOS" },
+      {
+        name: "description",
+        content: "Review student letter requests, verify hostel allocations, approve/reject, and issue official letters."
+      }
+    ]
+  }),
   component: WardenAllocationLetterPage
 });
+
+const TINT = "#7B4CED";
+const TABS = [
+  { id: "all", label: "All Requests" },
+  { id: "pending", label: "Pending" },
+  { id: "approved", label: "Approved" },
+  { id: "generated", label: "Generated" },
+  { id: "rejected", label: "Rejected" }
+];
 
 export function WardenAllocationLetterPage() {
   const [requests, setRequests] = useState([]);
@@ -31,32 +58,34 @@ export function WardenAllocationLetterPage() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Rejection modal
   const [rejectingReq, setRejectingReq] = useState(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [processingId, setProcessingId] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [reqRes, tempRes] = await Promise.all([
         wardenLetterApi.getRequests(),
         wardenLetterApi.getActiveTemplate().catch(() => null)
       ]);
-      setRequests(reqRes.data || []);
+      setRequests(reqRes?.data || []);
       if (tempRes?.data) {
         setActiveTemplate(tempRes.data);
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || "Failed to load letter requests");
+      toast.error("Failed to load letter requests");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const handleApprove = async (id) => {
     setProcessingId(id);
@@ -71,8 +100,8 @@ export function WardenAllocationLetterPage() {
     }
   };
 
-  const handleRejectSubmit = async (e) => {
-    e.preventDefault();
+  const handleRejectSubmit = async () => {
+    if (!rejectingReq) return;
     if (!rejectionReason.trim()) {
       return toast.error("Please enter a rejection reason");
     }
@@ -93,11 +122,9 @@ export function WardenAllocationLetterPage() {
   const handleGeneratePdf = async (reqItem, isRegenerate = false) => {
     setProcessingId(reqItem.id);
     try {
-      // 1. Call API to generate & record in backend DB
       const genRes = await wardenLetterApi.generateLetter(reqItem.id);
       const letterData = genRes.data;
 
-      // 2. Generate PDF client side using jsPDF with Official Template metadata
       generatePdfDocument(reqItem, letterData, activeTemplate);
 
       toast.success(isRegenerate ? "Letter regenerated successfully!" : "Allocation letter generated!");
@@ -110,20 +137,15 @@ export function WardenAllocationLetterPage() {
     }
   };
 
-  // Generate PDF document using jsPDF
   const generatePdfDocument = (reqItem, letterData, template) => {
     const doc = new jsPDF({ unit: "mm", format: "a4" });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-
-    // Primary Brand Purple Color
     const purpleHex = [123, 76, 237];
 
-    // Header Background Accent Bar
     doc.setFillColor(...purpleHex);
     doc.rect(0, 0, pageWidth, 6, "F");
 
-    // Header Title
     let currentY = 20;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
@@ -136,13 +158,11 @@ export function WardenAllocationLetterPage() {
     doc.setTextColor(100, 116, 139);
     doc.text("Official Resident Room Allocation Certificate", pageWidth / 2, currentY, { align: "center" });
 
-    // Decorative line
     currentY += 6;
     doc.setDrawColor(226, 232, 240);
     doc.setLineWidth(0.5);
     doc.line(20, currentY, pageWidth - 20, currentY);
 
-    // Reference Details Box
     currentY += 10;
     doc.setFillColor(248, 250, 252);
     doc.roundedRect(20, currentY, pageWidth - 40, 22, 3, 3, "F");
@@ -161,7 +181,6 @@ export function WardenAllocationLetterPage() {
     doc.text(`Status: Official Allocation Certificate`, 25, currentY + 16);
     doc.text(`Signed By: ${letterData?.signedBy || "Warden Office"}`, pageWidth - 25, currentY + 16, { align: "right" });
 
-    // Student & Allocation Details Grid
     currentY += 32;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
@@ -180,7 +199,6 @@ export function WardenAllocationLetterPage() {
     const bedNum = alloc?.bed?.number ? `Bed ${alloc.bed.number}` : "Bed 1";
 
     currentY += 6;
-    doc.setFillColor(255, 255, 255);
     doc.setFontSize(9);
 
     const rows = [
@@ -208,7 +226,6 @@ export function WardenAllocationLetterPage() {
       currentY += 7;
     });
 
-    // Terms & Conditions Box
     currentY += 8;
     doc.setFillColor(248, 250, 252);
     doc.roundedRect(20, currentY, pageWidth - 40, 45, 3, 3, "F");
@@ -234,7 +251,6 @@ export function WardenAllocationLetterPage() {
       termY += 5.5;
     });
 
-    // Signatures Section
     currentY += 60;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
@@ -246,165 +262,144 @@ export function WardenAllocationLetterPage() {
     doc.line(pageWidth - 75, currentY + 15, pageWidth - 25, currentY + 15);
     doc.text("Warden Signature & Stamp", pageWidth - 70, currentY + 20);
 
-    // Footer Accent
     doc.setFont("helvetica", "italic");
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
     doc.text(`Generated via CampusOS Portal on ${new Date().toLocaleString()}`, pageWidth / 2, pageHeight - 10, { align: "center" });
 
-    // Save PDF
     doc.save(`Allocation_Letter_${studentName.replace(/\s+/g, "_")}_${letterData?.referenceNo || "REF"}.pdf`);
   };
 
-  // Filter logic
-  const filteredRequests = requests.filter((r) => {
-    const matchesStatus =
-      filterStatus === "all"
-        ? true
-        : r.status.toLowerCase() === filterStatus.toLowerCase();
+  const filteredRequests = useMemo(() => {
+    return requests.filter((r) => {
+      const matchesStatus =
+        filterStatus === "all"
+          ? true
+          : r.status.toLowerCase() === filterStatus.toLowerCase();
 
-    const name = r.student?.fullName || r.student?.user?.name || "";
-    const email = r.student?.user?.email || "";
-    const collegeId = r.student?.collegeId || "";
+      const name = r.student?.fullName || r.student?.user?.name || "";
+      const email = r.student?.user?.email || "";
+      const collegeId = r.student?.collegeId || "";
 
-    const matchesSearch =
-      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      collegeId.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch =
+        name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        collegeId.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesStatus && matchesSearch;
-  });
+      return matchesStatus && matchesSearch;
+    });
+  }, [requests, filterStatus, searchQuery]);
 
-  // KPI Calculations
-  const totalCount = requests.length;
-  const pendingCount = requests.filter((r) => r.status === "Pending").length;
-  const approvedCount = requests.filter((r) => r.status === "Approved").length;
-  const generatedCount = requests.filter((r) => r.status === "Generated").length;
+  const counts = useMemo(
+    () => ({
+      total: requests.length,
+      pending: requests.filter((r) => r.status === "Pending").length,
+      approved: requests.filter((r) => r.status === "Approved").length,
+      generated: requests.filter((r) => r.status === "Generated").length,
+      rejected: requests.filter((r) => r.status === "Rejected").length
+    }),
+    [requests]
+  );
+
+  const stats = [
+    { label: "Total Requests", value: counts.total, icon: FileText, tint: "#0EA5E9" },
+    { label: "Pending Review", value: counts.pending, icon: Clock, tint: "#F97316" },
+    { label: "Approved", value: counts.approved, icon: CheckCircle2, tint: "#22C55E" },
+    { label: "Letters Generated", value: counts.generated, icon: Sparkles, tint: "#A855F7" }
+  ];
 
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-6 w-full min-h-full pb-10">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-[#7B4CED]/10 text-[#7B4CED]">
-            <FileText className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-              Letter Allocation Management
-            </h1>
-            <p className="text-xs font-medium text-slate-500">
-              Review student requests, verify hostel allocations, approve/reject, and issue official letters.
-            </p>
-          </div>
-        </div>
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      <WardenPageHeader
+        title="Letter Allocation Management"
+        description="Review student requests, verify hostel allocations, approve/reject, and issue official letters."
+        icon={FileText}
+        tint={TINT}
+        breadcrumbs={[{ label: "Letter Allocation" }]}
+      />
 
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin text-[#7B4CED]" : ""}`} />
-          Refresh
-        </button>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {stats.map((s) => (
+          <div key={s.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
+              <span
+                className="grid h-8 w-8 place-items-center rounded-lg"
+                style={{ backgroundColor: `${s.tint}1A`, color: s.tint }}
+              >
+                <s.icon className="h-4 w-4" />
+              </span>
+            </div>
+            <p className="mt-2 text-2xl font-bold text-foreground">{s.value}</p>
+          </div>
+        ))}
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Requests</span>
-            <FileText className="h-5 w-5 text-slate-400" />
-          </div>
-          <div className="mt-2 text-2xl font-extrabold text-slate-900">{totalCount}</div>
-        </div>
-
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-amber-700">Pending Review</span>
-            <Clock className="h-5 w-5 text-amber-500" />
-          </div>
-          <div className="mt-2 text-2xl font-extrabold text-amber-800">{pendingCount}</div>
-        </div>
-
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Approved</span>
-            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-          </div>
-          <div className="mt-2 text-2xl font-extrabold text-emerald-800">{approvedCount}</div>
-        </div>
-
-        <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-purple-700">Letters Generated</span>
-            <Sparkles className="h-5 w-5 text-purple-500" />
-          </div>
-          <div className="mt-2 text-2xl font-extrabold text-purple-800">{generatedCount}</div>
-        </div>
-      </div>
-
-      {/* Filter Tabs & Search */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
-          {[
-            { id: "all", label: "All Requests" },
-            { id: "pending", label: "Pending" },
-            { id: "approved", label: "Approved" },
-            { id: "generated", label: "Generated" },
-            { id: "rejected", label: "Rejected" }
-          ].map((t) => (
+      {/* Tabs + Table Container */}
+      <div className="rounded-xl border border-border bg-card shadow-sm">
+        {/* Tab Bar */}
+        <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
+          {TABS.map((t) => (
             <button
               key={t.id}
               onClick={() => setFilterStatus(t.id)}
-              className={`rounded-xl px-3.5 py-1.5 text-xs font-bold transition ${
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
                 filterStatus === t.id
-                  ? "bg-[#7B4CED] text-white shadow-sm"
-                  : "text-slate-600 hover:bg-slate-100"
-              }`}
+                  ? "text-white"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+              style={filterStatus === t.id ? { backgroundColor: TINT } : undefined}
             >
               {t.label}
+              {t.id === "pending" && counts.pending > 0 && (
+                <span
+                  className="ml-1.5 rounded-full px-1.5 py-0.5 text-xs font-bold"
+                  style={{ backgroundColor: "#F97316", color: "#fff" }}
+                >
+                  {counts.pending}
+                </span>
+              )}
             </button>
           ))}
+
+          {/* Search */}
+          <div className="relative ml-auto">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search student or email…"
+              className="h-9 w-64 rounded-lg border border-border bg-background pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
         </div>
 
-        <div className="relative min-w-[240px]">
-          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search student or email..."
-            className="w-full rounded-xl border border-slate-200 pl-9 pr-3 py-1.5 text-xs outline-none focus:border-[#7B4CED]"
-          />
-        </div>
-      </div>
-
-      {/* Requests Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        {loading ? (
-          <div className="flex h-48 items-center justify-center text-xs text-slate-400">
-            Loading allocation letter requests...
-          </div>
-        ) : filteredRequests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 text-center text-slate-400">
-            <FileText className="h-10 w-10 mb-2 stroke-1 text-slate-300" />
-            <p className="text-sm font-semibold text-slate-600">No requests found</p>
-            <p className="text-xs text-slate-400">There are no letter requests matching your filter criteria.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="border-b border-slate-100 bg-slate-50/50 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                <tr>
-                  <th className="px-4 py-3">Student Details</th>
-                  <th className="px-4 py-3">Hostel & Allocation</th>
-                  <th className="px-4 py-3">Requested On</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+        {/* Table */}
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="flex h-48 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : filteredRequests.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
+              <FileText className="h-10 w-10 mb-2 stroke-1 text-muted-foreground/60" />
+              <p className="text-sm font-semibold text-foreground">No requests found</p>
+              <p className="text-xs text-muted-foreground">There are no letter requests matching your filter criteria.</p>
+            </div>
+          ) : (
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted/40">
+                <tr className="text-xs uppercase tracking-wide text-muted-foreground">
+                  <th className="px-4 py-3 font-medium">Student Details</th>
+                  <th className="px-4 py-3 font-medium">Hostel & Allocation</th>
+                  <th className="px-4 py-3 font-medium">Requested On</th>
+                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border">
                 {filteredRequests.map((r) => {
                   const studentName = r.student?.fullName || r.student?.user?.name || "Student";
                   const studentEmail = r.student?.user?.email || "";
@@ -414,16 +409,16 @@ export function WardenAllocationLetterPage() {
                   const roomBed = alloc?.bed?.room?.number ? `Room ${alloc.bed.room.number} (${alloc.bed.number})` : "Unassigned";
 
                   return (
-                    <tr key={r.id} className="hover:bg-slate-50/60 transition">
+                    <tr key={r.id} className="hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3 font-medium">
-                        <div className="font-bold text-slate-900">{studentName}</div>
-                        <div className="text-[11px] text-slate-400">{studentEmail} · {collegeId}</div>
+                        <div className="font-semibold text-foreground">{studentName}</div>
+                        <div className="text-xs text-muted-foreground">{studentEmail} · {collegeId}</div>
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-bold text-slate-800">{hostelName}</div>
-                        <div className="text-[11px] text-slate-500">{roomBed}</div>
+                        <div className="font-semibold text-foreground">{hostelName}</div>
+                        <div className="text-xs text-muted-foreground">{roomBed}</div>
                       </td>
-                      <td className="px-4 py-3 text-slate-500">
+                      <td className="px-4 py-3 text-muted-foreground">
                         {new Date(r.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
@@ -433,48 +428,58 @@ export function WardenAllocationLetterPage() {
                         <div className="flex items-center justify-end gap-2">
                           {r.status === "Pending" && (
                             <>
-                              <button
+                              <Button
+                                size="sm"
                                 onClick={() => handleApprove(r.id)}
                                 disabled={processingId === r.id}
-                                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+                                className="h-8 gap-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
                               >
-                                <CheckCircle2 className="h-3.5 w-3.5" /> Approve
-                              </button>
-                              <button
-                                onClick={() => setRejectingReq(r)}
+                                <Check className="h-3.5 w-3.5" /> Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                  setRejectingReq(r);
+                                  setRejectionReason("");
+                                }}
                                 disabled={processingId === r.id}
-                                className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 disabled:opacity-50"
+                                className="h-8 gap-1 font-medium"
                               >
-                                <XCircle className="h-3.5 w-3.5" /> Reject
-                              </button>
+                                <X className="h-3.5 w-3.5" /> Reject
+                              </Button>
                             </>
                           )}
 
                           {r.status === "Approved" && (
-                            <button
+                            <Button
+                              size="sm"
                               onClick={() => handleGeneratePdf(r)}
                               disabled={processingId === r.id}
-                              className="inline-flex items-center gap-1.5 rounded-xl bg-[#7B4CED] px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#6a3fd1] disabled:opacity-50"
+                              className="h-8 gap-1.5 bg-[#7B4CED] hover:bg-[#6a3fd1] text-white font-semibold"
                             >
                               <Sparkles className="h-3.5 w-3.5" /> Generate Letter
-                            </button>
+                            </Button>
                           )}
 
                           {r.status === "Generated" && (
                             <>
-                              <button
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 onClick={() => handleGeneratePdf(r, true)}
                                 disabled={processingId === r.id}
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+                                className="h-8 gap-1 font-medium"
                               >
                                 <RefreshCw className="h-3 w-3" /> Regenerate
-                              </button>
-                              <button
+                              </Button>
+                              <Button
+                                size="sm"
                                 onClick={() => handleGeneratePdf(r, false)}
-                                className="inline-flex items-center gap-1 rounded-lg bg-[#7B4CED] px-2.5 py-1 text-xs font-bold text-white shadow-sm hover:bg-[#6a3fd1]"
+                                className="h-8 gap-1 bg-[#7B4CED] hover:bg-[#6a3fd1] text-white font-semibold"
                               >
                                 <Download className="h-3 w-3" /> Download PDF
-                              </button>
+                              </Button>
                             </>
                           )}
                         </div>
@@ -484,54 +489,47 @@ export function WardenAllocationLetterPage() {
                 })}
               </tbody>
             </table>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Reject Reason Modal */}
-      {rejectingReq && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl">
-            <h3 className="text-base font-bold text-slate-900">Reject Letter Request</h3>
-            <p className="mt-1 text-xs text-slate-500">
-              Please specify the reason for rejecting this allocation letter request for{" "}
-              <span className="font-bold text-slate-800">
-                {rejectingReq.student?.fullName || rejectingReq.student?.user?.name}
+      {/* Reject Reason Dialog */}
+      <Dialog open={!!rejectingReq} onOpenChange={(open) => !open && setRejectingReq(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject Letter Request</DialogTitle>
+            <DialogDescription>
+              Specify the reason for rejecting the allocation letter request for{" "}
+              <span className="font-semibold text-foreground">
+                {rejectingReq?.student?.fullName || rejectingReq?.student?.user?.name}
               </span>
               .
-            </p>
-            <form onSubmit={handleRejectSubmit} className="mt-4 flex flex-col gap-3">
-              <textarea
-                required
-                rows={3}
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Enter rejection reason..."
-                className="w-full rounded-xl border border-slate-200 p-3 text-xs outline-none focus:border-rose-500"
-              />
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRejectingReq(null);
-                    setRejectionReason("");
-                  }}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={processingId === rejectingReq.id}
-                  className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700 disabled:opacity-50"
-                >
-                  Confirm Rejection
-                </button>
-              </div>
-            </form>
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2">
+            <Textarea
+              rows={3}
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            />
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectingReq(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectSubmit}
+              disabled={processingId === rejectingReq?.id}
+            >
+              Confirm Rejection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -540,14 +538,14 @@ function StatusBadge({ status, reason }) {
   const s = (status || "").toLowerCase();
   if (s === "approved") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600">
+      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-500">
         <CheckCircle2 className="h-3 w-3" /> Approved
       </span>
     );
   }
   if (s === "generated") {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 px-2.5 py-0.5 text-[11px] font-bold text-purple-600">
+      <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/10 px-2.5 py-0.5 text-xs font-semibold text-purple-400">
         <Sparkles className="h-3 w-3" /> Letter Issued
       </span>
     );
@@ -556,14 +554,14 @@ function StatusBadge({ status, reason }) {
     return (
       <span
         title={reason ? `Reason: ${reason}` : "Rejected"}
-        className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-bold text-rose-600 cursor-help"
+        className="inline-flex items-center gap-1 rounded-full bg-rose-500/10 px-2.5 py-0.5 text-xs font-semibold text-rose-500 cursor-help"
       >
         <XCircle className="h-3 w-3" /> Rejected
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold text-amber-600">
+    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-500">
       <Clock className="h-3 w-3" /> Pending Review
     </span>
   );
