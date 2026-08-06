@@ -6,6 +6,13 @@ export const apiResponse = {
       data,
     });
   },
+  created: (res, data, message = "Created successfully") => {
+    return res.status(201).json({
+      success: true,
+      message,
+      data,
+    });
+  },
   error: (res, message = "Error occurred", statusCode = 500, errors = null) => {
     return res.status(statusCode).json({
       success: false,
@@ -16,3 +23,4 @@ export const apiResponse = {
 };
 
 export default apiResponse;
+

@@ -4,6 +4,8 @@ import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { myFees } from "@/lib/student-data";
+import { studentFeeApi } from "@/services/api";
+import { useEffect, useState } from "react";
 const Route = createFileRoute("/student/fees")({
   head: () => ({ meta: [{ title: "Hostel Fees \u2014 Student Portal" }] }),
   component: FeesPage
@@ -12,6 +14,19 @@ function FeesPage() {
   const pending = myFees.filter((f) => f.status !== "Paid");
   const totalDue = pending.reduce((sum, f) => sum + f.amount, 0);
   const paid = myFees.filter((f) => f.status === "Paid").reduce((s, f) => s + f.amount, 0);
+  const [receipts, setReceipts] = useState([]);
+
+  useEffect(() => {
+    const fetchReceipts = async () => {
+      try {
+        const { data } = await studentFeeApi.getMyReceipts();
+        setReceipts(data);
+      } catch (err) {
+        console.error("Failed to fetch receipts", err);
+      }
+    };
+    fetchReceipts();
+  }, []);
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <StudentPageHeader
     title="Hostel Fees"
@@ -64,17 +79,39 @@ function FeesPage() {
                   <td className="px-4 py-3">{f.paidOn ? new Date(f.paidOn).toLocaleDateString() : "\u2014"}</td>
                   <td className="px-4 py-3"><StatusPill status={f.status} /></td>
                   <td className="px-4 py-3">
-                    {f.receipt ? <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs font-medium hover:bg-muted">
-                        <Receipt className="h-3.5 w-3.5" /> {f.receipt}
-                        <Download className="ml-1 h-3.5 w-3.5" />
-                      </button> : "\u2014"}
-                  </td>
-                </tr>)}
+                  {f.receipt ? <button className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1 text-xs font-medium hover:bg-muted">
+                      <Receipt className="h-3.5 w-3.5" /> {f.receipt}
+                      <Download className="ml-1 h-3.5 w-3.5" />
+                    </button> : "—"}
+                </td>
+              </tr>)}
             </tbody>
           </table>
         </div>
       </div>
-    </div>;
+    
+    {/* New Receipts Section */}
+    <div className="mt-8">
+      <h3 className="mb-4 text-lg font-semibold text-foreground">Released Receipts</h3>
+      {receipts.length === 0 ? (
+        <p className="text-muted-foreground">No receipts released yet.</p>
+      ) : (
+        <ul className="space-y-2">
+          {receipts.map((r) => (
+            <li key={r.id} className="flex items-center justify-between rounded border border-border p-3">
+              <span className="flex items-center gap-2">
+                <Receipt className="h-4 w-4" />
+                {r.receiptNumber || `Receipt #${r.id}`}
+              </span>
+              <Button variant="outline" size="sm" onClick={() => alert(`Viewing receipt ${r.id}`)}>
+                View
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>;
 }
 export {
   Route

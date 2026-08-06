@@ -88,8 +88,8 @@ function AdminsPage() {
     async function loadRolesAndColleges() {
       try {
         const [resRoles, resColleges] = await Promise.all([
-          rolesApi.getAll(),
-          collegeApi.getAll()
+          rolesApi.getAll().catch(() => ({ data: [] })),
+          collegeApi.getAll().catch(() => ({ data: [] }))
         ]);
         const rolesData = Array.isArray(resRoles.data) ? resRoles.data : (Array.isArray(resRoles) ? resRoles : []);
         setRolesList(rolesData);

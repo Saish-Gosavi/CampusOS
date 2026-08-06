@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link } from "react-router-dom";
 import {
   Bell,
   Search,
@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/context/AuthContext";
+
 const notifications = [
   { icon: MessageSquareWarning, tint: "#EF4444", title: "High-priority complaint", meta: "Block B \xB7 118 \u2014 2 min ago" },
   { icon: IndianRupee, tint: "#22C55E", title: "Fee payment received", meta: "\u20B942,000 \u2014 Kabir Verma" },
@@ -49,6 +51,7 @@ function useDarkMode() {
 }
 function HostelNavbar() {
   const { isDark, toggle } = useDarkMode();
+  const { logout } = useAuth();
   return <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
       <SidebarTrigger className="text-muted-foreground" />
       <Separator orientation="vertical" className="mx-1 h-6" />
@@ -134,10 +137,11 @@ function HostelNavbar() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="text-[#EF4444] focus:text-[#EF4444]">
-              <Link to="/login">
-                <LogOut className="mr-2 h-4 w-4" /> Logout
-              </Link>
+            <DropdownMenuItem 
+              onClick={logout} 
+              className="text-[#EF4444] focus:text-[#EF4444] cursor-pointer"
+            >
+              <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

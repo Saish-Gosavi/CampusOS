@@ -77,8 +77,8 @@ function DashboardPage() {
       }))
     : [
         { label: "Total Colleges", value: "0", delta: "Active Campus Count", trend: "up", icon: Building2, tint: "#2563EB" },
-        { label: "Total Admins", value: "0", delta: "Configured Staff", trend: "up", icon: UserCog, tint: "#7B4CED" },
-        { label: "Total Senior Admin", value: "0", delta: "Platform Coordinators", trend: "up", icon: ShieldCheck, tint: "#3B82F6" },
+        { label: "Total Senior Admins", value: "0", delta: "Configured Coordinators", trend: "up", icon: UserCog, tint: "#7B4CED" },
+        { label: "Total Hostel Admins", value: "0", delta: "Campus Staff", trend: "up", icon: ShieldCheck, tint: "#3B82F6" },
         { label: "Total Students", value: "0", delta: "Enrolled", trend: "up", icon: GraduationCap, tint: "#EAB308" },
         { label: "Active Users (24h)", value: "1", delta: "Operational Accounts", trend: "up", icon: Users, tint: "#22C55E" },
         { label: "Platform Uptime", value: "99.99%", delta: "Last 30 days", trend: "up", icon: ActivityIcon, tint: "#22C55E" }

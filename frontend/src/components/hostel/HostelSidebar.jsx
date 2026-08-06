@@ -7,19 +7,21 @@ import {
   Users,
   UserCog,
   IndianRupee,
-  CalendarDays,
-  UserRoundCheck,
-  DoorOpen,
   MessageSquareWarning,
   Megaphone,
   BarChart3,
+  Blocks,
+  Layers,
+  CalendarDays,
+  UserRoundCheck,
+  DoorOpen,
+
   LogOut,
   GraduationCap
 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -30,7 +32,6 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/context/AuthContext";
 
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
@@ -42,7 +43,7 @@ const mainItems = [
 ];
 
 const opsItems = [
-  { title: "Fees Management", url: "/hostel-admin/fees", icon: IndianRupee },
+  { title: "Fees Management", url: "/hostel-admin/fee-management", icon: IndianRupee },
   { title: "Leave Management", url: "/hostel-admin/leaves", icon: CalendarDays },
   { title: "Visitor Management", url: "/hostel-admin/visitors", icon: UserRoundCheck },
   { title: "In Out Register", url: "/hostel-admin/in-out", icon: DoorOpen },
@@ -51,15 +52,8 @@ const opsItems = [
   { title: "Reports", url: "/hostel-admin/reports", icon: BarChart3 }
 ];
 
-function HostelSidebar() {
-  const { logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+function HostelSidebar() {
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -127,21 +121,6 @@ function HostelSidebar() {
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
-
-        <SidebarFooter className="border-t border-white/10 p-3">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={handleLogout}
-                tooltip="Logout"
-                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
       </div>
     </Sidebar>
   );

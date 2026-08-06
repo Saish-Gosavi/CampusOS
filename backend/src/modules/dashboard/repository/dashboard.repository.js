@@ -23,7 +23,7 @@ export class DashboardRepository {
       prisma.user.count({
         where: {
           role: {
-            name: { in: ["admin", "superadmin", "warden", "security", "librarian", "store"] },
+            name: "senioradmin",
           },
         },
       }).catch(() => 0),
@@ -124,6 +124,9 @@ export class DashboardRepository {
       activeUsersCount,
       recentAuditLogs,
       recentHostels,
+      hostelAdminsCount,
+      libraryAdminsCount,
+      inventoryAdminsCount,
       adminDistribution: [
         { name: "Hostel", value: hostelAdminsCount },
         { name: "Inventory", value: inventoryAdminsCount },
@@ -132,6 +135,104 @@ export class DashboardRepository {
       monthlyUsage,
       cityDistribution,
       studentDistribution
+    };
+  }
+
+  static async getHostelAdminStats() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    const [
+      studentsCount,
+      roomsCount,
+      occupiedRoomsCount,
+      pendingComplaints,
+      pendingLeaves,
+      visitorsToday,
+      blocks,
+      complaints,
+      leaves,
+      recentLeaves,
+      recentAuditLogs,
+      recentStudents
+    ] = await Promise.all([
+      prisma.student.count().catch(() => 0),
+      prisma.room.count().catch(() => 0),
+      prisma.room.count({ where: { status: "occupied" } }).catch(() => 0),
+      prisma.complaint.count({ where: { status: { in: ["open", "pending"] } } }).catch(() => 0),
+      prisma.leaveRequest.count({ where: { status: "pending" } }).catch(() => 0),
+      prisma.visitor.count({ where: { checkIn: { gte: today } } }).catch(() => 0),
+      prisma.block.findMany({
+        include: {
+          rooms: {
+            select: { capacity: true, status: true, beds: { where: { status: "occupied" } } }
+          }
+        }
+      }).catch(() => []),
+      prisma.complaint.groupBy({
+        by: ["status"],
+        _count: { id: true }
+      }).catch(() => []),
+      prisma.leaveRequest.groupBy({
+        by: ["status"],
+        _count: { id: true }
+      }).catch(() => []),
+      prisma.leaveRequest.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: { 
+          student: { 
+            select: { 
+              fullName: true, 
+              id: true,
+              allocations: {
+                where: { status: "active" },
+                take: 1,
+                include: { bed: { include: { room: { select: { number: true } } } } }
+              }
+            } 
+          } 
+        }
+      }).catch(() => []),
+      prisma.auditLog.findMany({
+        where: { module: "Hostel" },
+        take: 5,
+        orderBy: { id: "desc" },
+        include: { user: { select: { name: true } } }
+      }).catch(() => []),
+      prisma.student.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: {
+          allocations: {
+            where: { status: "active" },
+            take: 1,
+            include: { bed: { include: { room: { select: { number: true } } } } }
+          }
+        }
+      }).catch(() => []),
+    ]);
+
+    // Calculate Fees (Mocking fee total for now, or fetch from a Fee model if it exists)
+    const feeCollection = 1980000; // Mock 19.8L as requested in design
+
+    return {
+      studentsCount,
+      roomsCount,
+      occupiedRoomsCount,
+      availableRoomsCount: roomsCount - occupiedRoomsCount,
+      pendingComplaints,
+      pendingLeaves,
+      visitorsToday,
+      feeCollection,
+      blocks,
+      complaintDistribution: complaints,
+      leaveDistribution: leaves,
+      recentLeaves,
+      recentAuditLogs,
+      recentStudents
     };
   }
 }
