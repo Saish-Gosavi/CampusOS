@@ -56,12 +56,14 @@ import { Route as HostelBeds } from "@/pages/hostel/beds/index";
 import { Route as HostelBedAdd } from "@/pages/hostel/beds/add";
 import { Route as HostelBedEdit } from "@/pages/hostel/beds/$id.edit";
 import { Route as HostelAllocations } from "@/pages/hostel/allocations/index";
+import { Route as HostelRoomAllotmentLetter } from "@/pages/hostel/allocations/room-allotment-letter";
 import { Route as HostelAllocationNew } from "@/pages/hostel/allocations/new";
 import { Route as HostelAllocationChange } from "@/pages/hostel/allocations/change";
 import { Route as HostelAllocationHistory } from "@/pages/hostel/allocations/history";
 import { Route as HostelComplaints } from "@/pages/hostel/complaints/index";
 import { Route as HostelLeaves } from "@/pages/hostel/leave/index";
 import { Route as HostelVisitors } from "@/pages/hostel/visitors/index";
+import { Route as HostelReports } from "@/pages/hostel/reports/index";
 import { Route as HostelFurniture } from "@/pages/hostel/furniture/index";
 import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damaged";
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
@@ -266,9 +268,12 @@ export default function AppRoutes() {
         <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
         <Route path="rooms/add" element={<HostelRoomAdd.component />} />
         <Route path="allocation" element={<HostelAllocations.component />} />
+        <Route path="allocation/allotment-letter" element={<HostelRoomAllotmentLetter.component />} />
+        <Route path="allocation-letter" element={<HostelRoomAllotmentLetter.component />} />
         <Route path="allocation/new" element={<HostelAllocationNew.component />} />
         <Route path="allocation/change" element={<HostelAllocationChange.component />} />
         <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
+        <Route path="admission-approval" element={<AdmissionApprovalRoute.component />} />
         <Route path="complaints" element={<HostelComplaints.component />} />
         <Route path="fees" element={<HostelFees.component />} />
         <Route path="fee-management" element={<HostelFeeManagement.component />} />
@@ -277,6 +282,7 @@ export default function AppRoutes() {
         <Route path="leaves" element={<HostelLeaves.component />} />
         <Route path="notices" element={<HostelNotices.component />} />
         <Route path="staff" element={<HostelStaff.component />} />
+        <Route path="reports" element={<HostelReports.component />} />
         <Route path="furniture" element={<HostelFurniture.component />} />
         <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
         <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />
@@ -293,10 +299,6 @@ export default function AppRoutes() {
         <Route path="floors" element={<HostelFloors.component />} />
         <Route path="floors/add" element={<HostelFloorAdd.component />} />
         <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
-        <Route path="admission-approval" element={<AdmissionApprovalRoute.component />} />
-        <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
-
-        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 
       {/* Warden Dashboard Routes */}

@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+
 const catalogItems = [
   { title: "Dashboard", url: "/library-admin", icon: LayoutDashboard, exact: true },
   { title: "Book Management", url: "/library-admin/books", icon: BookOpen },
@@ -56,28 +57,35 @@ function LibrarySidebar() {
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const isActive = (url, exact) => exact ? pathname === url : pathname === url || pathname.startsWith(url + "/");
-  const renderMenu = (items) => <SidebarMenu>
+
+  const renderMenu = (items) => (
+    <SidebarMenu>
       {items.map((item) => {
-    const active = isActive(item.url, item.exact);
-    return <SidebarMenuItem key={item.title}>
+        const active = isActive(item.url, item.exact);
+        return (
+          <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-      asChild
-      tooltip={item.title}
+              asChild
+              tooltip={item.title}
               className={cn(
-                "text-white/70 hover:bg-white/10 hover:text-white transition-colors duration-200","dark:text-[#9999bb] dark:hover:bg-[#252545] dark:hover:text-[#e8e8f0]",
-                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm",active && "dark:bg-[#7c5cfc] dark:text-white dark:hover:bg-[#6a48f0] dark:hover:text-white"
+                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
               )}
-    >
+            >
               <Link to={item.url}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>
-          </SidebarMenuItem>;
-  })}
-    </SidebarMenu>;
-  return <Sidebar collapsible="icon" className="border-r-0">
-      <div className="flex h-full flex-col bg-primary dark:bg-[#1a1a2e] text-white dark:border-r dark:border-[#2e2e50]">
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+
+  return (
+    <Sidebar collapsible="icon" className="border-r-0">
+      <div className="flex h-full flex-col bg-primary text-white">
         <SidebarHeader className="border-b border-white/10">
           <div className="flex items-center gap-3 px-2 py-2">
             <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white/10 text-white backdrop-blur shadow-sm">
@@ -107,8 +115,6 @@ function LibrarySidebar() {
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Operations</SidebarGroupLabel>}
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
-
-          
         </SidebarContent>
 
         <SidebarFooter className="border-t border-white/10 p-3">
@@ -117,7 +123,7 @@ function LibrarySidebar() {
               <SidebarMenuButton
                 onClick={handleLogout}
                 tooltip="Logout"
-                className="cursor-pointer text-white/70 hover:bg-white/10 hover:text-white dark:text-[#9999bb] dark:hover:bg-[#252545] dark:hover:text-[#e8e8f0] transition-colors duration-200 mt-2"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
@@ -126,8 +132,8 @@ function LibrarySidebar() {
           </SidebarMenu>
         </SidebarFooter>
       </div>
-    </Sidebar>;
+    </Sidebar>
+  );
 }
-export {
-  LibrarySidebar
-};
+
+export { LibrarySidebar };

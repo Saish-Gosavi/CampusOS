@@ -39,7 +39,7 @@ export class DashboardRepository {
       prisma.auditLog.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
-        include: { user: true },
+        include: { user: { include: { role: true } } },
       }).catch(() => []),
       prisma.hostel.findMany({
         take: 5,

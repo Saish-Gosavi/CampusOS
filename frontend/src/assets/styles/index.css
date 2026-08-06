@@ -316,3 +316,177 @@
 .dark [data-sidebar="sidebar"] button[class*="bg-white"] {
   padding-left: 0.5rem !important;
 }
+
+/* ───────────────────────────────────────────────────────────
+   COMPREHENSIVE DARK MODE — GLOBAL OVERRIDES
+   Ensures consistent dark theme matching Visitor Management
+──────────────────────────────────────────────────────────── */
+
+/* Page-level containers */
+.dark .bg-\[\#F8FAFC\],
+.dark .bg-\[\#F9FAFB\],
+.dark .bg-\[\#f8fafc\] {
+  background-color: #131118 !important;
+}
+
+/* Opacity variants of common backgrounds */
+.dark .bg-slate-50\/80,
+.dark .bg-white\/80,
+.dark .bg-slate-50\/60,
+.dark .bg-white\/60 {
+  background-color: rgba(28, 26, 36, 0.85) !important;
+}
+
+/* Borders with opacity */
+.dark .border-slate-200\/80,
+.dark .border-slate-100\/80,
+.dark .border-slate-200\/60 {
+  border-color: rgba(38, 35, 53, 0.9) !important;
+}
+
+/* Slate-200 border (often used for card borders) */
+.dark .border-slate-200 {
+  border-color: #262335 !important;
+}
+
+/* Darker table headers (thead bg variants) */
+.dark thead.bg-slate-50\/80,
+.dark .bg-slate-50.border-b {
+  background-color: #1c1a24 !important;
+}
+
+/* Hover states for rows */
+.dark .hover\:bg-slate-50\/60:hover,
+.dark .hover\:bg-slate-50\/70:hover {
+  background-color: #262335 !important;
+}
+
+/* ── Recharts Dark Mode ── */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  stroke: #262335 !important;
+}
+
+.dark .recharts-text,
+.dark .recharts-cartesian-axis-tick-value {
+  fill: #a7a5c6 !important;
+}
+
+.dark .recharts-legend-item-text {
+  color: #a7a5c6 !important;
+}
+
+.dark .recharts-default-tooltip {
+  background-color: #1c1a24 !important;
+  border-color: #262335 !important;
+  color: #f8fafc !important;
+}
+
+.dark .recharts-tooltip-label {
+  color: #f8fafc !important;
+}
+
+.dark .recharts-tooltip-item {
+  color: #a7a5c6 !important;
+}
+
+.dark .recharts-surface {
+  background-color: transparent !important;
+}
+
+/* ── Status Badge / Pill Dark Overrides ── */
+.dark .bg-emerald-50 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+
+.dark .bg-amber-50 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+.dark .bg-rose-50 {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.dark .bg-blue-50 {
+  background-color: rgba(14, 165, 233, 0.12) !important;
+}
+
+.dark .bg-purple-50,
+.dark .bg-violet-50 {
+  background-color: rgba(127, 86, 217, 0.12) !important;
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+
+.dark .border-emerald-200 {
+  border-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.dark .border-amber-200 {
+  border-color: rgba(245, 158, 11, 0.25) !important;
+}
+
+.dark .border-rose-200 {
+  border-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.dark .border-blue-200 {
+  border-color: rgba(14, 165, 233, 0.25) !important;
+}
+
+/* ── Dark Mode Scrollbar ── */
+.dark ::-webkit-scrollbar-track {
+  background: #131118;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #262335;
+  border-radius: 4px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #2d2b3d;
+}
+
+/* ── Modal / Dialog / Overlay Dark ── */
+.dark [role="dialog"] {
+  background-color: #1c1a24 !important;
+  border-color: #262335 !important;
+  color: #f8fafc !important;
+}
+
+.dark [data-radix-popper-content-wrapper] [class*="bg-white"] {
+  background-color: #1c1a24 !important;
+}
+
+/* ── Form Elements Additional Overrides ── */
+.dark .focus\:bg-white:focus {
+  background-color: #1c1a24 !important;
+}
+
+.dark .focus\:bg-slate-50:focus {
+  background-color: #131118 !important;
+}
+
+/* ── Shadow soften in dark mode ── */
+.dark .shadow-sm,
+.dark .shadow-md {
+  --tw-shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ── Dividers ── */
+.dark .divide-slate-200 > * + * {
+  border-color: #262335 !important;
+}
+
+/* ── Text on coloured backgrounds in dark mode ── */
+.dark .text-slate-300 {
+  color: #94a3b8 !important;
+}
+
+.dark .text-slate-200 {
+  color: #cbd5e1 !important;
+}
+

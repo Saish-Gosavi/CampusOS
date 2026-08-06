@@ -53,6 +53,8 @@ model User {
   inOutLogs         InOutLog[]
   verifiedPayments  FeePayment[]
   generatedReceipts FeeReceipt[]
+  allotmentTemplates AllotmentTemplate[]
+  generatedReports  GeneratedReport[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -160,7 +162,6 @@ model Student {
   allocations Allocation[]
   leaves      LeaveRequest[]
   complaints  Complaint[]
-  visitors    Visitor[]
   fees        Fee[]
   bookIssues  BookIssue[]
   reservations Reservation[]
@@ -199,17 +200,32 @@ model SecurityStaff {
 // ==========================================
 
 model Allocation {
-  id        Int      @id @default(autoincrement())
-  bedId     Int
-  bed       Bed      @relation(fields: [bedId], references: [id], onDelete: Restrict)
-  studentId Int
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Restrict)
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("active") // "active", "completed", "cancelled"
+  id              Int                  @id @default(autoincrement())
+  bedId           Int
+  bed             Bed                  @relation(fields: [bedId], references: [id], onDelete: Restrict)
+  studentId       Int
+  student         Student              @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  startDate       DateTime
+  endDate         DateTime
+  status          String               @default("active") // "active", "completed", "cancelled"
+  allotmentLetter RoomAllotmentLetter?
 
   @@index([bedId])
   @@index([studentId])
+}
+
+model RoomAllotmentLetter {
+  id           Int        @id @default(autoincrement())
+  allocationId Int        @unique
+  allocation   Allocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  referenceNo  String     @unique
+  issuedDate   DateTime   @default(now())
+  terms        String?    @db.Text
+  signedBy     String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([allocationId])
 }
 
 model LeaveRequest {
@@ -251,16 +267,23 @@ model Complaint {
 }
 
 model Visitor {
-  id           Int      @id @default(autoincrement())
-  studentId    Int
-  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  fullName     String
-  relationship String
-  checkIn      DateTime
-  checkOut     DateTime?
-  status       String   @default("pending") // "pending", "approved", "rejected", "checked-in", "checked-out"
+  id             Int       @id @default(autoincrement())
+  studentName    String
+  fullName       String
+  visitorPhone   String?
+  visitorIdProof String?
+  relationship   String
+  purpose        String?   @db.Text
+  checkIn        DateTime?
+  checkOut       DateTime?
+  status         String    @default("Pending") // "Pending", "Approved", "Rejected", "Checked-In", "Checked-Out"
+  remarks        String?   @db.Text
+  reviewedBy     String?
+  wardenRemarks  String?   @db.Text
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
 
-  @@index([studentId])
+  // @@index([studentId]) removed
 }
 
 model Furniture {
@@ -567,4 +590,56 @@ model AdmissionApplication {
 
   @@index([hostelId])
   @@index([status])
+}
+
+// ==========================================
+// Allotment Template Upload
+// ==========================================
+
+model AllotmentTemplate {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  description         String?  @db.Text
+  filePath            String
+  fileName            String
+  fileType            String   // "pdf" or "docx"
+  imagePath           String?
+  imageFileName       String?
+  isActive            Boolean  @default(true)
+  uploadedBy          Int?
+  user                User?    @relation(fields: [uploadedBy], references: [id], onDelete: SetNull)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // PDF section uploads
+  headerPdfPath       String?
+  headerPdfName       String?
+  footerPdfPath       String?
+  footerPdfName       String?
+  mainPdfPath         String?
+  mainPdfName         String?
+  termsPdfPath        String?
+  termsPdfName        String?
+
+  @@index([uploadedBy])
+}
+
+// ==========================================
+// 10. Generated Reports History
+// ==========================================
+
+model GeneratedReport {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String   // "Student", "Allocation", "Fee", "Visitor", "Complaint", "Leave", "Staff", "Furniture"
+  format      String   // "Excel", "PDF", "CSV"
+  filters     String?  @db.Text // JSON metadata of applied filters
+  generatedBy String
+  createdById Int?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([createdById])
+  @@index([category])
+  @@index([createdAt])
 }

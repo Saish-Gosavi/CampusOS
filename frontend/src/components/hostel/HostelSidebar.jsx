@@ -15,6 +15,7 @@ import {
   CalendarDays,
   UserRoundCheck,
   DoorOpen,
+
   LogOut,
   GraduationCap
 } from "lucide-react";
@@ -119,7 +120,6 @@ function HostelSidebar() {
             )}
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
-
         </SidebarContent>
       </div>
     </Sidebar>

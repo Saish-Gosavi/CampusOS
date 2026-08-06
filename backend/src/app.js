@@ -57,6 +57,7 @@ app.use(cookieParser());
 
 // 6. Serve static files from uploads folder
 app.use("/uploads", express.static(path.join(process.cwd(), "src/uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -67,6 +68,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+import visitorsRouter from "./modules/hostel/visitors/routes/visitor.routes.js";
+
+import adminReportsRouter from "./modules/reports/routes/admin-reports.routes.js";
+
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
@@ -74,6 +79,8 @@ app.use('/api/notices', noticesRoutes);
 app.use('/api/inout', inoutRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use("/api/hostel", hostelRouter);
+app.use("/api/admin/visitor-management", visitorsRouter);
+app.use("/api/admin/reports", adminReportsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/audit-logs", auditRouter);

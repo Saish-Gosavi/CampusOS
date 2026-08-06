@@ -20,7 +20,7 @@ export const createUserSchema = z.object({
   roleId: z.number().int("Role ID must be an integer").optional(),
   roleName: z.string().optional(),
   name: z.string().optional(),
-  status: z.string().optional(),
   campus: z.string().optional(),
+  status: z.string().optional(),
   collegeId: z.number().optional(),
 });
