@@ -261,7 +261,7 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelDashboardPage />} />
+        <Route index element={<HostelDashboard.component />} />
         <Route path="students" element={<HostelStudents.component />} />
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
