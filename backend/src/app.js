@@ -28,6 +28,8 @@ import staffRouter from "./modules/admin/staff/staff.routes.js";
 import complaintsRouter from "./modules/hostel/complaints/routes/complaint.routes.js";
 import admissionRouter from "./modules/admission/admission.routes.js";
 import feeRouter, { studentFeeRouter } from "./modules/admin/fee/fee.routes.js";
+import wardenRoomChangeRoutes from "./modules/warden/room-change/room-change.routes.js";
+import studentRoomChangeRoutes from "./modules/student/room-change/room-change.routes.js";
 
 const app = express();
 
@@ -95,6 +97,8 @@ app.use("/api/admin/complaints", complaintsRouter);
 app.use("/api/admission", admissionRouter);
 app.use("/api/admin/fee-management", feeRouter);
 app.use("/api/student/fees", studentFeeRouter);
+app.use("/api/warden/room-change", wardenRoomChangeRoutes);
+app.use("/api/student/room-change-request", studentRoomChangeRoutes);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);

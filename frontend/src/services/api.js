@@ -583,3 +583,15 @@ export const adminReportsApi = {
     return apiClient.post("/admin/reports/log-export", data);
   },
 };
+
+export const wardenRoomChangeApi = {
+  getStatistics: async () => apiClient.get("/warden/room-change/statistics"),
+  getRequests: async (params) => apiClient.get("/warden/room-change", { params }),
+  approveRequest: async (id, data) => apiClient.put(`/warden/room-change/${id}/approve`, data),
+  rejectRequest: async (id, data) => apiClient.put(`/warden/room-change/${id}/reject`, data),
+};
+
+export const studentRoomChangeApi = {
+  submitRequest: async (data) => apiClient.post("/student/room-change-request", data),
+  getMyRequests: async () => apiClient.get("/student/room-change-request"),
+};

@@ -15,7 +15,8 @@ import {
   FileText, LogOut,
   GraduationCap,
   Search,
-  Library
+  Library,
+  ArrowRightLeft
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,6 +42,7 @@ const hostelItems = [
   { title: "Leave Application", url: "/student/leaves", icon: CalendarDays },
   { title: "Complaints", url: "/student/complaints", icon: MessageSquareWarning },
   { title: "Visitor Requests", url: "/student/visitors", icon: UserRoundCheck },
+  { title: "Room Change", url: "/student/room-change", icon: ArrowRightLeft },
   { title: "Hostel Fees", url: "/student/fees", icon: IndianRupee },
   { title: "My Furniture", url: "/student/furniture", icon: Armchair },
   { title: "Hostel Notices", url: "/student/hostel-notices", icon: Megaphone }

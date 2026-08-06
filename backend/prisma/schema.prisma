@@ -55,6 +55,7 @@ model User {
   generatedReceipts FeeReceipt[]
   allotmentTemplates AllotmentTemplate[]
   generatedReports  GeneratedReport[]
+  reviewedRoomChanges RoomChangeRequest[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -134,6 +135,8 @@ model Room {
   rent      Decimal     @db.Decimal(10, 2)
   beds      Bed[]
   furniture Furniture[]
+  currentRoomRequests RoomChangeRequest[] @relation("CurrentRoom")
+  requestedRoomRequests RoomChangeRequest[] @relation("RequestedRoom")
 
   @@index([floorId])
 }
@@ -167,6 +170,7 @@ model Student {
   reservations Reservation[]
   attendance  Attendance[]
   documents   StudentDocument[]
+  roomChangeRequests RoomChangeRequest[]
 
   @@index([userId])
 }
@@ -642,4 +646,31 @@ model GeneratedReport {
   @@index([createdById])
   @@index([category])
   @@index([createdAt])
+}
+
+// ==========================================
+// 12. Room Change Request
+// ==========================================
+
+model RoomChangeRequest {
+  id              Int      @id @default(autoincrement())
+  studentId       Int
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  currentRoomId   Int
+  currentRoom     Room     @relation("CurrentRoom", fields: [currentRoomId], references: [id])
+  requestedRoomId Int?
+  requestedRoom   Room?    @relation("RequestedRoom", fields: [requestedRoomId], references: [id])
+  reason          String   @db.Text
+  status          String   @default("Pending") // "Pending", "Approved", "Rejected"
+  remarks         String?  @db.Text
+  rejectionReason String?  @db.Text
+  reviewedById    Int?
+  reviewedBy      User?    @relation(fields: [reviewedById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([currentRoomId])
+  @@index([reviewedById])
 }
