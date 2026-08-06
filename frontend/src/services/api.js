@@ -307,15 +307,91 @@ export const allotmentTemplateApi = {
       timeout: 60000,
     });
   },
+  /**
+   * Upload a single section PDF.
+   * @param {string} section - "header" | "footer" | "main" | "terms"
+   * @param {File} file - The PDF file object
+   * @param {function} onProgress - Optional progress callback (0-100)
+   */
+  async uploadSection(section, file, onProgress) {
+    const formData = new FormData();
+    formData.append("section", section);
+    formData.append(`${section}Pdf`, file);
+    return apiClient.post("/hostel/allotment-template/upload-section", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 60000,
+      onUploadProgress: onProgress
+        ? (e) => {
+            if (e.total) onProgress(Math.round((e.loaded * 100) / e.total));
+          }
+        : undefined,
+    });
+  },
   async upload(formData) {
     return apiClient.post("/hostel/allotment-template/upload", formData, {
       headers: { "Content-Type": "multipart/form-data" },
       timeout: 30000,
     });
   },
+};
+
+export const visitorApi = {
+  /** All records — generic admin use */
+  async getAll() {
+    return apiClient.get("/admin/visitor-management");
+  },
+  /** Only Pending — for Warden review queue */
+  async getPending() {
+    return apiClient.get("/admin/visitor-management/pending");
+  },
+  /** Warden-processed (Approved/Rejected/Checked-In/Out) — for Hostel Admin view */
+  async getProcessed() {
+    return apiClient.get("/admin/visitor-management/processed");
+  },
+  async getById(id) {
+    return apiClient.get(`/admin/visitor-management/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/admin/visitor-management", data);
+  },
+  /** Warden approve/reject a request */
+  async wardenReview(id, data) {
+    return apiClient.put(`/admin/visitor-management/${id}/review`, data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/admin/visitor-management/${id}`, data);
+  },
   async delete(id) {
-    return apiClient.delete(`/hostel/allotment-template/${id}`);
+    return apiClient.delete(`/admin/visitor-management/${id}`);
   },
 };
+
+export const studentApi = {
+  async getAll() {
+    return apiClient.get("/users", { params: { role: "student" } });
+  },
+};
+
+export const adminReportsApi = {
+  async getSummary() {
+    return apiClient.get("/admin/reports/summary");
+  },
+  async getFilters() {
+    return apiClient.get("/admin/reports/filters");
+  },
+  async getCategoryData(params) {
+    return apiClient.get("/admin/reports/data", { params });
+  },
+  async getHistory() {
+    return apiClient.get("/admin/reports/history");
+  },
+  async generateReport(data) {
+    return apiClient.post("/admin/reports/generate", data);
+  },
+  async logExport(data) {
+    return apiClient.post("/admin/reports/log-export", data);
+  },
+};
+
 
 

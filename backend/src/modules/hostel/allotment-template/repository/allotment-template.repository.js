@@ -57,6 +57,40 @@ export class AllotmentTemplateRepository {
   }
 
   /**
+   * Update an existing template record by ID.
+   */
+  static async update(id, data) {
+    return prisma.allotmentTemplate.update({
+      where: { id: Number(id) },
+      data,
+    });
+  }
+
+  /**
+   * Ensure there is exactly one active "sections" template.
+   * If none exists, create a stub. Returns the template.
+   */
+  static async ensureActive(uploadedBy = null) {
+    const existing = await prisma.allotmentTemplate.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+    });
+    if (existing) return existing;
+
+    // Create a placeholder active template for section PDFs
+    return prisma.allotmentTemplate.create({
+      data: {
+        name: "Room Allotment Letter Format",
+        filePath: "sections_format",
+        fileName: "sections.pdf",
+        fileType: "pdf",
+        isActive: true,
+        uploadedBy: uploadedBy ? Number(uploadedBy) : null,
+      },
+    });
+  }
+
+  /**
    * Delete a template record by ID.
    */
   static async deleteById(id) {

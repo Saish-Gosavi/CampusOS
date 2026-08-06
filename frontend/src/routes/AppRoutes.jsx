@@ -59,6 +59,7 @@ import { Route as HostelAllocationHistory } from "@/pages/hostel/allocations/his
 import { Route as HostelComplaints } from "@/pages/hostel/complaints/index";
 import { Route as HostelLeaves } from "@/pages/hostel/leave/index";
 import { Route as HostelVisitors } from "@/pages/hostel/visitors/index";
+import { Route as HostelReports } from "@/pages/hostel/reports/index";
 import { Route as HostelFurniture } from "@/pages/hostel/furniture/index";
 import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damaged";
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
@@ -172,7 +173,8 @@ const RootNavigator = () => {
   
   if (!user) return <Navigate to="/login" replace />;
   
-  const role = user.role?.toLowerCase();
+  const roleStr = typeof user.role === "string" ? user.role : user.role?.name;
+  const role = roleStr?.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
   if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
@@ -269,7 +271,7 @@ export default function AppRoutes() {
         <Route path="leaves" element={<HostelLeaves.component />} />
         <Route path="notices" element={<HostelIndex.component />} />
         <Route path="staff" element={<HostelIndex.component />} />
-        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
+        <Route path="reports" element={<HostelReports.component />} />
         <Route path="furniture" element={<HostelFurniture.component />} />
         <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
         <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />

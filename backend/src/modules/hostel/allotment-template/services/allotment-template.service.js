@@ -5,6 +5,14 @@ import { AllotmentTemplateRepository } from "../repository/allotment-template.re
 import { safeDeleteFile, UPLOAD_DIR } from "../../../../middleware/templateUpload.middleware.js";
 import { AppError } from "../../../../utils/AppError.js";
 
+// Map section names to DB field names
+const SECTION_FIELD_MAP = {
+  header: { path: "headerPdfPath", name: "headerPdfName" },
+  footer: { path: "footerPdfPath", name: "footerPdfName" },
+  main: { path: "mainPdfPath", name: "mainPdfName" },
+  terms: { path: "termsPdfPath", name: "termsPdfName" },
+};
+
 export class AllotmentTemplateService {
   /**
    * Get the currently active allotment template.
@@ -148,6 +156,50 @@ export class AllotmentTemplateService {
   }
 
   /**
+   * Upload a single PDF section (header | footer | main | terms).
+   * Saves the file and updates the active template record.
+   * Creates one if none exists.
+   */
+  static async uploadSection({ section, pdfFile, uploadedBy }) {
+    const fields = SECTION_FIELD_MAP[section];
+    if (!fields) {
+      if (pdfFile?.path) safeDeleteFile(pdfFile.path);
+      throw new AppError(`Invalid section: "${section}". Must be one of: header, footer, main, terms.`, 400);
+    }
+
+    if (!pdfFile) {
+      throw new AppError("A PDF file is required.", 400);
+    }
+
+    // Validate PDF
+    const ext = path.extname(pdfFile.originalname).toLowerCase();
+    if (ext !== ".pdf" || pdfFile.mimetype !== "application/pdf") {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError("Only PDF files are accepted (max 10 MB).", 400);
+    }
+    if (pdfFile.size > 10 * 1024 * 1024) {
+      safeDeleteFile(pdfFile.path);
+      throw new AppError("PDF file must be under 10 MB.", 400);
+    }
+
+    // Ensure there is an active template record to attach to
+    const template = await AllotmentTemplateRepository.ensureActive(uploadedBy);
+
+    // Delete the old section file if it existed
+    if (template[fields.path]) {
+      safeDeleteFile(template[fields.path]);
+    }
+
+    // Persist the new file reference
+    const updated = await AllotmentTemplateRepository.update(template.id, {
+      [fields.path]: pdfFile.path,
+      [fields.name]: pdfFile.filename,
+    });
+
+    return updated;
+  }
+
+  /**
    * Delete a template record and its associated files from disk.
    */
   static async deleteTemplate(id) {
@@ -156,6 +208,10 @@ export class AllotmentTemplateService {
 
     if (template.filePath) safeDeleteFile(template.filePath);
     if (template.imagePath) safeDeleteFile(template.imagePath);
+    // Remove section PDFs too
+    for (const fields of Object.values(SECTION_FIELD_MAP)) {
+      if (template[fields.path]) safeDeleteFile(template[fields.path]);
+    }
 
     return AllotmentTemplateRepository.deleteById(id);
   }

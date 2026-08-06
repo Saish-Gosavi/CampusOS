@@ -20,7 +20,7 @@ export class UsersService {
     if (roleName) {
       return prisma.user.findMany({
         where: { role: { name: roleName } },
-        include: { role: true },
+        include: { role: true, studentProfile: true },
       });
     }
     return UsersRepository.findAll();

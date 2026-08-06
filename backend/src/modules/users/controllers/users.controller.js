@@ -34,10 +34,10 @@ export class UsersController {
     try {
       const creatorRoleName = req.user.role.toLowerCase();
       let users;
-      if (creatorRoleName === "senioradmin") {
-        users = await UsersService.getAllUsers("admin");
-      } else if (creatorRoleName === "superadmin" && req.query.role) {
+      if (req.query.role) {
         users = await UsersService.getAllUsers(req.query.role);
+      } else if (creatorRoleName === "senioradmin") {
+        users = await UsersService.getAllUsers("admin");
       } else {
         users = await UsersService.getAllUsers();
       }

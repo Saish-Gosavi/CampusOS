@@ -20,6 +20,14 @@ export class AllotmentTemplateController {
         if (template.imageFileName) {
           template.imageUrl = getTemplateFileUrl(req, template.imageFileName);
         }
+        // Enrich all 4 section PDF URLs
+        const sectionNames = ["header", "footer", "main", "terms"];
+        for (const s of sectionNames) {
+          const nameField = `${s}PdfName`;
+          if (template[nameField]) {
+            template[`${s}PdfUrl`] = getTemplateFileUrl(req, template[nameField]);
+          }
+        }
       }
 
       return apiResponse.success(res, template, "Active template retrieved successfully");
@@ -165,6 +173,71 @@ export class AllotmentTemplateController {
       });
 
       return apiResponse.success(res, template, "PDF uploaded and text extracted successfully", 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /allotment-template/upload-section
+   * Uploads a single PDF for one section (header | footer | main | terms).
+   * Field name in form-data matches the section: "headerPdf", "footerPdf", "mainPdf", "termsPdf"
+   */
+  static async uploadSection(req, res, next) {
+    try {
+      const { section } = req.body;
+
+      if (!section || !["header", "footer", "main", "terms"].includes(section)) {
+        return apiResponse.error(
+          res,
+          "Invalid or missing section. Must be one of: header, footer, main, terms.",
+          400
+        );
+      }
+
+      // The file field name in the form equals the section + "Pdf"
+      const fieldName = `${section}Pdf`;
+      const pdfFile = req.files?.[fieldName]?.[0] || req.file;
+
+      if (!pdfFile) {
+        return apiResponse.error(res, `No PDF file received for field "${fieldName}". Please upload a valid PDF.`, 400);
+      }
+
+      if (pdfFile.mimetype !== "application/pdf") {
+        return apiResponse.error(res, "Only PDF files are accepted.", 400);
+      }
+
+      if (pdfFile.size > 10 * 1024 * 1024) {
+        return apiResponse.error(res, "PDF file must be under 10 MB.", 400);
+      }
+
+      const template = await AllotmentTemplateService.uploadSection({
+        section,
+        pdfFile,
+        uploadedBy: req.user?.id,
+      });
+
+      // Enrich with URLs for all 4 sections
+      const sectionNames = ["header", "footer", "main", "terms"];
+      for (const s of sectionNames) {
+        const nameField = `${s}PdfName`;
+        if (template[nameField]) {
+          template[`${s}PdfUrl`] = getTemplateFileUrl(req, template[nameField]);
+        }
+      }
+
+      await AuditLogService.logAction({
+        userId: req.user?.id,
+        module: "Hostel",
+        action: "Upload Section PDF",
+        description: `Uploaded "${section}" section PDF for allotment letter format`,
+        status: "Success",
+        ipAddress: req.ip,
+        userAgent: req.headers["user-agent"],
+        newData: { section, fileName: pdfFile.filename },
+      });
+
+      return apiResponse.success(res, template, `"${section}" PDF section uploaded successfully`, 200);
     } catch (error) {
       next(error);
     }

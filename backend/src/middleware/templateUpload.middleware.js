@@ -33,6 +33,8 @@ const templateStorage = multer.diskStorage({
   },
 });
 
+const PDF_SECTION_FIELDS = ["headerPdf", "footerPdf", "mainPdf", "termsPdf"];
+
 const fileFilter = (_req, file, cb) => {
   const isTemplate =
     file.fieldname === "templateFile" &&
@@ -42,11 +44,15 @@ const fileFilter = (_req, file, cb) => {
     file.fieldname === "pdfFile" &&
     file.mimetype === "application/pdf";
 
+  const isSectionPdf =
+    PDF_SECTION_FIELDS.includes(file.fieldname) &&
+    file.mimetype === "application/pdf";
+
   const isImage =
     file.fieldname === "templateImage" &&
     Object.keys(ALLOWED_IMAGE_TYPES).includes(file.mimetype);
 
-  if (isTemplate || isPdfUpload || isImage) {
+  if (isTemplate || isPdfUpload || isSectionPdf || isImage) {
     cb(null, true);
   } else {
     cb(
@@ -63,7 +69,7 @@ export const templateUpload = multer({
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10 MB max per file
-    files: 2, // max 2 files (template + image)
+    files: 6, // max 6 files (template + image + 4 section PDFs)
   },
 });
 

@@ -12,6 +12,7 @@ function parseDatabaseUrl(url) {
     password: decodeURIComponent(parsed.password) || "",
     database: parsed.pathname.replace("/", "") || "hostel_management",
     connectionLimit: 10,
+    allowPublicKeyRetrieval: true,
   };
 }
 

@@ -11,6 +11,7 @@ const conn = await mariadb.createConnection({
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "campusos",
+  allowPublicKeyRetrieval: true,
 });
 console.log("✅ Raw connection works");
 await conn.end();
@@ -22,6 +23,7 @@ const adapter = new PrismaMariaDb({
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "campusos",
   connectionLimit: 5,
+  allowPublicKeyRetrieval: true,
 });
 
 const prisma = new PrismaClient({ adapter });

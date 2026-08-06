@@ -60,11 +60,17 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+import visitorsRouter from "./modules/hostel/visitors/routes/visitor.routes.js";
+
+import adminReportsRouter from "./modules/reports/routes/admin-reports.routes.js";
+
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/super_admin/roles-and-permissions", rolesRouter);
 app.use("/api/hostel", hostelRouter);
+app.use("/api/admin/visitor-management", visitorsRouter);
+app.use("/api/admin/reports", adminReportsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/audit-logs", auditRouter);

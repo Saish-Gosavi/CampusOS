@@ -20,6 +20,18 @@ router.post(
   AllotmentTemplateController.uploadPdf
 );
 
+// POST upload a single section PDF (header | footer | main | terms)
+router.post(
+  "/upload-section",
+  templateUpload.fields([
+    { name: "headerPdf", maxCount: 1 },
+    { name: "footerPdf", maxCount: 1 },
+    { name: "mainPdf", maxCount: 1 },
+    { name: "termsPdf", maxCount: 1 },
+  ]),
+  AllotmentTemplateController.uploadSection
+);
+
 // POST upload a new template (multipart/form-data)
 router.post(
   "/upload",
