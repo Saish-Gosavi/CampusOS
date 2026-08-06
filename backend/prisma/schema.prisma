@@ -93,6 +93,7 @@ model Hostel {
   users        User[]
   blocks       Block[]
   wardens      Warden[]
+  admissionApplications AdmissionApplication[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -206,16 +207,28 @@ model Allocation {
 }
 
 model LeaveRequest {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  reason    String
-  startDate DateTime
-  endDate   DateTime
-  status    String   @default("pending") // "pending", "approved", "rejected"
+  id            Int      @id @default(autoincrement())
+  studentId     Int
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  leaveType     String   @default("Personal") // "Home Visit", "Medical", "Family Function", "Personal", "Emergency", "Academic"
+  reason        String   @db.Text
+  destination   String?
+  contactPhone  String?
+  parentContact String?
+  startDate     DateTime
+  endDate       DateTime
+  status        String   @default("pending") // "pending", "approved", "rejected"
+  remarks       String?  @db.Text
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
 
   @@index([studentId])
+  @@index([status])
+  @@index([startDate])
 }
+
 
 model Complaint {
   id          Int      @id @default(autoincrement())
@@ -418,7 +431,6 @@ model Notice {
   @@index([createdById])
 }
 
-// ==========================================
 // 10. Staff Management
 // ==========================================
 
@@ -431,4 +443,29 @@ model StaffAttendance {
   remarks   String?
 
   @@index([userId])
+}
+
+// 11. Student Registration & Admission
+// ==========================================
+
+model RegistrationConfig {
+  id        Int      @id @default(autoincrement())
+  hostelId  Int?     // null = global default
+  config    Json     // { fields: [...], documents: [...] }
+  updatedAt DateTime @updatedAt
+}
+
+model AdmissionApplication {
+  id        Int      @id @default(autoincrement())
+  data      Json     // all field values submitted by student
+  documents Json     // list of uploaded file paths { key, label, path }
+  status    String   @default("pending") // pending | approved | rejected
+  remarks   String?
+  hostelId  Int?
+  hostel    Hostel?  @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([hostelId])
+  @@index([status])
 }

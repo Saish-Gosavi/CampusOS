@@ -14,6 +14,8 @@ import { Route as LoginRoute } from "@/pages/auth/Login";
 import { Route as ForgotPasswordRoute } from "@/pages/auth/ForgotPassword";
 import { Route as VerifyOtpRoute } from "@/pages/auth/VerifyOtp";
 import { Route as ResetPasswordRoute } from "@/pages/auth/ResetPassword";
+import { Route as RegisterRoute } from "@/pages/auth/Register";
+import { Route as AdmissionApprovalRoute } from "@/pages/hostel/admission-approval/index";
 
 // Super Admin Pages
 import { Route as SuperAdminIndex } from "@/pages/super-admin/index";
@@ -196,6 +198,7 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordRoute.component /></PublicRoute>} />
       <Route path="/verify-otp" element={<PublicRoute><VerifyOtpRoute.component /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPasswordRoute.component /></PublicRoute>} />
+      <Route path="/register" element={<RegisterRoute.component />} />
 
       {/* Navigation Dispatcher */}
       <Route path="/" element={<RootNavigator />} />
@@ -285,7 +288,7 @@ export default function AppRoutes() {
         <Route path="floors" element={<HostelFloors.component />} />
         <Route path="floors/add" element={<HostelFloorAdd.component />} />
         <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
-        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
+        <Route path="admission-approval" element={<AdmissionApprovalRoute.component />} />
         <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
         <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>

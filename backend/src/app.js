@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Import Custom Middlewares
+// CampusOS Backend Entry App
 import notFoundMiddleware from "./middleware/notFound.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 
@@ -22,6 +23,7 @@ import reportsRouter from "./modules/reports/routes/reports.routes.js";
 import rolesRouter from "./modules/roles/roles.routes.js";
 import staffRouter from "./modules/admin/staff/staff.routes.js";
 import complaintsRouter from "./modules/hostel/complaints/routes/complaint.routes.js";
+import admissionRouter from "./modules/admission/admission.routes.js";
 
 const app = express();
 
@@ -76,6 +78,7 @@ app.use("/api/reports", reportsRouter);
 app.use("/api/roles", rolesRouter);
 app.use("/api/admin/staff-management", staffRouter);
 app.use("/api/admin/complaints", complaintsRouter);
+app.use("/api/admission", admissionRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);
