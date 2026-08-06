@@ -13,8 +13,13 @@ export const useComplaints = (filters = {}) => {
   return useQuery({
     queryKey: COMPLAINT_KEYS.list(filters),
     queryFn: async () => {
-      const { data } = await api.get('/complaints', { params: filters });
-      return data.data || data;
+      try {
+        const res = await api.get('/admin/complaints', { params: filters });
+        return res?.data || res || [];
+      } catch (err) {
+        const res = await api.get('/hostel/complaints', { params: filters }).catch(() => null);
+        return res?.data || res || [];
+      }
     },
   });
 };
@@ -23,8 +28,8 @@ export const useComplaint = (id) => {
   return useQuery({
     queryKey: COMPLAINT_KEYS.detail(id),
     queryFn: async () => {
-      const { data } = await api.get(`/complaints/${id}`);
-      return data.data || data;
+      const res = await api.get(`/admin/complaints/${id}`);
+      return res?.data || res;
     },
     enabled: !!id,
   });
@@ -34,8 +39,8 @@ export const useCreateComplaint = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (newData) => {
-      const { data } = await api.post('/complaints', newData);
-      return data.data || data;
+      const res = await api.post('/admin/complaints', newData);
+      return res?.data || res;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() }),
   });
@@ -45,8 +50,8 @@ export const useUpdateComplaint = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updateData }) => {
-      const { data } = await api.patch(`/complaints/${id}`, updateData);
-      return data.data || data;
+      const res = await api.patch(`/admin/complaints/${id}`, updateData);
+      return res?.data || res;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
@@ -59,9 +64,10 @@ export const useDeleteComplaint = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id) => {
-      const { data } = await api.delete(`/complaints/${id}`);
-      return data.data || data;
+      const res = await api.delete(`/admin/complaints/${id}`);
+      return res?.data || res;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() }),
   });
 };
+

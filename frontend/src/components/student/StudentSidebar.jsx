@@ -31,6 +31,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 const overviewItems = [
   { title: "Dashboard", url: "/student", icon: LayoutDashboard, exact: true }];
 const hostelItems = [

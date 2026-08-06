@@ -1,8 +1,9 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email("Enter a valid email address"),
+  email: z.string().min(1, "Email or College ID is required").transform((val) => val.trim().toLowerCase()),
   password: z.string().min(1, "Password is required"),
+  remember: z.boolean().optional(),
 });
 
 export const forgotPasswordSchema = z.object({

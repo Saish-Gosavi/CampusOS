@@ -22,6 +22,7 @@ const adapter = new PrismaMariaDb({
   user: process.env.DB_USER || "root",
   password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "campusos",
+  allowPublicKeyRetrieval: true,
   connectionLimit: 5,
   allowPublicKeyRetrieval: true,
 });

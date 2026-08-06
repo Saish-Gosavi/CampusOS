@@ -25,6 +25,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 const overview = [
   { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true },
   { title: "Students", url: "/warden/students", icon: Users },
