@@ -416,81 +416,92 @@ function HostelRoomAllotmentLetterPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLetters.map((l) => (
-            <Card
-              key={l.id}
-              className="border-border bg-card shadow-sm hover:border-primary/45 transition-colors"
-            >
-              <CardContent className="p-5 flex flex-col h-full justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                      {l.referenceNo}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(l.issuedDate).toLocaleDateString()}
-                    </span>
+          {filteredLetters.map((l) => {
+            const student = l.allocation?.student || l.letterRequest?.student;
+            const studentName = student?.fullName || student?.user?.name || "Assigned Student";
+            const studentId = student?.collegeId || "N/A";
+            const hostelName = l.allocation?.bed?.room?.floor?.block?.hostel?.name || l.letterRequest?.hostel?.name || "Main Campus Hostel";
+            const roomNum = l.allocation?.bed?.room?.number || "Unassigned";
+            const bedNum = l.allocation?.bed?.number || "Unassigned";
+            const startDate = l.allocation?.startDate ? new Date(l.allocation.startDate).toLocaleDateString() : null;
+            const endDate = l.allocation?.endDate ? new Date(l.allocation.endDate).toLocaleDateString() : null;
+            const wardenName = l.generatedBy?.name || l.signedBy || "Warden Office";
+            const status = l.letterRequest?.status || "Approved";
+
+            return (
+              <Card
+                key={l.id}
+                className="border-border bg-card shadow-sm hover:border-primary/45 transition-colors"
+              >
+                <CardContent className="p-5 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                        {l.referenceNo}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(l.issuedDate).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-lg text-foreground mb-1">
+                      {studentName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Student ID: {studentId}
+                    </p>
+
+                    <div className="space-y-2 border-t border-border pt-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Building className="h-4 w-4 text-purple-500" />
+                        <span>Hostel: {hostelName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <User className="h-4 w-4 text-blue-500" />
+                        <span>
+                          Room: {roomNum} | Bed: {bedNum}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 text-emerald-500" />
+                        <span>
+                          {startDate && endDate ? `Valid: ${startDate} – ${endDate}` : `Status: ${status}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground border-t border-dashed border-border pt-2 mt-2">
+                        <span className="text-xs text-slate-500">
+                          Issued By: <strong className="text-foreground">{wardenName}</strong>
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="font-bold text-lg text-foreground mb-1">
-                    {l.allocation?.student?.fullName || "Assigned Student"}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Student ID: {l.allocation?.student?.collegeId || "N/A"}
-                  </p>
-
-                  <div className="space-y-2 border-t border-border pt-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Building className="h-4 w-4 text-purple-500" />
-                      <span>
-                        Hostel:{" "}
-                        {l.allocation?.bed?.room?.floor?.block?.hostel?.name ||
-                          "Main Campus Hostel"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4 text-blue-500" />
-                      <span>
-                        Room: {l.allocation?.bed?.room?.number || "Room"} | Bed:{" "}
-                        {l.allocation?.bed?.number || "Bed"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 text-emerald-500" />
-                      <span>
-                        Valid:{" "}
-                        {new Date(l.allocation?.startDate).toLocaleDateString()} –{" "}
-                        {new Date(l.allocation?.endDate).toLocaleDateString()}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 border-t border-border pt-4 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      onClick={() => {
+                        setSelectedLetter(l);
+                        setIsPreviewOpen(true);
+                      }}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      Preview & Print
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                      onClick={() => handleDeleteLetter(l.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 border-t border-border pt-4 mt-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 gap-1.5"
-                    onClick={() => {
-                      setSelectedLetter(l);
-                      setIsPreviewOpen(true);
-                    }}
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    Preview & Print
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                    onClick={() => handleDeleteLetter(l.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -654,13 +665,17 @@ function HostelRoomAllotmentLetterPage() {
                       <span className="text-muted-foreground">Full Name:</span>
                       <p className="font-medium">
                         {selectedLetter.allocation?.student?.fullName ||
+                          selectedLetter.letterRequest?.student?.fullName ||
+                          selectedLetter.letterRequest?.student?.user?.name ||
                           "Student Name"}
                       </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">College ID:</span>
                       <p className="font-medium">
-                        {selectedLetter.allocation?.student?.collegeId || "N/A"}
+                        {selectedLetter.allocation?.student?.collegeId ||
+                          selectedLetter.letterRequest?.student?.collegeId ||
+                          "N/A"}
                       </p>
                     </div>
                   </div>
@@ -674,26 +689,27 @@ function HostelRoomAllotmentLetterPage() {
                     <div>
                       <span className="text-muted-foreground">Hostel:</span>
                       <p className="font-medium">
-                        {selectedLetter.allocation?.bed?.room?.floor?.block
-                          ?.hostel?.name || "Main Campus Hostel"}
+                        {selectedLetter.allocation?.bed?.room?.floor?.block?.hostel?.name ||
+                          selectedLetter.letterRequest?.hostel?.name ||
+                          "Main Campus Hostel"}
                       </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Room & Bed No:</span>
                       <p className="font-medium">
                         Room{" "}
-                        {selectedLetter.allocation?.bed?.room?.number || "Room"}{" "}
-                        | Bed {selectedLetter.allocation?.bed?.number || "Bed"}
+                        {selectedLetter.allocation?.bed?.room?.number || "Unassigned"}{" "}
+                        | Bed {selectedLetter.allocation?.bed?.number || "Unassigned"}
                       </p>
                     </div>
                     <div>
                       <span className="text-muted-foreground">
-                        Allocation Valid Till:
+                        Allocation Valid Till / Status:
                       </span>
                       <p className="font-medium">
-                        {new Date(
-                          selectedLetter.allocation?.endDate
-                        ).toLocaleDateString()}
+                        {selectedLetter.allocation?.endDate
+                          ? new Date(selectedLetter.allocation.endDate).toLocaleDateString()
+                          : (selectedLetter.letterRequest?.status || "Approved")}
                       </p>
                     </div>
                   </div>
@@ -718,7 +734,7 @@ function HostelRoomAllotmentLetterPage() {
                   <div className="text-right text-xs text-muted-foreground">
                     <p>Authorized Signatory</p>
                     <p className="font-bold text-foreground mt-4">
-                      {selectedLetter.signedBy}
+                      {selectedLetter.generatedBy?.name || selectedLetter.signedBy || "Warden Office"}
                     </p>
                     <div className="w-36 border-b border-gray-400 mt-2 ml-auto" />
                   </div>

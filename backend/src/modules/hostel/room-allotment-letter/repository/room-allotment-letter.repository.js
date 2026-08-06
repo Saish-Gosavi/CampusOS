@@ -4,6 +4,23 @@ export class RoomAllotmentLetterRepository {
   static async findAll() {
     return prisma.roomAllotmentLetter.findMany({
       include: {
+        generatedBy: { select: { name: true } },
+        letterRequest: {
+          include: {
+            approvedBy: { select: { name: true } },
+            hostel: true,
+            student: {
+              include: {
+                user: {
+                  select: {
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         allocation: {
           include: {
             student: {
@@ -44,6 +61,23 @@ export class RoomAllotmentLetterRepository {
     return prisma.roomAllotmentLetter.findUnique({
       where: { id: Number(id) },
       include: {
+        generatedBy: { select: { name: true } },
+        letterRequest: {
+          include: {
+            approvedBy: { select: { name: true } },
+            hostel: true,
+            student: {
+              include: {
+                user: {
+                  select: {
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         allocation: {
           include: {
             student: {
