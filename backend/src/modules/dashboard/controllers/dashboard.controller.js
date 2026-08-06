@@ -19,4 +19,15 @@ export class DashboardController {
       next(error);
     }
   }
+
+  static async getWardenStats(req, res, next) {
+    try {
+      const userId = req.user?.id;
+      const { hostelId } = req.query;
+      const data = await DashboardService.getWardenDashboard(userId, hostelId);
+      return apiResponse.success(res, data, "Warden dashboard statistics retrieved");
+    } catch (error) {
+      next(error);
+    }
+  }
 }

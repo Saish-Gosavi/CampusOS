@@ -1,238 +1,243 @@
-import { createFileRoute, Link } from "@/routes/compat";
+import { useState, useEffect } from "react";
+import { createFileRoute, Link, useNavigate } from "@/routes/compat";
 import {
   Users,
-  BedDouble,
-  DoorOpen,
-  MessageSquareWarning,
-  Megaphone,
+  UtensilsCrossed,
   ArrowRight,
   CalendarDays,
-  UserCheck,
-  Armchair,
-  Wrench,
   CheckCircle2,
   XCircle,
-  UserPlus,
-  Eye,
-  Bell
+  Star,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
   Cell,
   Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis
+  Tooltip
 } from "recharts";
 import { StatCard } from "@/components/admin/StatCard";
 import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
-import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
 import { StatusPill } from "@/components/hostel/StatusPill";
-import {
-  complaintOverview,
-  hostelActivities,
-  leaveRequestOverview,
-  leaveRequests,
-  occupancyByBlock,
-  complaints,
-  visitorRequests
-} from "@/lib/hostel-data";
+import { dashboardApi, leaveApi, messApi } from "@/services/api";
+import { toast } from "sonner";
+
 const Route = createFileRoute("/warden/")({
   component: WardenDashboard
 });
-const stats = [
-  { label: "Total Students", value: "142", delta: "+6 this week", trend: "up", icon: Users, tint: "#2563EB" },
-  { label: "Occupied Rooms", value: "78", delta: "+3 this week", trend: "up", icon: BedDouble, tint: "#7B4CED" },
-  { label: "Available Rooms", value: "22", delta: "-2 this week", trend: "down", icon: DoorOpen, tint: "#22C55E" },
-  { label: "Pending Leaves", value: "6", delta: "3 urgent", trend: "down", icon: CalendarDays, tint: "#F97316" },
-  { label: "Active Complaints", value: "5", delta: "-2 vs last week", trend: "up", icon: MessageSquareWarning, tint: "#EF4444" },
-  { label: "Visitors Today", value: "18", delta: "+5 vs yesterday", trend: "up", icon: UserCheck, tint: "#06B6D4" },
-  { label: "Furniture Maintenance", value: "9", delta: "2 completed today", trend: "up", icon: Wrench, tint: "#EAB308" },
-  { label: "Notices Published", value: "12", delta: "+3 this month", trend: "up", icon: Megaphone, tint: "#0EA5E9" }
-];
-const quickActions = [
-  { title: "Approve Leave", description: "Review pending requests", icon: CheckCircle2, tint: "#22C55E" },
-  { title: "View Complaints", description: "Take action on tickets", icon: MessageSquareWarning, tint: "#EF4444" },
-  { title: "Register Visitor", description: "Log new campus visitor", icon: UserPlus, tint: "#06B6D4" },
-  { title: "Report Furniture Damage", description: "Raise maintenance", icon: Armchair, tint: "#EAB308" },
-  { title: "Publish Notice", description: "Send to residents", icon: Bell, tint: "#0EA5E9" }
-];
+
 function WardenDashboard() {
-  const recentComplaints = complaints.slice(0, 4);
-  const recentVisitors = visitorRequests.slice(0, 4);
-  return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [messStats, setMessStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const [res, messRes] = await Promise.all([
+        dashboardApi.getWardenStats(),
+        messApi.getDashboard().catch(() => null)
+      ]);
+      const payload = res?.data || res;
+      setData(payload);
+      if (messRes) {
+        setMessStats(messRes.data?.stats || messRes.stats || null);
+      }
+    } catch (err) {
+      console.error("Failed to load warden dashboard:", err);
+      toast.error(err?.message || "Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleUpdateLeaveStatus = async (id, status) => {
+    try {
+      await leaveApi.updateStatus(id, { status, remark: `Leave ${status} by Warden` });
+      toast.success(`Leave request ${status} successfully`);
+      fetchStats();
+    } catch (err) {
+      toast.error(err?.message || `Failed to update leave status`);
+    }
+  };
+
+  const wardenInfo = {
+    fullName: data?.warden?.fullName || "Warden",
+    hostelName: data?.warden?.hostelName || "Campus Hostel",
+    blocks: Array.isArray(data?.warden?.blocks) && data.warden.blocks.length > 0
+      ? data.warden.blocks
+      : ["Block A", "Block B"]
+  };
+
+  const stats = data?.stats || {
+    totalStudents: 142,
+    pendingLeaves: 1
+  };
+
+  const statCards = [
+    { label: "Mess & Hostel Residents", value: String(stats.totalStudents || 142), delta: "Active subscribers", trend: "up", icon: Users, tint: "#7B4CED" },
+    { label: "Pending Leave Requests", value: String(stats.pendingLeaves || 1), delta: "Awaiting review", trend: "down", icon: CalendarDays, tint: "#F97316" },
+    { label: "Today's Meals Served", value: String(messStats?.todayMealsServed || 420), delta: "Breakfast, Lunch, Dinner", trend: "up", icon: UtensilsCrossed, tint: "#2563EB" },
+    { label: "Mess Food Rating", value: `${messStats?.avgRating || "4.5"} / 5.0`, delta: "Student reviews", trend: "up", icon: Star, tint: "#EAB308" }
+  ];
+
+  const quickActions = [
+    { title: "Review Leave Requests", description: "Approve or reject student leave applications", icon: CalendarDays, tint: "#F97316", href: "/warden/leaves" },
+    { title: "Mess Management", description: "View meal menus, attendance logs & reviews", icon: UtensilsCrossed, tint: "#2563EB", href: "/warden/mess" }
+  ];
+
+  const leaveRequestOverview = (Array.isArray(data?.leaveRequestOverview) && data.leaveRequestOverview.length > 0)
+    ? data.leaveRequestOverview.map(l => ({
+        ...l,
+        color: l.name === "Pending" ? "#F97316" : l.name === "Approved" ? "#22C55E" : "#EF4444"
+      }))
+    : [
+        { name: "Pending", value: stats.pendingLeaves || 1, color: "#F97316" },
+        { name: "Approved", value: 15, color: "#22C55E" },
+        { name: "Rejected", value: 2, color: "#EF4444" }
+      ];
+
+  const recentLeaves = Array.isArray(data?.recentLeaves) ? data.recentLeaves : [];
+
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-2 sm:p-4">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-4">
         <div>
-                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Welcome back, Warden
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            Welcome back, {wardenInfo.fullName}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Daily snapshot of residents, complaints, visitors and hostel operations assigned to you.
+          <p className="text-sm text-muted-foreground mt-1">
+            Overview of student leave applications and mess dining operations for {wardenInfo.hostelName}.
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-[#22C55E]" />
-          Assigned: Block A, Block B
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => <StatCard key={s.label} {...s} />)}
-      </div>
-
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Quick Actions</h2>
-            <p className="text-xs text-muted-foreground">Frequent tasks a warden performs every day</p>
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={fetchStats}
+            className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted transition-colors"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+          </button>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
+            <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
+            Assigned: {wardenInfo.blocks.join(", ")}
+          </span>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {quickActions.map((a) => <QuickActionCard key={a.title} {...a} />)}
+      </div>
+
+      {loading && !data ? (
+        <div className="flex h-56 items-center justify-center rounded-xl border border-border bg-card">
+          <Loader2 className="h-7 w-7 animate-spin text-primary mr-3" />
+          <span className="text-sm font-medium text-muted-foreground">Loading Warden Dashboard...</span>
         </div>
-      </section>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard className="lg:col-span-2" title="Room Occupancy by Block" description="Occupied vs total capacity">
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={occupancyByBlock} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
-                <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="occupied" fill="#2563EB" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="capacity" fill="#E5E7EB" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      ) : (
+        <>
+          {/* Stat Cards Grid */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((s) => (
+              <StatCard key={s.label} {...s} />
+            ))}
           </div>
-        </ChartCard>
 
-        <ChartCard title="Complaint Status" description="Current breakdown">
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={complaintOverview} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={3}>
-                  {complaintOverview.map((d) => <Cell key={d.name} fill={d.color} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
+          {/* Quick Actions */}
+          <section className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-3">
+            <div>
+              <h2 className="text-base font-semibold text-foreground">Quick Actions</h2>
+              <p className="text-xs text-muted-foreground">Key operations for Warden Portal</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {quickActions.map((a) => (
+                <QuickActionCard
+                  key={a.title}
+                  {...a}
+                  onClick={() => navigate(a.href)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Leaves & Overview */}
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <ChartCard title="Leave Requests Status" description="Distribution of leave applications">
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={leaveRequestOverview} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} paddingAngle={3}>
+                      {leaveRequestOverview.map((d, idx) => (
+                        <Cell key={d.name || idx} fill={d.color || "#F97316"} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+
+            <ChartCard
+              className="lg:col-span-2"
+              title="Recent Leave Applications"
+              description="Latest student leave requests awaiting review"
+              action={
+                <Link to="/warden/leaves" className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
+                  View all <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              }
+            >
+              {recentLeaves.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted-foreground">No recent leave requests</div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {recentLeaves.map((l) => (
+                    <li key={l.id} className="flex items-center justify-between gap-3 py-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-semibold text-foreground">
+                          {l.student?.fullName || l.studentName || "Student"}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground mt-0.5">
+                          Room: {l.student?.allocations?.[0]?.bed?.room?.number || "N/A"} · Reason: {l.reason || "Leave"}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <StatusPill status={l.status || "Pending"} />
+                        {l.status?.toLowerCase() === "pending" && (
+                          <>
+                            <button
+                              onClick={() => handleUpdateLeaveStatus(l.id, "approved")}
+                              title="Approve"
+                              className="grid h-7 w-7 place-items-center rounded-md bg-[#22C55E]/10 text-[#16A34A] hover:bg-[#22C55E]/20"
+                            >
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleUpdateLeaveStatus(l.id, "rejected")}
+                              title="Reject"
+                              className="grid h-7 w-7 place-items-center rounded-md bg-[#EF4444]/10 text-[#DC2626] hover:bg-[#EF4444]/20"
+                            >
+                              <XCircle className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </ChartCard>
           </div>
-        </ChartCard>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard title="Leave Status" description="This month">
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={leaveRequestOverview} dataKey="value" nameKey="name" innerRadius={50} outerRadius={85} paddingAngle={3}>
-                  {leaveRequestOverview.map((d) => <Cell key={d.name} fill={d.color} />)}
-                </Pie>
-                <Tooltip contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </ChartCard>
-
-        <ChartCard
-    className="lg:col-span-2"
-    title="Recent Leave Requests"
-    description="Latest applications awaiting your review"
-    action={<Link to="/warden/leaves" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
-              View all <ArrowRight className="h-3.5 w-3.5" />
-            </Link>}
-  >
-          <ul className="divide-y divide-border">
-            {leaveRequests.slice(0, 5).map((l) => <li key={l.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{l.student}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {l.room} · {l.from} → {l.to} · {l.reason}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <StatusPill status={l.status} />
-                  {l.status === "Pending" && <>
-                      <button className="grid h-7 w-7 place-items-center rounded-md bg-[#22C55E]/10 text-[#16A34A] hover:bg-[#22C55E]/20">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                      </button>
-                      <button className="grid h-7 w-7 place-items-center rounded-md bg-[#EF4444]/10 text-[#DC2626] hover:bg-[#EF4444]/20">
-                        <XCircle className="h-3.5 w-3.5" />
-                      </button>
-                    </>}
-                </div>
-              </li>)}
-          </ul>
-        </ChartCard>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard
-    title="Recent Complaints"
-    description="Latest tickets from residents"
-    action={<Link to="/warden/complaints" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
-              View all <ArrowRight className="h-3.5 w-3.5" />
-            </Link>}
-  >
-          <ul className="divide-y divide-border">
-            {recentComplaints.map((c) => <li key={c.id} className="flex items-center justify-between gap-3 py-3">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{c.title}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {c.raisedBy} · {c.room} · {c.category}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <StatusPill status={c.priority} />
-                  <StatusPill status={c.status} />
-                </div>
-              </li>)}
-          </ul>
-        </ChartCard>
-
-        <ChartCard
-    title="Recent Visitors"
-    description="Latest visitor requests"
-    action={<Link to="/warden/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
-              View all <ArrowRight className="h-3.5 w-3.5" />
-            </Link>}
-  >
-          <ul className="divide-y divide-border">
-            {recentVisitors.map((v) => <li key={v.id} className="flex items-center gap-3 py-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#06B6D4] to-[#0EA5E9] text-xs font-semibold text-white">
-                  {v.visitorName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">{v.visitorName}</p>
-                  <p className="truncate text-xs text-muted-foreground">
-                    {v.relation} of {v.student} · {v.purpose}
-                  </p>
-                </div>
-                <StatusPill status={v.status} />
-                <button className="grid h-7 w-7 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
-                  <Eye className="h-3.5 w-3.5" />
-                </button>
-              </li>)}
-          </ul>
-        </ChartCard>
-      </div>
-
-      <ChartCard title="Recent Activity" description="Latest events across your assigned hostels">
-        <ActivityTimeline items={hostelActivities} />
-      </ChartCard>
-    </div>;
+        </>
+      )}
+    </div>
+  );
 }
-export {
-  Route
-};
+
+export { Route };

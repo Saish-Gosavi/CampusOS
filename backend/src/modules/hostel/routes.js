@@ -14,6 +14,7 @@ import furnitureRouter from "./furniture/routes/furniture.routes.js";
 import feesRouter from "./fees/routes/fee.routes.js";
 
 import wardenRouter from "./wardens/routes/warden.routes.js";
+import messRouter from "./mess/routes/mess.routes.js";
 
 const router = Router();
 
@@ -32,5 +33,6 @@ router.use("/leaves", leaveRouter);
 router.use("/visitors", visitorsRouter);
 router.use("/furniture", furnitureRouter);
 router.use("/fees", feesRouter);
+router.use("/mess", messRouter);
 
 export default router;

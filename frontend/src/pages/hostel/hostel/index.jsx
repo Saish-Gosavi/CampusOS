@@ -1283,6 +1283,12 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
     if (!email.trim() || !password.trim() || !fullName.trim()) {
       return toast.error("Please fill all required fields");
     }
+    if (password.trim().length < 6) {
+      return toast.error("Password must be at least 6 characters long");
+    }
+    if (phone.trim() && phone.trim().length < 5) {
+      return toast.error("Phone number must be at least 5 digits");
+    }
     setSubmitting(true);
     try {
       await wardenApi.create({
@@ -1296,7 +1302,8 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
       toast.success(`Warden account created for ${fullName}`);
       onSaved();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to create warden login");
+      const msg = err?.message || err?.data?.message || err?.response?.data?.message || "Failed to create warden login";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -1376,9 +1383,10 @@ function WardenModal({ hostelId, hostels, onClose, onSaved }) {
             <input
               type={showPassword ? "text" : "password"}
               required
+              minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Set password"
+              placeholder="Set password (min 6 characters)"
               className="w-full rounded-lg border border-border bg-background py-1.5 pl-3 pr-9 text-xs outline-none focus:border-primary"
             />
             <button

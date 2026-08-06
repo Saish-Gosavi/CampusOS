@@ -5,6 +5,7 @@ import {
   BedDouble,
   Armchair,
   CalendarDays,
+  UtensilsCrossed,
   MessageSquareWarning,
   UserRoundCheck,
   Megaphone,
@@ -28,17 +29,11 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
 const overview = [
-  { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true },
-  { title: "Students", url: "/warden/students", icon: Users },
-  { title: "Room Occupancy", url: "/warden/occupancy", icon: BedDouble },
-  { title: "Furniture", url: "/warden/furniture", icon: Armchair }
+  { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true }
 ];
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
-  { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
-  { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
-  { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
-  { title: "Reports", url: "/warden/reports", icon: BarChart3 }
+  { title: "Mess Management", url: "/warden/mess", icon: UtensilsCrossed }
 ];
 
 function WardenSidebar() {

@@ -227,12 +227,203 @@ export class DashboardRepository {
       pendingLeaves,
       visitorsToday,
       feeCollection,
-      blocks,
-      complaintDistribution: complaints,
-      leaveDistribution: leaves,
-      recentLeaves,
-      recentAuditLogs,
       recentStudents
+    };
+  }
+
+  static async getWardenStats(userId = null, hostelIdFilter = null) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // 1. Get warden info if userId is provided
+    let wardenProfile = null;
+    if (userId) {
+      wardenProfile = await prisma.warden.findUnique({
+        where: { userId: Number(userId) },
+        include: { hostel: { include: { blocks: true } } }
+      }).catch(() => null);
+    }
+
+    const targetHostelId = hostelIdFilter || wardenProfile?.hostelId || null;
+    const hostelWhere = targetHostelId ? { hostelId: Number(targetHostelId) } : {};
+    const blockWhere = targetHostelId ? { block: { hostelId: Number(targetHostelId) } } : {};
+
+    const [
+      studentsCount,
+      totalRoomsCount,
+      occupiedRoomsCount,
+      pendingLeavesCount,
+      activeComplaintsCount,
+      visitorsTodayCount,
+      furnitureMaintenanceCount,
+      noticesCount,
+      blocksData,
+      complaintsGroupBy,
+      leavesGroupBy,
+      recentLeaves,
+      recentComplaints,
+      recentVisitors,
+      auditLogs
+    ] = await Promise.all([
+      prisma.student.count({
+        where: targetHostelId ? {
+          allocations: {
+            some: {
+              status: "active",
+              bed: { room: { floor: { block: { hostelId: Number(targetHostelId) } } } }
+            }
+          }
+        } : {}
+      }).catch(() => 0),
+
+      prisma.room.count({
+        where: targetHostelId ? { floor: { block: { hostelId: Number(targetHostelId) } } } : {}
+      }).catch(() => 0),
+
+      prisma.room.count({
+        where: {
+          ...(targetHostelId ? { floor: { block: { hostelId: Number(targetHostelId) } } } : {}),
+          beds: { some: { allocations: { some: { status: "active" } } } }
+        }
+      }).catch(() => 0),
+
+      prisma.leaveRequest.count({ where: { status: "pending" } }).catch(() => 0),
+
+      prisma.complaint.count({
+        where: { status: { in: ["pending", "open", "in_progress"] } }
+      }).catch(() => 0),
+
+      prisma.visitor.count({
+        where: { checkIn: { gte: today } }
+      }).catch(() => 0),
+
+      prisma.furniture.count({
+        where: { status: { in: ["damaged", "maintenance", "Repair"] } }
+      }).catch(() => 0),
+
+      prisma.notice.count().catch(() => 0),
+
+      prisma.block.findMany({
+        where: hostelWhere,
+        include: {
+          floors: {
+            include: {
+              rooms: {
+                include: { beds: { include: { allocations: { where: { status: "active" } } } } }
+              }
+            }
+          }
+        }
+      }).catch(() => []),
+
+      prisma.complaint.groupBy({
+        by: ["status"],
+        _count: { id: true }
+      }).catch(() => []),
+
+      prisma.leaveRequest.groupBy({
+        by: ["status"],
+        _count: { id: true }
+      }).catch(() => []),
+
+      prisma.leaveRequest.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: {
+          student: {
+            select: {
+              id: true,
+              fullName: true,
+              allocations: {
+                where: { status: "active" },
+                take: 1,
+                include: { bed: { include: { room: { select: { number: true } } } } }
+              }
+            }
+          }
+        }
+      }).catch(() => []),
+
+      prisma.complaint.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: {
+          student: { select: { fullName: true } }
+        }
+      }).catch(() => []),
+
+      prisma.visitor.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: {
+          student: { select: { fullName: true } }
+        }
+      }).catch(() => []),
+
+      prisma.auditLog.findMany({
+        take: 5,
+        orderBy: { id: "desc" },
+        include: { user: { select: { name: true } } }
+      }).catch(() => [])
+    ]);
+
+    // Format occupancy by block for chart
+    const occupancyByBlock = blocksData.map((b) => {
+      let capacity = 0;
+      let occupied = 0;
+      (b.floors || []).forEach((f) => {
+        (f.rooms || []).forEach((r) => {
+          capacity += r.capacity || 0;
+          (r.beds || []).forEach((bed) => {
+            if (bed.allocations && bed.allocations.length > 0) occupied += 1;
+          });
+        });
+      });
+      return { name: b.name, capacity, occupied };
+    });
+
+    return {
+      warden: wardenProfile ? {
+        id: wardenProfile.id,
+        fullName: wardenProfile.fullName,
+        shift: wardenProfile.shift,
+        hostelName: wardenProfile.hostel?.name || "Hostel Main",
+        blocks: wardenProfile.hostel?.blocks?.map(b => b.name) || ["Block A", "Block B"]
+      } : {
+        fullName: "Warden",
+        shift: "Day",
+        hostelName: "Campus Hostel",
+        blocks: ["Block A", "Block B"]
+      },
+      stats: {
+        totalStudents: studentsCount,
+        occupiedRooms: occupiedRoomsCount,
+        availableRooms: Math.max(0, totalRoomsCount - occupiedRoomsCount),
+        pendingLeaves: pendingLeavesCount,
+        activeComplaints: activeComplaintsCount,
+        visitorsToday: visitorsTodayCount,
+        furnitureMaintenance: furnitureMaintenanceCount,
+        noticesPublished: noticesCount
+      },
+      occupancyByBlock,
+      complaintOverview: complaintsGroupBy.map(c => ({
+        name: c.status.charAt(0).toUpperCase() + c.status.slice(1),
+        value: c._count.id
+      })),
+      leaveRequestOverview: leavesGroupBy.map(l => ({
+        name: l.status.charAt(0).toUpperCase() + l.status.slice(1),
+        value: l._count.id
+      })),
+      recentLeaves,
+      recentComplaints,
+      recentVisitors,
+      recentActivities: auditLogs.map(a => ({
+        id: a.id,
+        user: a.user?.name || "System",
+        action: a.action,
+        description: a.description,
+        time: a.createdAt
+      }))
     };
   }
 }

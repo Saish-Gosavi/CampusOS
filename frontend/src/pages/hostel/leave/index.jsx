@@ -102,7 +102,7 @@ function LeavesPage() {
     const { row, action } = reviewing;
     setActionLoading(true);
     try {
-      await leaveApi.updateStatus(row.id, action.toLowerCase(), remarks.trim());
+      await leaveApi.updateStatus(row.id, { status: action.toLowerCase(), remarks: remarks.trim() });
       toast.success(`${action} — ${row.student?.fullName || "Student"}`);
       setReviewing(null);
       setRemarks("");
