@@ -184,6 +184,7 @@ export const collegeApi = {
   }
 };
 
+
 export const hostelApi = collegeApi;
 
 export const blockApi = {
@@ -280,7 +281,6 @@ export const globalNoticeApi = {
     return apiClient.delete(`/super_admin/global-notice/${id}`);
   },
 };
-
 export const userApi = {
   async getAll(role = "") {
     const params = role ? { role } : {};
@@ -434,5 +434,34 @@ export const leaveApi = {
   },
   async delete(id) {
     return apiClient.delete(`/hostel/leaves/${id}`);
+  }
+};
+
+export const feeApi = {
+  async getDashboardStats() {
+    return apiClient.get("/admin/fee-management/statistics");
+  },
+  async getAllFeeRecords() {
+    return apiClient.get("/admin/fee-management");
+  },
+  async getStudentFeeRecords(studentId) {
+    return apiClient.get(`/admin/fee-management/${studentId}`);
+  },
+  async verifyPayment(id) {
+    return apiClient.put(`/admin/fee-management/${id}/verify`);
+  },
+  async rejectPayment(id, reason) {
+    return apiClient.put(`/admin/fee-management/${id}/reject`, { reason });
+  },
+  async releaseReceipt(receiptId) {
+    return apiClient.put(`/admin/fee-management/${receiptId}/release-receipt`);
+  }
+};
+
+export const studentFeeApi = {
+  async getMyReceipts() {
+    return apiClient.get("/student/fees/my-receipts");
+  }
+};
   }
 };

@@ -42,7 +42,7 @@ const mainItems = [
 ];
 
 const opsItems = [
-  { title: "Fees Management", url: "/hostel-admin/fees", icon: IndianRupee },
+  { title: "Fees Management", url: "/hostel-admin/fee-management", icon: IndianRupee },
   { title: "Leave Management", url: "/hostel-admin/leaves", icon: CalendarDays },
   { title: "Visitor Management", url: "/hostel-admin/visitors", icon: UserRoundCheck },
   { title: "In Out Register", url: "/hostel-admin/in-out", icon: DoorOpen },

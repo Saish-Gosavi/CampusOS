@@ -13,7 +13,7 @@ export class StaffController {
 
   static async createStaff(req, res, next) {
     try {
-      const staff = await StaffService.createStaff(req.user, req.body);
+      const staff = await StaffService.createStaff(req.user.hostelId, req.body);
       return apiResponse.success(res, staff, "Staff created successfully", 201);
     } catch (error) {
       next(error);
