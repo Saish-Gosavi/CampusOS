@@ -359,8 +359,17 @@ export const staffApi = {
   async delete(id) {
     return apiClient.delete(`/admin/staff-management/${id}`);
   },
-  async getAttendance(id) {
-    return apiClient.get(`/admin/staff-management/${id}/attendance`);
+  async getAttendance(id, isWarden = false) {
+    return apiClient.get(`/admin/staff-management/${id}/attendance`, { params: { isWarden } });
+  },
+  async createCredentials(id, data) {
+    return apiClient.post(`/admin/staff-management/${id}/credentials`, data);
+  },
+  async resetPassword(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}/password`, data);
+  },
+  async updateLoginStatus(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}/login-status`, data);
   }
 };
 
@@ -594,4 +603,13 @@ export const wardenRoomChangeApi = {
 export const studentRoomChangeApi = {
   submitRequest: async (data) => apiClient.post("/student/room-change-request", data),
   getMyRequests: async () => apiClient.get("/student/room-change-request"),
+};
+
+export const wardenStaffApi = {
+  getAll:          ()          => apiClient.get("/warden/staff-management"),
+  create:          (data)      => apiClient.post("/warden/staff-management", data),
+  update:          (id, data)  => apiClient.put(`/warden/staff-management/${id}`, data),
+  delete:          (id)        => apiClient.delete(`/warden/staff-management/${id}`),
+  getAttendance:   (id)        => apiClient.get(`/warden/staff-management/${id}/attendance`),
+  markAttendance:  (id, data)  => apiClient.post(`/warden/staff-management/${id}/attendance`, data),
 };

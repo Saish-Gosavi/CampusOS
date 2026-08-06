@@ -44,6 +44,7 @@ model User {
   studentProfile    Student?
   wardenProfile     Warden?
   securityProfile   SecurityStaff?
+  staffProfile      Staff?
   
   // Audits & Utilities
   notifications     Notification[]
@@ -547,8 +548,11 @@ model InOutLog {
 // Physical staff (cleaners, maintenance, etc.) — no system login
 model Staff {
   id          Int              @id @default(autoincrement())
+  userId      Int?             @unique
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   name        String
   phone       String?
+  email       String?
   designation String           // e.g., "Cleaning", "Maintenance", "Cook", "Guard"
   hostelId    Int
   hostel      Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)

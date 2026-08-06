@@ -10,7 +10,9 @@ import {
   Megaphone,
   BarChart3, LogOut,
   ShieldCheck,
-  ArrowRightLeft
+  ArrowRightLeft,
+  UserCog,
+  Settings
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,7 +34,8 @@ const overview = [
   { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true },
   { title: "Students", url: "/warden/students", icon: Users },
   { title: "Room Occupancy", url: "/warden/occupancy", icon: BedDouble },
-  { title: "Furniture", url: "/warden/furniture", icon: Armchair }
+  { title: "Furniture", url: "/warden/furniture", icon: Armchair },
+  { title: "Staff Management", url: "/warden/staff", icon: UserCog }
 ];
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
@@ -112,6 +115,18 @@ function WardenSidebar() {
 
         <SidebarFooter className="border-t border-white/10 p-3">
           <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                tooltip="Settings"
+                className="text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200"
+              >
+                <Link to="/warden/settings">
+                  <Settings className="h-4 w-4" />
+                  <span>Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={handleLogout}

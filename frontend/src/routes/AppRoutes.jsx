@@ -88,6 +88,7 @@ import { Route as WardenProfile } from "@/pages/warden/profile";
 import { Route as WardenReports } from "@/pages/warden/reports";
 import { Route as WardenSettings } from "@/pages/warden/settings";
 import { Route as WardenRoomChange } from "@/pages/warden/room-change";
+import { Route as WardenStaff } from "@/pages/warden/staff";
 
 // Student Pages
 import { Route as StudentIndex } from "@/pages/student/index";
@@ -324,6 +325,7 @@ export default function AppRoutes() {
         <Route path="reports" element={<WardenReports.component />} />
         <Route path="settings" element={<WardenSettings.component />} />
         <Route path="room-change" element={<WardenRoomChange.component />} />
+        <Route path="staff" element={<WardenStaff.component />} />
       </Route>
 
       {/* Student Dashboard Routes */}

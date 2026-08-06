@@ -28,8 +28,8 @@ export function RoomChangeDashboard() {
 
   const fetchStats = async () => {
     try {
-      const { data } = await wardenRoomChangeApi.getStatistics();
-      setStats(data.data);
+      const res = await wardenRoomChangeApi.getStatistics();
+      setStats(res.data || {});
     } catch (err) {
       console.error(err);
     }
@@ -37,8 +37,8 @@ export function RoomChangeDashboard() {
 
   const fetchRequests = async () => {
     try {
-      const { data } = await wardenRoomChangeApi.getRequests();
-      setRequests(data.data);
+      const res = await wardenRoomChangeApi.getRequests();
+      setRequests(res.data || []);
     } catch (err) {
       console.error(err);
     }
