@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { UserCircle2, Mail, Phone, ShieldCheck, KeyRound, Bell } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { Input } from "@/components/ui/input";

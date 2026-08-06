@@ -1,16 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
+import { useNavigate } from "react-router-dom";
 import {
   Building2,
   UserCog,
   ShieldCheck,
-  Megaphone,
-  DatabaseBackup,
-  ArrowRight,
-  Users,
   GraduationCap,
-  Activity as ActivityIcon,
-  ServerCog
+  Users,
+  Activity as ActivityIcon
 } from "lucide-react";
 import {
   Bar,
@@ -27,9 +24,7 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { Breadcrumbs } from "@/components/admin/Breadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
-import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
 import { useAuth } from "@/context/AuthContext";
@@ -48,14 +43,6 @@ const Route = createFileRoute("/super-admin/")({
 });
 
 const PIE_COLORS = ["#2563EB", "#7B4CED", "#3B82F6", "#22C55E", "#EAB308"];
-
-const quickActions = [
-  { title: "Create College", description: "Onboard a new institution", icon: Building2, tint: "#2563EB", to: "/super-admin/colleges" },
-  { title: "Create Admin", description: "Assign a module administrator", icon: UserCog, tint: "#7B4CED", to: "/super-admin/admins" },
-  { title: "Add Role", description: "Define permissions & scope", icon: ShieldCheck, tint: "#3B82F6", to: "/super-admin/roles" },
-  { title: "Global Notice", description: "Broadcast to all colleges", icon: Megaphone, tint: "#EAB308", to: "/super-admin/notices" },
-  { title: "System Backup", description: "Trigger platform backup", icon: DatabaseBackup, tint: "#22C55E", to: "/super-admin/system-health" }
-];
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -91,7 +78,7 @@ function DashboardPage() {
     : [
         { label: "Total Colleges", value: "0", delta: "Active Campus Count", trend: "up", icon: Building2, tint: "#2563EB" },
         { label: "Total Admins", value: "0", delta: "Configured Staff", trend: "up", icon: UserCog, tint: "#7B4CED" },
-        { label: "System Roles", value: "7", delta: "Active RBAC Scopes", trend: "up", icon: ShieldCheck, tint: "#3B82F6" },
+        { label: "Total Senior Admin", value: "0", delta: "Platform Coordinators", trend: "up", icon: ShieldCheck, tint: "#3B82F6" },
         { label: "Total Students", value: "0", delta: "Enrolled", trend: "up", icon: GraduationCap, tint: "#EAB308" },
         { label: "Active Users (24h)", value: "1", delta: "Operational Accounts", trend: "up", icon: Users, tint: "#22C55E" },
         { label: "Platform Uptime", value: "99.99%", delta: "Last 30 days", trend: "up", icon: ActivityIcon, tint: "#22C55E" }
@@ -101,8 +88,7 @@ function DashboardPage() {
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <Breadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Welcome back, {user?.name || "Super Admin"}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -123,28 +109,6 @@ function DashboardPage() {
           <StatCard key={s.label} {...s} />
         ))}
       </div>
-
-      {/* Quick actions */}
-      <section className="rounded-xl border border-border bg-card p-5 shadow-sm">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-foreground">Quick Actions</h2>
-            <p className="text-xs text-muted-foreground">Platform-level tasks reserved for the Super Admin</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {quickActions.map((a) => (
-            <QuickActionCard
-              key={a.title}
-              title={a.title}
-              description={a.description}
-              icon={a.icon}
-              tint={a.tint}
-              onClick={() => navigate({ to: a.to })}
-            />
-          ))}
-        </div>
-      </section>
 
       {/* Charts row 1 */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -178,31 +142,41 @@ function DashboardPage() {
 
         <ChartCard title="Admins by Module" description="Distribution of module administrators">
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={statsData?.adminDistribution || adminDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={55}
-                  outerRadius={90}
-                  paddingAngle={3}
-                >
-                  {(statsData?.adminDistribution || adminDistribution).map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {statsData?.adminDistribution && statsData.adminDistribution.some((d) => d.value > 0) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statsData.adminDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={3}
+                  >
+                    {statsData.adminDistribution.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <Users className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Admins Assigned Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[210px]">
+                  Onboard staff members to view distribution across Hostel, Inventory & Library.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
       </div>
@@ -211,128 +185,76 @@ function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title="Colleges by City" description="Institutional footprint">
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={collegeDistribution} layout="vertical" margin={{ top: 5, right: 12, left: 8, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
-                <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={12} width={80} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Bar dataKey="value" fill="#7B4CED" radius={[0, 6, 6, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {statsData?.cityDistribution && statsData.cityDistribution.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={statsData.cityDistribution}
+                  layout="vertical"
+                  margin={{ top: 5, right: 12, left: 8, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+                  <XAxis type="number" stroke="var(--muted-foreground)" fontSize={12} allowDecimals={false} />
+                  <YAxis dataKey="name" type="category" stroke="var(--muted-foreground)" fontSize={12} width={90} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Bar dataKey="value" fill="#7B4CED" radius={[0, 6, 6, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <Building2 className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Colleges Onboarded Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[220px]">
+                  Click + Create College above to onboard your first campus and see city insights.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
 
         <ChartCard title="Student Distribution" description="Enrolled students by year">
           <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={studentDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={90}
-                  paddingAngle={2}
-                >
-                  {studentDistribution.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            {statsData?.studentDistribution && statsData.studentDistribution.some((s) => s.value > 0) ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={statsData.studentDistribution}
+                    dataKey="value"
+                    nameKey="name"
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
+                    {statsData.studentDistribution.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <GraduationCap className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Enrolled Students</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
+                  Enrolled student profiles will populate the academic year breakdown here.
+                </p>
+              </div>
+            )}
           </div>
-        </ChartCard>
-      </div>
-
-      {/* System health + colleges + activity */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ChartCard title="System Health" description="Service status snapshot">
-          <ul className="divide-y divide-border">
-            {[
-              { name: "API Gateway", status: "Operational", tint: "#22C55E" },
-              { name: "Database", status: "Operational", tint: "#22C55E" },
-              { name: "Auth Service", status: "Operational", tint: "#22C55E" },
-              { name: "File Storage", status: "Operational", tint: "#22C55E" },
-              { name: "Background Jobs", status: "Operational", tint: "#22C55E" }
-            ].map((s) => (
-              <li key={s.name} className="flex items-center justify-between py-2.5">
-                <div className="flex items-center gap-2 text-sm text-foreground">
-                  <ServerCog className="h-4 w-4 text-muted-foreground" />
-                  {s.name}
-                </div>
-                <span
-                  className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium"
-                  style={{ backgroundColor: `${s.tint}1A`, color: s.tint }}
-                >
-                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: s.tint }} />
-                  {s.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </ChartCard>
-
-        <ChartCard
-          title="Recent Colleges"
-          description="Latest institutions onboarded"
-          action={
-            <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
-              View all <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          }
-        >
-          <div className="-mx-1 overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="text-xs uppercase tracking-wide text-muted-foreground">
-                  <th className="px-2 py-2 font-medium">Name</th>
-                  <th className="px-2 py-2 font-medium">City</th>
-                  <th className="px-2 py-2 font-medium">Students</th>
-                  <th className="px-2 py-2 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentColleges.map((r) => (
-                  <tr key={r.name} className="transition-colors hover:bg-muted/40">
-                    <td className="whitespace-nowrap px-2 py-2.5 font-medium text-foreground">{r.name}</td>
-                    <td className="whitespace-nowrap px-2 py-2.5 text-foreground">{r.city}</td>
-                    <td className="whitespace-nowrap px-2 py-2.5 text-foreground">{r.students.toLocaleString()}</td>
-                    <td className="px-2 py-2.5">
-                      <StatusPill status={r.status} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </ChartCard>
-
-        <ChartCard
-          title="Recent Activity"
-          description="Latest platform-level events"
-          action={
-            <button className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
-              View all <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          }
-        >
-          <ActivityTimeline items={activities} />
         </ChartCard>
       </div>
     </div>

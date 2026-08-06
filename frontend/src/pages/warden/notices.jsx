@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Megaphone, Plus, Search, Edit2, Trash2, Eye, Pin } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
@@ -127,7 +127,7 @@ function NoticeCard({ notice, onEdit, onDelete, onPreview }) {
       <h3 className="mt-3 line-clamp-2 text-base font-semibold text-foreground">{notice.title}</h3>
       <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{notice.body}</p>
       <div className="mt-3 flex flex-wrap gap-1.5 text-[10px]">
-        <span className="rounded-full bg-[#2563EB]/10 px-2 py-0.5 font-medium text-[#2563EB]">{notice.audience}</span>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary">{notice.audience}</span>
         <span className="rounded-full bg-muted px-2 py-0.5 font-medium text-muted-foreground">{notice.category}</span>
       </div>
       <div className="mt-3 border-t border-border pt-3 text-[11px] text-muted-foreground">

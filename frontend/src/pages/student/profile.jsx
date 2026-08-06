@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { UserCircle2, Pencil, Mail, Phone, HeartPulse, Users2, BedDouble, GraduationCap } from "lucide-react";
 import { useState } from "react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
@@ -25,7 +25,7 @@ function ProfilePage() {
     icon={UserCircle2}
     tint="#2563EB"
     breadcrumbs={[{ label: "Profile" }]}
-    action={<Button onClick={() => setEditing((v) => !v)} className="bg-[#2563EB] hover:bg-[#1d4fd8]">
+    action={<Button onClick={() => setEditing((v) => !v)} className="bg-primary hover:bg-primary/90">
             <Pencil className="mr-2 h-4 w-4" /> {editing ? "Save changes" : "Edit profile"}
           </Button>}
   />
@@ -40,7 +40,7 @@ function ProfilePage() {
           </div>
           <h2 className="mt-4 text-xl font-bold text-foreground">{studentProfile.name}</h2>
           <p className="text-sm text-muted-foreground">{studentProfile.enrollment}</p>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#2563EB]/10 px-3 py-1 text-xs font-medium text-[#2563EB]">
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
             <GraduationCap className="h-3 w-3" /> {studentProfile.department} · {studentProfile.year}
           </div>
           <div className="mt-6 space-y-2 text-left">
@@ -103,7 +103,7 @@ function ProfilePage() {
 
             <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
               <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
-                <BedDouble className="h-4 w-4 text-[#2563EB]" /> Hostel information
+                <BedDouble className="h-4 w-4 text-primary" /> Hostel information
               </h3>
               <InfoRow label="Hostel" value={studentProfile.hostel.name} />
               <InfoRow label="Block" value={studentProfile.hostel.block} />

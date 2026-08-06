@@ -7,6 +7,6 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/superadmin", authorize("superadmin"), DashboardController.getSuperAdminStats);
+router.get("/superadmin", authorize("superadmin", "senioradmin"), DashboardController.getSuperAdminStats);
 
 export default router;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ function BlockForm({ mode, block }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const onSubmit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/blocks" });
+    navigate("/hostel-admin/blocks");
   };
   const Field = ({ label, children }) => <div className="flex flex-col gap-1.5">
       <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</label>
@@ -58,7 +58,7 @@ function BlockForm({ mode, block }) {
         <Button asChild variant="outline">
           <Link to="/hostel-admin/blocks"><X className="mr-1.5 h-4 w-4" /> Cancel</Link>
         </Button>
-        <Button type="submit" className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+        <Button type="submit" className="bg-primary hover:bg-primary/90">
           <Save className="mr-1.5 h-4 w-4" /> {mode === "add" ? "Create Block" : "Save Changes"}
         </Button>
       </div>

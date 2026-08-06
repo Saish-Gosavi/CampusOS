@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ function BedForm({ mode, bed }) {
   }, [form.roomId]);
   const onSubmit = (e) => {
     e.preventDefault();
-    navigate({ to: "/hostel-admin/beds" });
+    navigate("/hostel-admin/beds");
   };
   const selectCls = "h-10 rounded-lg border border-border bg-background px-3 text-sm";
   const Field = ({
@@ -132,7 +132,7 @@ function BedForm({ mode, bed }) {
             <X className="mr-1.5 h-4 w-4" /> Cancel
           </Link>
         </Button>
-        <Button type="submit" className="bg-[#2563EB] hover:bg-[#1e4fd1]">
+        <Button type="submit" className="bg-primary hover:bg-primary/90">
           <Save className="mr-1.5 h-4 w-4" />{" "}
           {mode === "add" ? "Create Bed" : "Save Changes"}
         </Button>

@@ -1,30 +1,71 @@
 import "dotenv/config";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "@prisma/client";
+import mariadb from "mariadb";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb"; // Keep this as standard import
+import clientPkg from "@prisma/client";
+const { PrismaClient } = clientPkg; // Only this one needs the workaround
 import bcrypt from "bcryptjs";
 
-function parseDatabaseUrl(url) {
-  const parsed = new URL(url);
-  return {
-    host: parsed.hostname || "localhost",
-    port: Number(parsed.port) || 3306,
-    user: decodeURIComponent(parsed.username) || "root",
-    password: decodeURIComponent(parsed.password) || "",
-    database: parsed.pathname.replace("/", "") || "campusos",
-    connectionLimit: 5,
-  };
-}
+const conn = await mariadb.createConnection({
+  host: process.env.DB_HOST || "localhost",
+  port: 3306,
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "campusos",
+  allowPublicKeyRetrieval: true,
+});
+console.log("✅ Raw connection works");
+await conn.end();
 
-const dbConfig = parseDatabaseUrl(process.env.DATABASE_URL);
-const adapter = new PrismaMariaDb(dbConfig);
+const adapter = new PrismaMariaDb({
+  host: process.env.DB_HOST || "localhost",
+  port: 3306,
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "campusos",
+  allowPublicKeyRetrieval: true,
+  connectionLimit: 5,
+});
+
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("🌱 Database seeding started...\n");
+  console.log("🧹 Cleaning static data from database...\n");
 
-  // 1. Create Roles
+  // 1. Clean non-superadmin users and dynamic operational data
+  await prisma.auditLog.deleteMany().catch(() => {});
+  await prisma.notification.deleteMany().catch(() => {});
+  await prisma.inventoryRequest.deleteMany().catch(() => {});
+  await prisma.leaveRequest.deleteMany().catch(() => {});
+  await prisma.complaint.deleteMany().catch(() => {});
+  await prisma.allocation.deleteMany().catch(() => {});
+  await prisma.bookIssue.deleteMany().catch(() => {});
+  await prisma.reservation.deleteMany().catch(() => {});
+  await prisma.attendance.deleteMany().catch(() => {});
+
+  await prisma.student.deleteMany().catch(() => {});
+  await prisma.warden.deleteMany().catch(() => {});
+  await prisma.securityStaff.deleteMany().catch(() => {});
+
+  // Delete all users except superadmin
+  const superadminRole = await prisma.role.findUnique({ where: { name: "superadmin" } });
+  if (superadminRole) {
+    await prisma.user.deleteMany({
+      where: {
+        NOT: { email: "admin@campusos.com" }
+      }
+    });
+  }
+
+  // Delete all hostels and colleges
+  await prisma.hostel.deleteMany().catch(() => {});
+  await prisma.college.deleteMany().catch(() => {});
+
+  console.log("✅ Cleaned static colleges, hostels, admins, and students.");
+
+  // 2. Ensure System Roles
   const roles = [
     { name: "superadmin", description: "Super Administrator with full access" },
+    { name: "senioradmin", description: "Senior Administrator who manages Admins" },
     { name: "admin", description: "Hostel Administrator" },
     { name: "warden", description: "Hostel Warden" },
     { name: "student", description: "Hostel Student" },
@@ -39,10 +80,10 @@ async function main() {
       update: {},
       create: role,
     });
-    console.log(`  ✅ Role: ${role.name}`);
   }
+  console.log("  ✅ System Roles configured");
 
-  // 2. Create Permissions
+  // 3. Ensure Permissions
   const permissions = [
     { name: "users:read", description: "View users" },
     { name: "users:write", description: "Create/update users" },
@@ -77,59 +118,79 @@ async function main() {
       create: perm,
     });
   }
-  console.log(`  ✅ Permissions: ${permissions.length} created\n`);
 
-  // 3. Assign all permissions to superadmin role
-  const superadminRole = await prisma.role.findUnique({ where: { name: "superadmin" } });
+  const roleSuperAdmin = await prisma.role.findUnique({ where: { name: "superadmin" } });
   const allPermissions = await prisma.permission.findMany();
 
   for (const perm of allPermissions) {
     await prisma.rolesOnPermissions.upsert({
       where: {
         roleId_permissionId: {
-          roleId: superadminRole.id,
+          roleId: roleSuperAdmin.id,
           permissionId: perm.id,
         },
       },
       update: {},
       create: {
-        roleId: superadminRole.id,
+        roleId: roleSuperAdmin.id,
         permissionId: perm.id,
       },
     });
   }
-  console.log(`  ✅ All permissions assigned to superadmin\n`);
+  console.log("  ✅ System Permissions configured");
 
-  // 4. Create Superadmin User
+  // Configure permissions for Senior Admin
+  const roleSeniorAdmin = await prisma.role.findUnique({ where: { name: "senioradmin" } });
+  const seniorAdminPermissions = [
+    "users:read",
+    "users:write",
+    "users:delete",
+    "dashboard:read",
+  ];
+
+  for (const permName of seniorAdminPermissions) {
+    const perm = await prisma.permission.findUnique({ where: { name: permName } });
+    if (perm) {
+      await prisma.rolesOnPermissions.upsert({
+        where: {
+          roleId_permissionId: {
+            roleId: roleSeniorAdmin.id,
+            permissionId: perm.id,
+          },
+        },
+        update: {},
+        create: {
+          roleId: roleSeniorAdmin.id,
+          permissionId: perm.id,
+        },
+      });
+    }
+  }
+  console.log("  ✅ Senior Admin Permissions configured");
+
+  // 4. Ensure Superadmin User
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash("Admin@123", salt);
 
   await prisma.user.upsert({
     where: { email: "admin@campusos.com" },
-    update: {
-      password: hashedPassword,
-      roleId: superadminRole.id,
-      status: "active",
-    },
+    update: { password: hashedPassword },
     create: {
       email: "admin@campusos.com",
       password: hashedPassword,
       name: "Super Admin",
-      roleId: superadminRole.id,
+      roleId: roleSuperAdmin.id,
       status: "active",
     },
   });
-  console.log(`  ✅ Superadmin user created:`);
-  console.log(`     Email:    admin@campusos.com`);
-  console.log(`     Password: Admin@123`);
-  console.log(`     Role:     superadmin\n`);
+  console.log(`  ✅ Superadmin User active: admin@campusos.com / Admin@123\n`);
 
-  console.log("🎉 Database seeding completed successfully!");
+  console.log("🎉 Database reset complete! All static data removed.");
 }
 
 main()
   .catch((e) => {
-    console.error("❌ Seeding failed:", e);
+    console.error("❌ Reset failed:", e);
     process.exit(1);
   })
   .finally(async () => {

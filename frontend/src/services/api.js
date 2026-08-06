@@ -180,3 +180,180 @@ export const collegeApi = {
     return apiClient.delete(`/hostel/hostels/${collegeId}/admins/${userId}`);
   }
 };
+
+export const hostelApi = collegeApi;
+
+export const blockApi = {
+  async getAll(hostelId) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/hostel/blocks", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/blocks", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/blocks/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/blocks/${id}`);
+  }
+};
+
+export const floorApi = {
+  async getAll(blockId) {
+    const params = blockId ? { blockId } : {};
+    return apiClient.get("/hostel/floors", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/floors", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/floors/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/floors/${id}`);
+  }
+};
+
+export const roomApi = {
+  async getAll(floorId) {
+    const params = floorId ? { floorId } : {};
+    return apiClient.get("/hostel/rooms", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/rooms", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/rooms/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/rooms/${id}`);
+  }
+};
+
+export const bedApi = {
+  async getAll(roomId) {
+    const params = roomId ? { roomId } : {};
+    return apiClient.get("/hostel/beds", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/beds", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/beds/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/beds/${id}`);
+  }
+};
+
+export const wardenApi = {
+  async getAll(hostelId) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/hostel/wardens", { params });
+  },
+  async create(data) {
+    return apiClient.post("/hostel/wardens", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/wardens/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/wardens/${id}`);
+  }
+};
+
+export const rolesApi = {
+  async getAll() {
+    return apiClient.get("/super_admin/roles-and-permissions");
+  },
+  async getPermissions() {
+    return apiClient.get("/super_admin/roles-and-permissions/permissions");
+  },
+  async getById(id) {
+    return apiClient.get(`/super_admin/roles-and-permissions/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/super_admin/roles-and-permissions", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/super_admin/roles-and-permissions/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/super_admin/roles-and-permissions/${id}`);
+  }
+};
+
+export const userApi = {
+  async getAll(role = "") {
+    const params = role ? { role } : {};
+    return apiClient.get("/users", { params });
+  },
+  async create(data) {
+    return apiClient.post("/users", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/users/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/users/${id}`);
+  },
+  async getProfile() {
+    return apiClient.get("/users/profile");
+  },
+  async updateProfile(data) {
+    return apiClient.put("/users/profile", data);
+  }
+};
+
+export const settingsApi = {
+  async get() {
+    return apiClient.get("/settings");
+  },
+  async update(data) {
+    return apiClient.put("/settings", data);
+  },
+  async reset() {
+    return apiClient.post("/settings/reset");
+  }
+};
+
+export const auditLogApi = {
+  async getLogs(params) {
+    return apiClient.get("/audit-logs", { params });
+  }
+};
+
+export const globalNoticeApi = {
+  async getAll() {
+    return apiClient.get("/super_admin/global-notice");
+  },
+  async create(data) {
+    return apiClient.post("/super_admin/global-notice", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/super_admin/global-notice/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/super_admin/global-notice/${id}`);
+  },
+};
+
+export const reportsApi = {
+  async getSummary(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async getSuperAdminStats(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async exportCsv(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  },
+  async downloadSuperAdminReport(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  }
+};

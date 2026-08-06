@@ -11,40 +11,51 @@ export class RolesController {
     }
   }
 
-  static async getRolesAndPermissions(req, res, next) {
+  static async getAllPermissions(req, res, next) {
     try {
-      const rolesAndPermissions = await RolesService.getRolesAndPermissions();
-      return apiResponse.success(
-        res,
-        rolesAndPermissions,
-        "Roles and permissions retrieved successfully"
-      );
+      const permissions = await RolesService.getAllPermissions();
+      return apiResponse.success(res, permissions, "Permissions list retrieved successfully");
     } catch (error) {
       next(error);
     }
   }
 
-  static async createRoleAndPermissions(req, res, next) {
+  static async getRoleById(req, res, next) {
     try {
-      const { name, description, permissionIds } = req.body;
-      const userContext = {
-        userId: req.user ? req.user.id : null,
-        ipAddress: req.ip || req.headers["x-forwarded-for"],
-      };
+      const role = await RolesService.getRoleById(req.params.id);
+      return apiResponse.success(res, role, "Role retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      const newRole = await RolesService.createRoleAndPermissions(
-        { name, description, permissionIds },
-        userContext
-      );
+  static async createRole(req, res, next) {
+    try {
+      const userContext = { id: req.user?.id, ipAddress: req.ip };
+      const role = await RolesService.createRole(req.body, userContext);
+      return apiResponse.success(res, role, "Role created successfully", 201);
+    } catch (error) {
+      next(error);
+    }
+  }
 
-      return apiResponse.created(
-        res,
-        newRole,
-        "Role and permissions created successfully"
-      );
+  static async updateRole(req, res, next) {
+    try {
+      const userContext = { id: req.user?.id, ipAddress: req.ip };
+      const role = await RolesService.updateRole(req.params.id, req.body, userContext);
+      return apiResponse.success(res, role, "Role updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteRole(req, res, next) {
+    try {
+      const userContext = { id: req.user?.id, ipAddress: req.ip };
+      const role = await RolesService.deleteRole(req.params.id, userContext);
+      return apiResponse.success(res, null, "Role deleted successfully");
     } catch (error) {
       next(error);
     }
   }
 }
-

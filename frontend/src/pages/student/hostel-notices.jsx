@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Megaphone, Pin } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { hostelNoticesFeed } from "@/lib/student-data";
@@ -21,7 +21,7 @@ function HostelNoticesPage() {
             {n.pinned && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#EF4444]/10 px-2 py-0.5 text-[10px] font-semibold text-[#EF4444]">
                 <Pin className="h-3 w-3" /> Pinned
               </span>}
-            <span className="inline-flex items-center gap-1 rounded-full bg-[#2563EB]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#2563EB]">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary">
               {n.category}
             </span>
             <h3 className="mt-3 text-base font-semibold text-foreground">{n.title}</h3>

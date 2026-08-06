@@ -1,8 +1,8 @@
 import { BlockRepository } from "../repository/block.repository.js";
 
 export class BlockService {
-  static async getAll() {
-    return BlockRepository.findAll();
+  static async getAll(hostelId) {
+    return BlockRepository.findAll(hostelId);
   }
 
   static async getById(id) {

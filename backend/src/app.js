@@ -16,6 +16,10 @@ import usersRouter from "./modules/users/routes/users.routes.js";
 import rolesRouter from "./modules/roles/routes/roles.routes.js";
 import hostelRouter from "./modules/hostel/routes.js";
 import dashboardRouter from "./modules/dashboard/routes/dashboard.routes.js";
+import settingsRouter from "./modules/settings/routes/settings.routes.js";
+import auditRouter from "./modules/audit/audit.routes.js";
+import noticeRouter from "./modules/notice/routes/notice.routes.js";
+import reportsRouter from "./modules/reports/routes/reports.routes.js";
 
 const app = express();
 
@@ -58,10 +62,16 @@ app.get("/api/health", (req, res) => {
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/roles", rolesRouter);
-app.use("/api/super_admin", rolesRouter);
+app.use("/api/super_admin/roles-and-permissions", rolesRouter);
 app.use("/api/hostel", hostelRouter);
 app.use("/api/dashboard", dashboardRouter);
+app.use("/api/settings", settingsRouter);
+app.use("/api/audit-logs", auditRouter);
+app.use("/api/super_admin/audit-logs", auditRouter);
+app.use("/api/super_admin/global-notice", noticeRouter);
+app.use("/api/global-notices", noticeRouter);
+app.use("/api/super_admin/reports", reportsRouter);
+app.use("/api/reports", reportsRouter);
 
 // 7. Undefined route handling (404)
 app.use(notFoundMiddleware);

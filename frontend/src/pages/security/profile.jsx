@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { UserCircle2, Mail, Phone, Shield, Lock, Save } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { Button } from "@/components/ui/button";
@@ -66,7 +66,7 @@ function ProfilePage() {
 }
 function Row({ icon: Icon, k, v }) {
   return <div className="flex items-center gap-3">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]"><Icon className="h-4 w-4" /></span>
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary"><Icon className="h-4 w-4" /></span>
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{k}</p>
         <p className="truncate text-sm font-medium text-foreground">{v}</p>

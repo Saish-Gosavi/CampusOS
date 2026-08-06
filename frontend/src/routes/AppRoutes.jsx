@@ -1,5 +1,6 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Building2 } from "lucide-react";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import PrivateRoute from "./PrivateRoute";
 import RoleRoute from "./RoleRoute";
@@ -17,16 +18,24 @@ import { Route as ResetPasswordRoute } from "@/pages/auth/ResetPassword";
 // Super Admin Pages
 import { Route as SuperAdminIndex } from "@/pages/super-admin/index";
 import { Route as SuperAdminAdmins } from "@/pages/super-admin/admins";
-import { Route as SuperAdminRoles } from "@/pages/super-admin/roles";
 import { Route as SuperAdminColleges } from "@/pages/super-admin/colleges";
 import { Route as SuperAdminNotices } from "@/pages/super-admin/notices";
 import { Route as SuperAdminSettings } from "@/pages/super-admin/settings";
-import { Route as SuperAdminSystemHealth } from "@/pages/super-admin/system-health";
 import { Route as SuperAdminProfile } from "@/pages/super-admin/profile";
 import { Route as SuperAdminAuditLogs } from "@/pages/super-admin/audit-logs";
 import { Route as SuperAdminReports } from "@/pages/super-admin/reports";
 
+// Senior Admin Pages
+import { Route as SeniorAdminIndex } from "@/pages/senior-admin/index";
+import { Route as SeniorAdminAdmins } from "@/pages/senior-admin/admins";
+import { Route as SeniorAdminHostel } from "@/pages/senior-admin/hostel";
+import { Route as SeniorAdminLibrary } from "@/pages/senior-admin/library";
+import { Route as SeniorAdminInventory } from "@/pages/senior-admin/inventory";
+import { Route as SeniorAdminSettings } from "@/pages/super-admin/settings";
+import { Route as SeniorAdminProfile } from "@/pages/super-admin/profile";
+
 // Hostel Pages
+import HostelDashboardPage from "@/modules/hostel/HostelDashboardPage";
 import { Route as HostelIndex } from "@/pages/hostel/hostel/index";
 import { Route as HostelDetail } from "@/pages/hostel/hostel/$id";
 import { Route as HostelAdd } from "@/pages/hostel/hostel/add";
@@ -131,15 +140,43 @@ import { Route as InventoryStock } from "@/pages/inventory/stock/index";
 import { Route as Error403 } from "@/pages/errors/403";
 import { Route as Error404 } from "@/pages/errors/404";
 
+function SeniorAdminTypoRedirect() {
+  const location = useLocation();
+  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
+  return <Navigate to={cleanPath + location.search} replace />;
+}
+
+function GenericModuleShell({ title, description }) {
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
+      <div className="flex items-center gap-3">
+        <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/10 text-primary">
+          <Building2 className="h-6 w-6" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="rounded-2xl border border-border bg-card p-12 text-center shadow-sm">
+        <p className="text-base font-semibold text-foreground">{title} Module Active</p>
+        <p className="mt-1 text-sm text-muted-foreground">This module section is configured and ready for operational records.</p>
+      </div>
+    </div>
+  );
+}
+
 // Root navigator helper
 const RootNavigator = () => {
   const { user } = useAuth();
   
   if (!user) return <Navigate to="/login" replace />;
   
-  const role = user.role?.toLowerCase();
+  const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
+  const role = rawRole.toLowerCase();
   
   if (role === "superadmin") return <Navigate to="/super-admin" replace />;
+  if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
   if (role === "admin") return <Navigate to="/hostel-admin" replace />;
   if (role === "warden") return <Navigate to="/warden" replace />;
   if (role === "librarian") return <Navigate to="/library-admin" replace />;
@@ -172,15 +209,37 @@ export default function AppRoutes() {
       >
         <Route index element={<SuperAdminIndex.component />} />
         <Route path="admins" element={<SuperAdminAdmins.component />} />
-        <Route path="roles" element={<SuperAdminRoles.component />} />
         <Route path="colleges" element={<SuperAdminColleges.component />} />
         <Route path="notices" element={<SuperAdminNotices.component />} />
         <Route path="settings" element={<SuperAdminSettings.component />} />
-        <Route path="system-health" element={<SuperAdminSystemHealth.component />} />
         <Route path="profile" element={<SuperAdminProfile.component />} />
         <Route path="audit-logs" element={<SuperAdminAuditLogs.component />} />
         <Route path="reports" element={<SuperAdminReports.component />} />
       </Route>
+
+      {/* Senior Admin Dashboard Routes */}
+      <Route
+        path="/senior-admin"
+        element={
+          <RoleRoute allowedRoles={["senioradmin"]}>
+            <DashboardLayout />
+          </RoleRoute>
+        }
+      >
+        <Route index element={<SeniorAdminIndex.component />} />
+        <Route path="admins" element={<SeniorAdminAdmins.component />} />
+        <Route path="hostel" element={<SeniorAdminHostel.component />} />
+        <Route path="library" element={<SeniorAdminLibrary.component />} />
+        <Route path="inventory" element={<SeniorAdminInventory.component />} />
+        <Route path="settings" element={<SeniorAdminSettings.component />} />
+        <Route path="profile" element={<SeniorAdminProfile.component />} />
+      </Route>
+
+      {/* Graceful redirects for senior admin spacing typos */}
+      <Route path="/senior admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior admin/*" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin" element={<SeniorAdminTypoRedirect />} />
+      <Route path="/senior%20admin/*" element={<SeniorAdminTypoRedirect />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route
@@ -191,39 +250,19 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelIndex.component />} />
-        <Route path="students" element={<HostelIndex.component />} />
-        <Route path="rooms" element={<HostelRooms.component />} />
-        <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
-        <Route path="rooms/:id/edit" element={<HostelRoomEdit.component />} />
-        <Route path="rooms/add" element={<HostelRoomAdd.component />} />
-        <Route path="allocation" element={<HostelAllocations.component />} />
-        <Route path="allocation/new" element={<HostelAllocationNew.component />} />
-        <Route path="allocation/change" element={<HostelAllocationChange.component />} />
-        <Route path="allocation/history" element={<HostelAllocationHistory.component />} />
-        <Route path="complaints" element={<HostelComplaints.component />} />
-        <Route path="fees" element={<HostelFees.component />} />
-        <Route path="visitors" element={<HostelVisitors.component />} />
-        <Route path="in-out" element={<HostelIndex.component />} />
-        <Route path="leaves" element={<HostelLeaves.component />} />
-        <Route path="notices" element={<HostelIndex.component />} />
-        <Route path="staff" element={<HostelIndex.component />} />
-        <Route path="furniture" element={<HostelFurniture.component />} />
-        <Route path="furniture/damaged" element={<HostelFurnitureDamaged.component />} />
-        <Route path="furniture/maintenance" element={<HostelFurnitureMaintenance.component />} />
-        <Route path="furniture/replacement" element={<HostelFurnitureReplacement.component />} />
+        <Route index element={<HostelDashboardPage />} />
         <Route path="hostels" element={<HostelIndex.component />} />
-        <Route path="hostels/:id" element={<HostelDetail.component />} />
-        <Route path="hostels/add" element={<HostelAdd.component />} />
-        <Route path="beds" element={<HostelBeds.component />} />
-        <Route path="beds/add" element={<HostelBedAdd.component />} />
-        <Route path="beds/:id/edit" element={<HostelBedEdit.component />} />
-        <Route path="blocks" element={<HostelBlocks.component />} />
-        <Route path="blocks/add" element={<HostelBlockAdd.component />} />
-        <Route path="blocks/:id/edit" element={<HostelBlockEdit.component />} />
-        <Route path="floors" element={<HostelFloors.component />} />
-        <Route path="floors/add" element={<HostelFloorAdd.component />} />
-        <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
+        <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
+        <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
+        <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
+        <Route path="staff" element={<GenericModuleShell title="Staff Management" description="Manage hostel staff members, roles and schedules." />} />
+        <Route path="fees" element={<GenericModuleShell title="Fees Management" description="Track and manage hostel fee collection and dues." />} />
+        <Route path="leaves" element={<GenericModuleShell title="Leave Management" description="Review and approve student and staff leave requests." />} />
+        <Route path="visitors" element={<GenericModuleShell title="Visitor Management" description="Register and track all hostel visitor entries." />} />
+        <Route path="in-out" element={<GenericModuleShell title="In Out Register" description="Monitor student and staff entry and exit logs." />} />
+        <Route path="complaints" element={<GenericModuleShell title="Complaints" description="Receive and resolve hostel complaints and grievances." />} />
+        <Route path="notices" element={<GenericModuleShell title="Notice Board" description="Post and manage official hostel notices and announcements." />} />
+        <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 
       {/* Warden Dashboard Routes */}

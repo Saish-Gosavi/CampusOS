@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useState } from "react";
 import { UserRoundCheck, Plus } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
@@ -21,7 +21,7 @@ function VisitorsPage() {
     icon={UserRoundCheck}
     tint="#06B6D4"
     breadcrumbs={[{ label: "Hostel", to: "/student/room" }, { label: "Visitors" }]}
-    action={<Button onClick={() => setOpen((v) => !v)} className="bg-[#2563EB] hover:bg-[#1d4fd8]">
+    action={<Button onClick={() => setOpen((v) => !v)} className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" /> {open ? "Close form" : "New visitor request"}
           </Button>}
   />
@@ -49,7 +49,7 @@ function VisitorsPage() {
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" className="bg-[#2563EB] hover:bg-[#1d4fd8]">Send request</Button>
+            <Button type="submit" className="bg-primary hover:bg-primary/90">Send request</Button>
           </div>
         </form>}
 

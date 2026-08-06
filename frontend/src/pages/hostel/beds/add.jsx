@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { PlusCircle } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { BedForm } from "@/components/hostel/BedForm";

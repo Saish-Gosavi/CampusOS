@@ -1,8 +1,8 @@
 import { FloorRepository } from "../repository/floor.repository.js";
 
 export class FloorService {
-  static async getAll() {
-    return FloorRepository.findAll();
+  static async getAll(blockId) {
+    return FloorRepository.findAll(blockId);
   }
 
   static async getById(id) {

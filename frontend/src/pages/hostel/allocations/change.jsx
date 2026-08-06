@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
+import { useNavigate } from "react-router-dom";
 import { ArrowRight, Repeat, User, BedDouble } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/hostel/StatusPill";
@@ -55,7 +56,7 @@ function RoomChangePage() {
     toast.success(
       `${student?.name} transferred from ${curRoom?.number} \u2192 ${newRoom?.number} (${newBed?.number})`
     );
-    navigate({ to: "/hostel-admin/allocation" });
+    navigate("/hostel-admin/allocation");
   };
   return <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_1fr]">
       {
@@ -63,7 +64,7 @@ function RoomChangePage() {
   }
       <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
         <div className="mb-3 flex items-center gap-2">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
             <User className="h-4 w-4" />
           </span>
           <div>

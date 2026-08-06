@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { BedDouble, Building2, Layers, Phone, User } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
 import { studentProfile } from "@/lib/student-data";
@@ -50,7 +50,7 @@ function MyRoomPage() {
                   <p className="truncate text-sm font-semibold text-foreground">{r.name}</p>
                   <p className="truncate text-xs text-muted-foreground">{r.enrollment}</p>
                 </div>
-                <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-xs font-medium text-[#2563EB]">{r.bed}</span>
+                <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">{r.bed}</span>
               </li>)}
           </ul>
         </div>
@@ -68,7 +68,7 @@ function MyRoomPage() {
           </div>
           <a
     href={`tel:${h.warden.mobile.replace(/\s/g, "")}`}
-    className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#1d4fd8]"
+    className="mt-3 flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary/90"
   >
             <Phone className="h-4 w-4" /> Call {h.warden.mobile}
           </a>

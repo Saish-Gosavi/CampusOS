@@ -22,7 +22,15 @@ export class UsersController {
 
   static async getAllUsers(req, res, next) {
     try {
-      const users = await UsersService.getAllUsers();
+      const creatorRoleName = req.user.role.toLowerCase();
+      let users;
+      if (creatorRoleName === "senioradmin") {
+        users = await UsersService.getAllUsers("admin");
+      } else if (creatorRoleName === "superadmin" && req.query.role) {
+        users = await UsersService.getAllUsers(req.query.role);
+      } else {
+        users = await UsersService.getAllUsers();
+      }
       return apiResponse.success(res, users, "Users list retrieved successfully");
     } catch (error) {
       next(error);
@@ -31,8 +39,26 @@ export class UsersController {
 
   static async createUser(req, res, next) {
     try {
-      const user = await UsersService.createUser(req.body);
+      const user = await UsersService.createUser(req.user, req.body);
       return apiResponse.success(res, user, "User created successfully", 201);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async updateUser(req, res, next) {
+    try {
+      const user = await UsersService.updateUser(req.user, req.params.id, req.body);
+      return apiResponse.success(res, user, "User updated successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async deleteUser(req, res, next) {
+    try {
+      await UsersService.deleteUser(req.user, req.params.id);
+      return apiResponse.success(res, null, "User deleted successfully");
     } catch (error) {
       next(error);
     }

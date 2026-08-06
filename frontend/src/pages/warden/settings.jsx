@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { Settings, Moon, Languages, Bell } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { Button } from "@/components/ui/button";
@@ -49,7 +49,7 @@ function SettingsPage() {
 function SettingSection({ icon: Icon, title, description, children }) {
   return <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
       <div className="flex items-center gap-2">
-        <span className="grid h-9 w-9 place-items-center rounded-lg bg-[#2563EB]/10 text-[#2563EB]"><Icon className="h-4 w-4" /></span>
+        <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary"><Icon className="h-4 w-4" /></span>
         <div>
           <h3 className="text-base font-semibold text-foreground">{title}</h3>
           <p className="text-xs text-muted-foreground">{description}</p>

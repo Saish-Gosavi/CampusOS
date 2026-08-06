@@ -6,7 +6,7 @@ CampusOS is a comprehensive Hostel Management System built with React.js, Node.j
 
 The modules should be implemented in the following order to ensure all data dependencies are met:
 
-1. **[Authentication](01_Authentication.md)**: Handles login, logout, forgot password, reset password, JWT authentication, role-based access control, session management and audit logging.
+1. **[Authentication](01_Authentication.md)**: Handles , logout, forgot password, reset password, JWT authentication, role-based access control, session management and audit logging.
 2. **[Database Design](02_Database_Design.md)**: Maintains every database table required for the project including students, hostels, rooms, room allocation, attendance, fees, complaints, visitors, notices, notifications and reports.
 3. **[Hostel Management](03_Hostel_Management.md)**: Manage hostel information including hostel creation, blocks, floors, capacity, availability and hostel configuration.
 4. **[Admin Management](04_Admin_Management.md)**: Manage hostel administrators, assign hostels, activate/deactivate admins and monitor administrator activities.

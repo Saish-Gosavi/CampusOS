@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { useState } from "react";
 import { CalendarDays, Plus } from "lucide-react";
 import { StudentPageHeader } from "@/components/student/StudentPageHeader";
@@ -51,7 +51,7 @@ function LeavesPage() {
     icon={CalendarDays}
     tint="#F97316"
     breadcrumbs={[{ label: "Hostel", to: "/student/room" }, { label: "Leaves" }]}
-    action={<Button onClick={() => setOpen((v) => !v)} className="bg-[#2563EB] hover:bg-[#1d4fd8]">
+    action={<Button onClick={() => setOpen((v) => !v)} className="bg-primary hover:bg-primary/90">
             <Plus className="mr-2 h-4 w-4" /> {open ? "Close form" : "Apply Leave"}
           </Button>}
   />
@@ -81,7 +81,7 @@ function LeavesPage() {
           </div>
           <div className="mt-4 flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" className="bg-[#2563EB] hover:bg-[#1d4fd8]">Submit request</Button>
+            <Button type="submit" className="bg-primary hover:bg-primary/90">Submit request</Button>
           </div>
         </form>}
 

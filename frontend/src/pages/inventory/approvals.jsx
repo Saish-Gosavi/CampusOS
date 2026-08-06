@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { ClipboardCheck, Check, X } from "lucide-react";
 import { InventoryPageHeader } from "@/components/inventory/InventoryPageHeader";
 import { InventoryStatusPill } from "@/components/inventory/InventoryStatusPill";

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { ArrowRightLeft, BookUp, Undo2 } from "lucide-react";
 import { InventoryPageHeader } from "@/components/inventory/InventoryPageHeader";
 import { InventoryStatusPill } from "@/components/inventory/InventoryStatusPill";
@@ -42,7 +42,7 @@ function BorrowingPage() {
                 <Input type="date" />
               </div>
             </div>
-            <Button className="mt-2 w-full bg-[#2563EB] hover:bg-[#1e4fd1]">
+            <Button className="mt-2 w-full bg-primary hover:bg-primary/90">
               <BookUp className="mr-1.5 h-4 w-4" /> Issue Item
             </Button>
           </div>

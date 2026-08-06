@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { QrCode, Camera, Keyboard, CheckCircle2, LogIn, LogOut, User, RefreshCcw } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,7 @@ function QRScannerPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <Camera className="h-4 w-4 text-[#2563EB]" />
+            <Camera className="h-4 w-4 text-primary" />
             <h3 className="text-base font-semibold text-foreground">Scanner</h3>
           </div>
           <div className="relative grid h-72 place-items-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-slate-900 text-slate-400">
@@ -73,7 +73,7 @@ function QRScannerPage() {
 
         <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
-            <User className="h-4 w-4 text-[#2563EB]" />
+            <User className="h-4 w-4 text-primary" />
             <h3 className="text-base font-semibold text-foreground">Scan Result</h3>
           </div>
           {!scanned ? <div className="grid h-72 place-items-center rounded-xl border border-dashed border-border bg-muted/30 text-center">

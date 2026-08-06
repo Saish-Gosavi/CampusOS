@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { DoorOpen, Search, Filter, Eye, Download, LogIn, LogOut, History as HistoryIcon } from "lucide-react";
 import { SecurityPageHeader } from "@/components/security/SecurityPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";

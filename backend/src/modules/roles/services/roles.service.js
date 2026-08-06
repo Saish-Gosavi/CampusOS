@@ -6,42 +6,78 @@ export class RolesService {
     return RolesRepository.findAll();
   }
 
-  static async getRolesAndPermissions() {
-    const roles = await RolesRepository.findAll();
-    return roles.map((role) => ({
-      id: role.id,
-      name: role.name,
-      description: role.description,
-      permissions: role.permissions.map((p) => p.permission),
-    }));
+  static async getAllPermissions() {
+    return RolesRepository.findAllPermissions();
   }
 
-  static async createRoleAndPermissions({ name, description, permissionIds }, userContext = {}) {
-    if (!name) {
+  static async getRoleById(id) {
+    const role = await RolesRepository.findById(id);
+    if (!role) {
+      throw new AppError("Role not found", 404);
+    }
+    return role;
+  }
+
+  static async createRole(data, userContext) {
+    if (!data.name) {
       throw new AppError("Role name is required", 400);
     }
 
-    const createdRole = await RolesRepository.createRoleWithPermissions({
-      name,
-      description,
-      permissionIds,
-    });
-
-    if (userContext.userId) {
-      await RolesRepository.createAuditLog({
-        userId: userContext.userId,
-        action: "CREATE_ROLE_AND_PERMISSIONS",
-        details: JSON.stringify({ roleId: createdRole.id, name: createdRole.name, permissionIds }),
-        ipAddress: userContext.ipAddress || null,
-      });
+    const existingRole = await RolesRepository.findByName(data.name.trim());
+    if (existingRole) {
+      throw new AppError("Role with this name already exists", 400);
     }
 
-    return {
-      id: createdRole.id,
-      name: createdRole.name,
-      description: createdRole.description,
-      permissions: createdRole.permissions.map((p) => p.permission),
-    };
+    if (data.permissionIds && data.permissionIds.length > 0) {
+      const uniqueIds = [...new Set(data.permissionIds.map(Number))];
+      const validCount = await RolesRepository.countPermissionsByIds(uniqueIds);
+      if (validCount !== uniqueIds.length) {
+        throw new AppError("One or more specified permission IDs do not exist", 400);
+      }
+    }
+
+    return RolesRepository.createRoleWithPermissions(data, userContext?.id, userContext?.ipAddress);
+  }
+
+  static async updateRole(id, data, userContext) {
+    const role = await RolesRepository.findById(id);
+    if (!role) {
+      throw new AppError("Role not found", 404);
+    }
+
+    if (role.name.toLowerCase() === "superadmin") {
+      throw new AppError("Cannot modify the superadmin role", 400);
+    }
+
+    if (data.name) {
+      const existingRole = await RolesRepository.findByName(data.name.trim());
+      if (existingRole && existingRole.id !== Number(id)) {
+        throw new AppError("Role with this name already exists", 400);
+      }
+    }
+
+    if (data.permissionIds && data.permissionIds.length > 0) {
+      const uniqueIds = [...new Set(data.permissionIds.map(Number))];
+      const validCount = await RolesRepository.countPermissionsByIds(uniqueIds);
+      if (validCount !== uniqueIds.length) {
+        throw new AppError("One or more specified permission IDs do not exist", 400);
+      }
+    }
+
+    return RolesRepository.updateRoleWithPermissions(id, data, userContext?.id, userContext?.ipAddress);
+  }
+
+  static async deleteRole(id, userContext) {
+    const role = await RolesRepository.findById(id);
+    if (!role) {
+      throw new AppError("Role not found", 404);
+    }
+
+    if (role.name.toLowerCase() === "superadmin") {
+      throw new AppError("Cannot delete the superadmin role", 400);
+    }
+
+    return RolesRepository.deleteRole(id, userContext?.id, userContext?.ipAddress);
   }
 }
 

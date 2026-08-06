@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@/routes/compat";
 import {
   Users,
   DoorOpen,
@@ -23,7 +23,6 @@ import {
   XAxis,
   YAxis
 } from "recharts";
-import { SecurityBreadcrumbs } from "@/components/security/SecurityBreadcrumbs";
 import { StatCard } from "@/components/admin/StatCard";
 import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
@@ -58,8 +57,7 @@ function SecurityDashboard() {
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <SecurityBreadcrumbs items={[{ label: "Dashboard" }]} />
-          <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                    <h1 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             Security Command Center
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -115,7 +113,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Today's Entries"
     description="Recent students returning to campus"
-    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -136,7 +134,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Today's Exits"
     description="Students currently outside campus"
-    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/in-out" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >
@@ -159,7 +157,7 @@ function SecurityDashboard() {
         <ChartCard
     title="Recent Visitors"
     description="Latest visitor activity"
-    action={<Link to="/security/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-[#2563EB] hover:bg-[#2563EB]/10">
+    action={<Link to="/security/visitors" className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-primary hover:bg-primary/10">
               View all <ArrowRight className="h-3.5 w-3.5" />
             </Link>}
   >

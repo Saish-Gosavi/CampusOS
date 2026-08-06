@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@/routes/compat";
 import { BookOpen, Plus, Search, Filter, Pencil, Trash2, Eye, BookUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { LibraryPageHeader } from "@/components/library/LibraryPageHeader";
 import { LibraryStatusPill } from "@/components/library/LibraryStatusPill";

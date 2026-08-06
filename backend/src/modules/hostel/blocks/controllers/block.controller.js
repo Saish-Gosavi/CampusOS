@@ -4,7 +4,8 @@ import { apiResponse } from "../../../../helpers/response.helper.js";
 export class BlockController {
   static async getAll(req, res, next) {
     try {
-      const data = await BlockService.getAll();
+      const { hostelId } = req.query;
+      const data = await BlockService.getAll(hostelId);
       return apiResponse.success(res, data, "Records retrieved successfully");
     } catch (error) {
       next(error);
