@@ -40,23 +40,9 @@ const Route = createFileRoute("/senior-admin/hostel")({
   component: HostelManagementPage
 });
 
-const MOCK_OCCUPANCY_TREND = [
-  { month: "Jan", Occupied: 320, Vacant: 80, Maintenance: 12 },
-  { month: "Feb", Occupied: 340, Vacant: 60, Maintenance: 10 },
-  { month: "Mar", Occupied: 355, Vacant: 45, Maintenance: 8 },
-  { month: "Apr", Occupied: 368, Vacant: 32, Maintenance: 14 },
-  { month: "May", Occupied: 375, Vacant: 25, Maintenance: 6 },
-  { month: "Jun", Occupied: 384, Vacant: 16, Maintenance: 6 }
-];
+const MOCK_OCCUPANCY_TREND = [];
 
-const MOCK_ROOMS = [
-  { id: "A-101", wing: "Wing A", type: "Double Sharing", capacity: 2, occupied: 2, status: "Occupied", resident: "Aarav Sharma & Rohan Verma" },
-  { id: "A-102", wing: "Wing A", type: "Single Deluxe", capacity: 1, occupied: 1, status: "Occupied", resident: "Priya Patel" },
-  { id: "A-103", wing: "Wing A", type: "Triple Sharing", capacity: 3, occupied: 2, status: "Available", resident: "Kabir Mehta, Vikram Singh" },
-  { id: "B-201", wing: "Wing B", type: "Double Sharing", capacity: 2, occupied: 0, status: "Maintenance", resident: "— (Plumbing Work)" },
-  { id: "B-202", wing: "Wing B", type: "Single Deluxe", capacity: 1, occupied: 1, status: "Occupied", resident: "Neha Gupta" },
-  { id: "C-301", wing: "Wing C", type: "Triple Sharing", capacity: 3, occupied: 3, status: "Occupied", resident: "Aditya, Siddharth, Harsh" },
-];
+const MOCK_ROOMS = [];
 
 function HostelManagementPage() {
   const [loading, setLoading] = useState(true);
@@ -242,10 +228,10 @@ function HostelManagementPage() {
 
           {/* KPIs */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <KPI label="Total Rooms" value="148" subtitle="Across 3 Wings" icon={Bed} tint="#7B4CED" />
-            <KPI label="Active Occupants" value="384" subtitle="88.5% Capacity" icon={Users} tint="#2563EB" />
-            <KPI label="Vacant Capacity" value="16" subtitle="Ready for allocation" icon={Home} tint="#22C55E" />
-            <KPI label="Pending Maintenance" value="6" subtitle="Work orders open" icon={Wrench} tint="#EAB308" />
+            <KPI label="Total Rooms" value="0" subtitle="Across 0 Wings" icon={Bed} tint="#7B4CED" />
+            <KPI label="Active Occupants" value="0" subtitle="0% Capacity" icon={Users} tint="#2563EB" />
+            <KPI label="Vacant Capacity" value="0" subtitle="Ready for allocation" icon={Home} tint="#22C55E" />
+            <KPI label="Pending Maintenance" value="0" subtitle="Work orders open" icon={Wrench} tint="#EAB308" />
           </div>
 
           {/* Analytics Charts */}
@@ -291,37 +277,37 @@ function HostelManagementPage() {
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
                       <span>Wing A Occupancy</span>
-                      <span className="text-emerald-600">94%</span>
+                      <span className="text-emerald-600">0%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: "94%" }} />
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: "0%" }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
                       <span>Wing B Occupancy</span>
-                      <span className="text-blue-600">82%</span>
+                      <span className="text-blue-600">0%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-blue-500 rounded-full" style={{ width: "82%" }} />
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: "0%" }} />
                     </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between text-xs font-semibold mb-1">
                       <span>Wing C Occupancy</span>
-                      <span className="text-purple-600">90%</span>
+                      <span className="text-purple-600">0%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-purple-500 rounded-full" style={{ width: "90%" }} />
+                      <div className="h-full bg-purple-500 rounded-full" style={{ width: "0%" }} />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground border border-border">
-                <span className="font-semibold text-foreground">System Note:</span> Maintenance check scheduled for Wing B plumbing on Friday.
+                <span className="font-semibold text-foreground">System Note:</span> No scheduled maintenance work orders.
               </div>
             </div>
           </div>

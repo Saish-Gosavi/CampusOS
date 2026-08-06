@@ -68,6 +68,7 @@ model User {
   auditLogs         AuditLog[]
   inventoryRequests InventoryRequest[]
   notices           Notice[]
+  inOutLogs         InOutLog[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -110,6 +111,8 @@ model Hostel {
   users        User[]
   blocks       Block[]
   wardens      Warden[]
+  notices      Notice[]
+  inOutLogs    InOutLog[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -176,6 +179,7 @@ model Student {
   bookIssues  BookIssue[]
   reservations Reservation[]
   attendance  Attendance[]
+  documents   StudentDocument[]
 
   @@index([userId])
 }
@@ -426,10 +430,46 @@ model Notice {
   isActive    Boolean   @default(true)
   scheduledAt DateTime?
   expiresAt   DateTime?
+  priority    String    @default("General") // "General", "Urgent", "Maintenance", "Event"
+  hostelId    Int?
+  hostel      Hostel?   @relation(fields: [hostelId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   createdById Int
   createdBy   User      @relation(fields: [createdById], references: [id])
 
   @@index([createdById])
+  @@index([hostelId])
+}
+
+// ==========================================
+// 10. Document & Log Extensions
+// ==========================================
+
+model StudentDocument {
+  id           Int      @id @default(autoincrement())
+  studentId    Int
+  student      Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  documentType String   // "Aadhar", "Income", "Admission", "Custom"
+  name         String
+  fileUrl      String
+  uploadedAt   DateTime @default(now())
+
+  @@index([studentId])
+}
+
+model InOutLog {
+  id          Int      @id @default(autoincrement())
+  userType    String   // "Student", "Staff", "Visitor"
+  direction   String   // "IN", "OUT"
+  name        String   // Can be name or ID
+  reason      String?
+  timestamp   DateTime @default(now())
+  hostelId    Int?
+  hostel      Hostel?  @relation(fields: [hostelId], references: [id])
+  loggedById  Int
+  loggedBy    User     @relation(fields: [loggedById], references: [id])
+
+  @@index([hostelId])
+  @@index([loggedById])
 }

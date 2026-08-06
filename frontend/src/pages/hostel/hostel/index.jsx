@@ -50,7 +50,7 @@ function HostelsPage() {
     title="Hostel Management"
     description="View, add and manage every hostel block on campus."
     icon={Building2}
-    tint="#2563EB"
+    tint="#210963"
     breadcrumbs={[{ label: "Hostel Management" }]}
     action={<Button asChild className="bg-primary hover:bg-primary/90">
             <Link to="/hostel-admin/hostels/add">

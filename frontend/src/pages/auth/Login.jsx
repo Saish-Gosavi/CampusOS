@@ -33,6 +33,7 @@ function LoginPage() {
 
         const role = user.role?.toLowerCase();
         if (role === "superadmin") navigate("/super-admin");
+        else if (role === "senioradmin") navigate("/senior-admin");
         else if (role === "admin") navigate("/hostel-admin");
         else if (role === "warden") navigate("/warden");
         else if (role === "librarian") navigate("/library-admin");

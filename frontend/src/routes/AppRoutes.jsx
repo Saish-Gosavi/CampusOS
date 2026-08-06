@@ -63,6 +63,9 @@ import { Route as HostelFurnitureDamaged } from "@/pages/hostel/furniture/damage
 import { Route as HostelFurnitureMaintenance } from "@/pages/hostel/furniture/maintenance";
 import { Route as HostelFurnitureReplacement } from "@/pages/hostel/furniture/replacement";
 import { Route as HostelFees } from "@/pages/hostel/fees/index";
+import { Route as HostelStudents } from "@/pages/hostel/students/index";
+import { Route as HostelInOut } from "@/pages/hostel/in-out/index";
+import { Route as HostelNotices } from "@/pages/hostel/notices/index";
 
 // Warden Pages
 import { Route as WardenIndex } from "@/pages/warden/index";
@@ -252,14 +255,14 @@ export default function AppRoutes() {
         <Route path="hostels" element={<GenericModuleShell title="Hostel" description="Manage hostel buildings, blocks, floors and rooms." />} />
         <Route path="admission-approval" element={<GenericModuleShell title="New Admission Approval" description="Review and approve student hostel admission applications." />} />
         <Route path="allocation-letter" element={<GenericModuleShell title="Room Allocation Letter" description="Generate and issue official room allocation letters to residents." />} />
-        <Route path="students" element={<GenericModuleShell title="Student Management" description="Manage all enrolled hostel students and their records." />} />
+        <Route path="students" element={<HostelStudents.component />} />
         <Route path="staff" element={<GenericModuleShell title="Staff Management" description="Manage hostel staff members, roles and schedules." />} />
         <Route path="fees" element={<GenericModuleShell title="Fees Management" description="Track and manage hostel fee collection and dues." />} />
         <Route path="leaves" element={<GenericModuleShell title="Leave Management" description="Review and approve student and staff leave requests." />} />
         <Route path="visitors" element={<GenericModuleShell title="Visitor Management" description="Register and track all hostel visitor entries." />} />
-        <Route path="in-out" element={<GenericModuleShell title="In Out Register" description="Monitor student and staff entry and exit logs." />} />
+        <Route path="in-out" element={<HostelInOut.component />} />
         <Route path="complaints" element={<GenericModuleShell title="Complaints" description="Receive and resolve hostel complaints and grievances." />} />
-        <Route path="notices" element={<GenericModuleShell title="Notice Board" description="Post and manage official hostel notices and announcements." />} />
+        <Route path="notices" element={<HostelNotices.component />} />
         <Route path="reports" element={<GenericModuleShell title="Reports" description="View system metrics and download hostel reports." />} />
       </Route>
 
