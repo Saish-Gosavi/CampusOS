@@ -80,6 +80,7 @@ import { Route as WardenIndex } from "@/pages/warden/index";
 import { Route as WardenStudents } from "@/pages/warden/students";
 import { Route as WardenLeaves } from "@/pages/warden/leaves";
 import { Route as WardenVisitors } from "@/pages/warden/visitors";
+import { Route as WardenAllocationLetter } from "@/pages/warden/allocation-letter";
 import { Route as WardenComplaints } from "@/pages/warden/complaints";
 import { Route as WardenNotices } from "@/pages/warden/notices";
 import { Route as WardenFurniture } from "@/pages/warden/furniture";
@@ -314,6 +315,7 @@ export default function AppRoutes() {
         <Route path="students" element={<WardenStudents.component />} />
         <Route path="leaves" element={<WardenLeaves.component />} />
         <Route path="visitors" element={<WardenVisitors.component />} />
+        <Route path="allocation-letter" element={<WardenAllocationLetter.component />} />
         <Route path="complaints" element={<WardenComplaints.component />} />
         <Route path="notices" element={<WardenNotices.component />} />
         <Route path="furniture" element={<WardenFurniture.component />} />

@@ -9,6 +9,7 @@ import {
   UserRoundCheck,
   Megaphone,
   BarChart3, LogOut,
+  FileText,
   ShieldCheck
 } from "lucide-react";
 import {
@@ -37,9 +38,11 @@ const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
   { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
   { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
+  { title: "Letter Allocation", url: "/warden/allocation-letter", icon: FileText },
   { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
   { title: "Reports", url: "/warden/reports", icon: BarChart3 }
 ];
+
 
 function WardenSidebar() {
   const { logout } = useAuth();

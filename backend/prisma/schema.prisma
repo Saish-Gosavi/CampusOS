@@ -55,6 +55,8 @@ model User {
   generatedReceipts FeeReceipt[]
   allotmentTemplates AllotmentTemplate[]
   generatedReports  GeneratedReport[]
+  approvedLetterRequests LetterRequest[] @relation("LetterRequestApprover")
+  generatedLetters RoomAllotmentLetter[] @relation("LetterGenerator")
 
   @@index([roleId])
   @@index([hostelId])
@@ -101,6 +103,7 @@ model Hostel {
   notices      Notice[]
   inOutLogs    InOutLog[]
   staff        Staff[]
+  letterRequests LetterRequest[]
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now()) @updatedAt
 }
@@ -167,6 +170,7 @@ model Student {
   reservations Reservation[]
   attendance  Attendance[]
   documents   StudentDocument[]
+  letterRequests LetterRequest[]
 
   @@index([userId])
 }
@@ -215,18 +219,44 @@ model Allocation {
 }
 
 model RoomAllotmentLetter {
-  id           Int        @id @default(autoincrement())
-  allocationId Int        @unique
-  allocation   Allocation @relation(fields: [allocationId], references: [id], onDelete: Cascade)
-  referenceNo  String     @unique
-  issuedDate   DateTime   @default(now())
-  terms        String?    @db.Text
-  signedBy     String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id              Int            @id @default(autoincrement())
+  allocationId    Int?           @unique
+  allocation      Allocation?    @relation(fields: [allocationId], references: [id], onDelete: Cascade)
+  letterRequestId Int?           @unique
+  letterRequest   LetterRequest? @relation(fields: [letterRequestId], references: [id], onDelete: SetNull)
+  referenceNo     String         @unique
+  issuedDate      DateTime       @default(now())
+  terms           String?        @db.Text
+  signedBy        String?
+  pdfPath         String?
+  generatedById   Int?
+  generatedBy     User?          @relation("LetterGenerator", fields: [generatedById], references: [id], onDelete: SetNull)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
 
   @@index([allocationId])
+  @@index([letterRequestId])
 }
+
+model LetterRequest {
+  id              Int                  @id @default(autoincrement())
+  studentId       Int
+  student         Student              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  hostelId        Int?
+  hostel          Hostel?              @relation(fields: [hostelId], references: [id], onDelete: SetNull)
+  status          String               @default("Pending") // "Pending", "Approved", "Rejected", "Generated"
+  rejectionReason String?              @db.Text
+  approvedById    Int?
+  approvedBy      User?                @relation("LetterRequestApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  allotmentLetter RoomAllotmentLetter?
+
+  @@index([studentId])
+  @@index([hostelId])
+  @@index([status])
+}
+
 
 model LeaveRequest {
   id            Int      @id @default(autoincrement())

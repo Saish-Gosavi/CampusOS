@@ -583,3 +583,34 @@ export const adminReportsApi = {
     return apiClient.post("/admin/reports/log-export", data);
   },
 };
+
+export const wardenLetterApi = {
+  async getRequests() {
+    return apiClient.get("/warden/requests");
+  },
+  async approve(id) {
+    return apiClient.put(`/warden/requests/${id}/approve`);
+  },
+  async reject(id, rejectionReason) {
+    return apiClient.put(`/warden/requests/${id}/reject`, { rejectionReason });
+  },
+  async generateLetter(id) {
+    return apiClient.post(`/warden/requests/${id}/generate`);
+  },
+  async getActiveTemplate() {
+    return apiClient.get("/warden/allotment-template/active");
+  },
+  async logDownload(letterId, referenceNo) {
+    return apiClient.post("/warden/log-download", { letterId, referenceNo });
+  }
+};
+
+export const studentLetterApi = {
+  async submitRequest() {
+    return apiClient.post("/warden/student-requests");
+  },
+  async getRequests() {
+    return apiClient.get("/warden/student-requests");
+  }
+};
+

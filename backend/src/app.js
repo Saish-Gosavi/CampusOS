@@ -72,6 +72,9 @@ import visitorsRouter from "./modules/hostel/visitors/routes/visitor.routes.js";
 
 import adminReportsRouter from "./modules/reports/routes/admin-reports.routes.js";
 
+import wardenLetterRouter from "./modules/warden/letter.routes.js";
+import allotmentTemplateRouter from "./modules/hostel/allotment-template/routes/allotment-template.routes.js";
+
 // Register routers
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
@@ -79,7 +82,10 @@ app.use('/api/notices', noticesRoutes);
 app.use('/api/inout', inoutRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use("/api/hostel", hostelRouter);
+app.use("/api/warden/allotment-template", allotmentTemplateRouter);
+app.use("/api/warden", wardenLetterRouter);
 app.use("/api/admin/visitor-management", visitorsRouter);
+
 app.use("/api/admin/reports", adminReportsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
