@@ -9,7 +9,6 @@ import {
   UserCheck,
   CalendarClock,
   RefreshCw,
-  FileSpreadsheet,
   FileText,
   Filter,
   TrendingUp,
@@ -418,14 +417,6 @@ function AdminReportsPage() {
               className={`h-4 w-4 ${loading ? "animate-spin text-[#7B4CED]" : ""}`}
             />
             Refresh
-          </button>
-          <button
-            onClick={handleExportCsv}
-            disabled={generating}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-            Excel (.csv)
           </button>
           <button
             onClick={handleExportPdf}
