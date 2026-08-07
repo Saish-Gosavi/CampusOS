@@ -7,6 +7,7 @@ import { StudentNavbar } from "@/components/student/StudentNavbar";
 import { SecurityNavbar } from "@/components/security/SecurityNavbar";
 import { LibraryNavbar } from "@/components/library/LibraryNavbar";
 import { InventoryNavbar } from "@/components/inventory/InventoryNavbar";
+import { MessNavbar } from "@/components/mess/MessNavbar";
 
 export function Navbar() {
   const { user } = useAuth();
@@ -20,6 +21,10 @@ export function Navbar() {
       return <HostelNavbar />;
     case "warden":
       return <WardenNavbar />;
+    case "mess":
+    case "messmanager":
+    case "mess_manager":
+      return <MessNavbar />;
     case "student":
       return <StudentNavbar />;
     case "security":

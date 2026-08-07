@@ -41,6 +41,7 @@ function LoginPage() {
         else if (role === "senioradmin") navigate("/senior-admin");
         else if (role === "admin") navigate("/hostel-admin");
         else if (role === "warden") navigate("/warden");
+        else if (role === "mess" || role === "messmanager" || role === "mess_manager") navigate("/mess");
         else if (role === "librarian") navigate("/library-admin");
         else if (role === "store") navigate("/inventory-admin");
         else if (role === "student") navigate("/student");

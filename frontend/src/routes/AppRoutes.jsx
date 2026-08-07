@@ -92,6 +92,15 @@ import { Route as WardenSettings } from "@/pages/warden/settings";
 import { Route as WardenRoomChange } from "@/pages/warden/room-change";
 import { Route as WardenStaff } from "@/pages/warden/staff";
 import { Route as WardenLetters } from "@/pages/warden/letters";
+import { Route as WardenMess } from "@/pages/warden/mess";
+
+// Mess Manager Pages
+import { Route as MessIndex } from "@/pages/mess/index";
+import { Route as MessMenu } from "@/pages/mess/menu";
+import { Route as MessOffDays } from "@/pages/mess/off-days";
+import { Route as MessInventory } from "@/pages/mess/inventory";
+import { Route as MessFeedback } from "@/pages/mess/feedback";
+import { Route as MessProfile } from "@/pages/mess/profile";
 
 // Student Pages
 import { Route as StudentIndex } from "@/pages/student/index";
@@ -348,6 +357,24 @@ export default function AppRoutes() {
         <Route path="room-change" element={<WardenRoomChange.component />} />
         <Route path="staff" element={<WardenStaff.component />} />
         <Route path="letters" element={<WardenLetters.component />} />
+        <Route path="mess" element={<WardenMess.component />} />
+      </Route>
+
+      {/* Mess Manager Routes */}
+      <Route
+        path="/mess"
+        element={
+          <RoleRoute allowedRoles={["superadmin", "mess", "messmanager", "mess_manager"]}>
+            <DashboardLayout />
+          </RoleRoute>
+        }
+      >
+        <Route index element={<MessIndex.component />} />
+        <Route path="menu" element={<MessMenu.component />} />
+        <Route path="off-days" element={<MessOffDays.component />} />
+        <Route path="inventory" element={<MessInventory.component />} />
+        <Route path="feedback" element={<MessFeedback.component />} />
+        <Route path="profile" element={<MessProfile.component />} />
       </Route>
 
       {/* Student Dashboard Routes */}

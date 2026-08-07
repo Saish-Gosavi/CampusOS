@@ -7,6 +7,7 @@ import { StudentSidebar } from "@/components/student/StudentSidebar";
 import { SecuritySidebar } from "@/components/security/SecuritySidebar";
 import { LibrarySidebar } from "@/components/library/LibrarySidebar";
 import { InventorySidebar } from "@/components/inventory/InventorySidebar";
+import { MessSidebar } from "@/components/mess/MessSidebar";
 
 export function Sidebar() {
   const { user } = useAuth();
@@ -20,6 +21,10 @@ export function Sidebar() {
       return <HostelSidebar />;
     case "warden":
       return <WardenSidebar />;
+    case "mess":
+    case "messmanager":
+    case "mess_manager":
+      return <MessSidebar />;
     case "student":
       return <StudentSidebar />;
     case "security":
