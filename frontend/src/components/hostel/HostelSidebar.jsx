@@ -35,20 +35,20 @@ import { cn } from "@/lib/utils";
 
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
-  { title: "Hostel", url: "/hostel-admin/hostels", icon: Building2 },
-  { title: "New Admission Approval", url: "/hostel-admin/admission-approval", icon: UserCheck },
-  { title: "Room Allocation Letter", url: "/hostel-admin/allocation-letter", icon: FileText },
-  { title: "Student Management", url: "/hostel-admin/students", icon: Users },
-  { title: "Staff Management", url: "/hostel-admin/staff", icon: UserCog }
+  { title: "Hostel Setup", url: "/hostel-admin/hostels", icon: Building2 },
+  { title: "Admissions", url: "/hostel-admin/admission-approval", icon: UserCheck },
+  { title: "Allotments", url: "/hostel-admin/allocation-letter", icon: FileText },
+  { title: "Students", url: "/hostel-admin/students", icon: Users },
+  { title: "Staff", url: "/hostel-admin/staff", icon: UserCog }
 ];
 
 const opsItems = [
-  { title: "Fees Management", url: "/hostel-admin/fee-management", icon: IndianRupee },
-  { title: "Leave Management", url: "/hostel-admin/leaves", icon: CalendarDays },
-  { title: "Visitor Management", url: "/hostel-admin/visitors", icon: UserRoundCheck },
-  { title: "In Out Register", url: "/hostel-admin/in-out", icon: DoorOpen },
+  { title: "Fees & Dues", url: "/hostel-admin/fee-management", icon: IndianRupee },
+  { title: "Leaves", url: "/hostel-admin/leaves", icon: CalendarDays },
+  { title: "Visitors", url: "/hostel-admin/visitors", icon: UserRoundCheck },
+  { title: "In/Out Logs", url: "/hostel-admin/in-out", icon: DoorOpen },
   { title: "Complaints", url: "/hostel-admin/complaints", icon: MessageSquareWarning },
-  { title: "Notice Board", url: "/hostel-admin/notices", icon: Megaphone },
+  { title: "Notices", url: "/hostel-admin/notices", icon: Megaphone },
   { title: "Reports", url: "/hostel-admin/reports", icon: BarChart3 }
 ];
 
@@ -70,8 +70,8 @@ function HostelSidebar() {
               asChild
               tooltip={item.title}
               className={cn(
-                "text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200",
-                active && "bg-white text-primary hover:bg-white hover:text-primary font-semibold shadow-sm"
+                "text-white/70 hover:bg-white/10 hover:text-white transition-all duration-200 rounded-lg py-2 h-auto",
+                active && "bg-white text-primary hover:bg-white hover:text-primary font-bold shadow-md"
               )}
             >
               <Link to={item.url}>

@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useLocation } from "react-router-dom";
 const notifications = [
   { icon: MessageSquareWarning, tint: "#EF4444", title: "New complaint raised", meta: "Block A \xB7 Room 214 \u2014 5 min ago" },
   { icon: CalendarDays, tint: "#F97316", title: "Leave request pending", meta: "Aarav Sharma \u2014 Home Visit" },
@@ -35,6 +36,22 @@ function WardenNavbar() {
   const isDark = theme === "dark";
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getSearchPlaceholder = () => {
+    const path = location.pathname.toLowerCase();
+    if (path.includes("/students")) return "Search students, ID...";
+    if (path.includes("/room")) return "Search rooms, blocks...";
+    if (path.includes("/occupancy")) return "Search occupancy...";
+    if (path.includes("/furniture")) return "Search furniture, status...";
+    if (path.includes("/leaves") || path.includes("/leave")) return "Search leave requests...";
+    if (path.includes("/complaints") || path.includes("/complaint")) return "Search complaints...";
+    if (path.includes("/visitors") || path.includes("/visitor")) return "Search visitors...";
+    if (path.includes("/notices") || path.includes("/notice")) return "Search notices...";
+    if (path.includes("/reports") || path.includes("/report")) return "Search reports...";
+    return "Search dashboard...";
+  };
+
   return <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
       <SidebarTrigger className="text-muted-foreground" />
       <Separator orientation="vertical" className="mx-1 h-6" />
@@ -42,7 +59,7 @@ function WardenNavbar() {
       <div className="relative hidden max-w-md flex-1 md:block">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-    placeholder="Search students, rooms, complaints..."
+    placeholder={getSearchPlaceholder()}
     className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-primary"
   />
       </div>

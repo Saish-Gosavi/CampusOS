@@ -12,6 +12,9 @@ router.use(authenticate);
 router.get("/profile", UsersController.getProfile);
 router.put("/profile", validate(updateProfileSchema), UsersController.updateProfile);
 
+// Get Students (Available to wardens and admins)
+router.get("/students", authorize("superadmin", "senioradmin", "admin", "warden"), UsersController.getStudents);
+
 // Administrative User Management
 router.get("/", authorize("superadmin", "senioradmin", "admin"), UsersController.getAllUsers);
 router.post("/", authorize("superadmin", "senioradmin", "admin"), validate(createUserSchema), UsersController.createUser);

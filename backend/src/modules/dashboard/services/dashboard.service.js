@@ -65,6 +65,37 @@ export class DashboardService {
       color: leaveColors[l.status] || "#94A3B8"
     }));
 
+    // Map furniture distribution
+    const furnitureColors = {
+      good: "#22C55E",
+      damaged: "#EF4444",
+      "under-maintenance": "#EAB308"
+    };
+    const furnitureStatus = (rawData.furnitureStats || []).map(f => ({
+      name: f.status.charAt(0).toUpperCase() + f.status.slice(1).replace("-", " "),
+      value: f._count.id,
+      color: furnitureColors[f.status] || "#6B7280"
+    }));
+
+    // Map visitor trend (group by day of week)
+    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const visitorTrendMap = {};
+    daysOfWeek.forEach(d => visitorTrendMap[d] = { day: d, total: 0, approved: 0 });
+    
+    (rawData.recentVisitors || []).forEach(v => {
+      const d = new Date(v.createdAt).getDay();
+      const dayName = daysOfWeek[d];
+      visitorTrendMap[dayName].total += 1;
+      if (v.status === "Approved" || v.status === "Checked-In" || v.status === "Checked-Out") {
+        visitorTrendMap[dayName].approved += 1;
+      }
+    });
+    // Shift array to start with Monday for standard chart presentation
+    const visitorTrend = [
+      visitorTrendMap["Mon"], visitorTrendMap["Tue"], visitorTrendMap["Wed"], 
+      visitorTrendMap["Thu"], visitorTrendMap["Fri"], visitorTrendMap["Sat"], visitorTrendMap["Sun"]
+    ];
+
     return {
       stats: {
         totalStudents: rawData.studentsCount,
@@ -79,7 +110,9 @@ export class DashboardService {
       charts: {
         occupancyByBlock,
         complaintOverview,
-        leaveOverview
+        leaveOverview,
+        furnitureStatus,
+        visitorTrend
       },
       lists: {
         recentLeaves: rawData.recentLeaves.map(l => ({

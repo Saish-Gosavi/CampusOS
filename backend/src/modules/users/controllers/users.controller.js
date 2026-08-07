@@ -47,6 +47,22 @@ export class UsersController {
     }
   }
 
+  static async getStudents(req, res, next) {
+    try {
+      const users = await UsersService.getAllUsers("student");
+      // Map to return just the student profiles with the user ID attached
+      const students = users
+        .filter(u => u.studentProfile)
+        .map(u => ({
+          ...u.studentProfile,
+          email: u.email
+        }));
+      return apiResponse.success(res, students, "Students retrieved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async createUser(req, res, next) {
     try {
       const user = await UsersService.createUser(req.user, req.body);

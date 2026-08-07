@@ -9,7 +9,8 @@ import {
   UserRoundCheck,
   Megaphone,
   BarChart3, LogOut,
-  ShieldCheck
+  ShieldCheck,
+  FileText
 } from "lucide-react";
 import {
   Sidebar,
@@ -38,6 +39,7 @@ const ops = [
   { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
   { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
   { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
+  { title: "Occupancy Letters", url: "/warden/letters", icon: FileText },
   { title: "Reports", url: "/warden/reports", icon: BarChart3 }
 ];
 

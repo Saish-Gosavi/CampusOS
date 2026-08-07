@@ -24,8 +24,8 @@ export default function HostelDashboardPage() {
     blocksCount: 0,
     totalCapacity: 0,
     occupiedBeds: 0,
-    pendingApprovals: 4,
-    pendingLeaves: 3,
+    pendingApprovals: 0,
+    pendingLeaves: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -65,8 +65,8 @@ export default function HostelDashboardPage() {
           ...prev,
           hostelsCount: hostelsList.length,
           blocksCount: totalBlks,
-          totalCapacity: totalCap || 120,
-          occupiedBeds: totalOcc || 85,
+          totalCapacity: totalCap,
+          occupiedBeds: totalOcc,
         }));
       } catch (err) {
         console.error("Dashboard stats load failed:", err);
@@ -177,14 +177,14 @@ export default function HostelDashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <OpBox
               title="Student Management"
-              count="260 Active"
+              count="0 Active"
               desc="Enrolled student profiles and hostel stay history"
               link="/hostel-admin/students"
               icon={Users}
             />
             <OpBox
               title="Fees & Dues Tracking"
-              count="₹1,24,000 Due"
+              count="₹0 Due"
               desc="Track fee collections, receipts, and overdue payments"
               link="/hostel-admin/fees"
               icon={IndianRupee}
@@ -198,7 +198,7 @@ export default function HostelDashboardPage() {
             />
             <OpBox
               title="Hostel Security & Visitor Logs"
-              count="14 Today"
+              count="0 Today"
               desc="Check-in/out registers and daily gate pass verification"
               link="/hostel-admin/visitors"
               icon={Clock}
@@ -214,24 +214,11 @@ export default function HostelDashboardPage() {
           </h3>
 
           <div className="space-y-3">
-            <AlertItem
-              title="New Warden Account Created"
-              time="10 mins ago"
-              desc="Warden login generated for VPPCOE Main Hostel."
-              type="info"
-            />
-            <AlertItem
-              title="Pending Room Allocations"
-              time="1 hour ago"
-              desc="4 students waiting for room allotment."
-              type="warning"
-            />
-            <AlertItem
-              title="Fee Collection Milestone"
-              time="3 hours ago"
-              desc="85% hostel fees collected for the current term."
-              type="success"
-            />
+            <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground border-2 border-dashed border-border/50 rounded-lg bg-card/50">
+              <ShieldAlert className="h-8 w-8 mb-3 opacity-20" />
+              <p className="text-sm font-medium">No new notifications</p>
+              <p className="text-xs mt-1">You're all caught up for today!</p>
+            </div>
           </div>
         </div>
       </div>

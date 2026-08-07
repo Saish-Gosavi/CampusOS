@@ -1,26 +1,101 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { createFileRoute } from "@/routes/compat";
-import { BedDouble, DoorClosed, DoorOpen, Wrench } from "lucide-react";
+import { BedDouble, DoorClosed, DoorOpen, Wrench, Loader2 } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { StatCard } from "@/components/admin/StatCard";
-import { rooms } from "@/lib/hostel-data";
 import { cn } from "@/lib/utils";
+import { blockApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+
 const Route = createFileRoute("/warden/occupancy")({
   component: OccupancyPage
 });
-const TINT = "#7B4CED";
+const TINT = "#210963";
 function OccupancyPage() {
-  const [block, setBlock] = useState("All");
-  const filtered = useMemo(() => block === "All" ? rooms : rooms.filter((r) => r.block === block), [block]);
-  const totalBeds = rooms.reduce((s, r) => s + r.beds, 0);
-  const occupied = rooms.reduce((s, r) => s + r.occupied, 0);
-  const maintenance = rooms.filter((r) => r.status === "Maintenance").length;
-  const available = totalBeds - occupied;
-  const byBlock = ["A", "B", "C", "D"].map((b) => {
-    const items = rooms.filter((r) => r.block === b);
-    return { block: b, capacity: items.reduce((s, r) => s + r.beds, 0), occupied: items.reduce((s, r) => s + r.occupied, 0), rooms: items.length };
-  });
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [rawBlocks, setRawBlocks] = useState([]);
+  const [blockFilter, setBlockFilter] = useState("All");
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.hostelId) return;
+      try {
+        setLoading(true);
+        const res = await blockApi.getAll(user.hostelId);
+        const data = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
+        setRawBlocks(data);
+      } catch (err) {
+        console.error("Failed to load occupancy data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [user?.hostelId]);
+
+  const { roomsList, byBlock, stats } = useMemo(() => {
+    const list = [];
+    const blockMap = [];
+    let totBeds = 0;
+    let totOcc = 0;
+    let totMaint = 0;
+
+    rawBlocks.forEach((b) => {
+      let bCap = 0;
+      let bOcc = 0;
+      let bRooms = 0;
+
+      (b.floors || []).forEach((f) => {
+        (f.rooms || []).forEach((r) => {
+          bRooms++;
+          let rCap = r.capacity || 0;
+          let rOcc = 0;
+          (r.beds || []).forEach((bed) => {
+            if (bed.allocations && bed.allocations.length > 0) {
+              rOcc++;
+            }
+          });
+
+          totBeds += rCap;
+          totOcc += rOcc;
+          bCap += rCap;
+          bOcc += rOcc;
+          
+          list.push({
+            id: r.id,
+            number: r.number,
+            block: b.name,
+            floor: f.number,
+            beds: rCap,
+            occupied: rOcc,
+            status: "Active", // Add maintenance status field in DB later if needed
+          });
+        });
+      });
+
+      blockMap.push({
+        block: b.name,
+        capacity: bCap,
+        occupied: bOcc,
+        rooms: bRooms,
+      });
+    });
+
+    return {
+      roomsList: list,
+      byBlock: blockMap,
+      stats: {
+        totalBeds: totBeds,
+        occupied: totOcc,
+        maintenance: totMaint,
+        available: Math.max(0, totBeds - totOcc),
+      }
+    };
+  }, [rawBlocks]);
+
+  const filtered = useMemo(() => blockFilter === "All" ? roomsList : roomsList.filter((r) => r.block === blockFilter), [blockFilter, roomsList]);
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <WardenPageHeader
     title="Room Occupancy"
@@ -31,10 +106,10 @@ function OccupancyPage() {
   />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Beds" value={String(totalBeds)} delta={`${rooms.length} rooms`} trend="up" icon={BedDouble} tint="#2563EB" />
-        <StatCard label="Occupied Beds" value={String(occupied)} delta={`${Math.round(occupied / totalBeds * 100)}% utilised`} trend="up" icon={DoorClosed} tint="#7B4CED" />
-        <StatCard label="Available Beds" value={String(available)} delta="Ready to allocate" trend="up" icon={DoorOpen} tint="#22C55E" />
-        <StatCard label="Under Maintenance" value={String(maintenance)} delta="Rooms" trend="down" icon={Wrench} tint="#EAB308" />
+        <StatCard label="Total Beds" value={String(stats.totalBeds)} delta={`${roomsList.length} rooms`} trend="up" icon={BedDouble} tint="#2563EB" />
+        <StatCard label="Occupied Beds" value={String(stats.occupied)} delta={`${stats.totalBeds ? Math.round(stats.occupied / stats.totalBeds * 100) : 0}% utilised`} trend="up" icon={DoorClosed} tint="#210963" />
+        <StatCard label="Available Beds" value={String(stats.available)} delta="Ready to allocate" trend="up" icon={DoorOpen} tint="#22C55E" />
+        <StatCard label="Under Maintenance" value={String(stats.maintenance)} delta="Rooms" trend="down" icon={Wrench} tint="#EAB308" />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -46,7 +121,7 @@ function OccupancyPage() {
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Block</p>
                   <h3 className="text-lg font-bold text-foreground">Block {b.block}</h3>
                 </div>
-                <span className="rounded-full bg-[#7B4CED]/10 px-2 py-0.5 text-xs font-medium text-[#7B4CED]">{b.rooms} rooms</span>
+                <span className="rounded-full bg-[#210963]/10 px-2 py-0.5 text-xs font-medium text-[#210963]">{b.rooms} rooms</span>
               </div>
               <div className="mt-4 space-y-1">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -54,7 +129,7 @@ function OccupancyPage() {
                   <span className="font-medium text-foreground">{b.occupied} / {b.capacity}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#7B4CED]" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#210963]" style={{ width: `${pct}%` }} />
                 </div>
               </div>
             </div>;
@@ -68,16 +143,27 @@ function OccupancyPage() {
             <p className="text-xs text-muted-foreground">Visual occupancy card for each room</p>
           </div>
           <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-muted/40 p-1">
-            {["All", "A", "B", "C", "D"].map((b) => <button
-    key={b}
-    onClick={() => setBlock(b)}
-    className={cn(
-      "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-      block === b ? "bg-[#7B4CED] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
-    )}
-  >
-                {b === "All" ? "All Blocks" : `Block ${b}`}
-              </button>)}
+            <button
+              onClick={() => setBlockFilter("All")}
+              className={cn(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                blockFilter === "All" ? "bg-[#210963] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              All Blocks
+            </button>
+            {byBlock.map((b) => (
+              <button
+                key={b.block}
+                onClick={() => setBlockFilter(b.block)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  blockFilter === b.block ? "bg-[#210963] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {b.block}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -98,9 +184,9 @@ function OccupancyPage() {
                     <p className="text-[10px] uppercase text-muted-foreground">Beds</p>
                     <p className="text-sm font-semibold text-foreground">{r.beds}</p>
                   </div>
-                  <div className="rounded-lg bg-[#7B4CED]/10 py-2">
-                    <p className="text-[10px] uppercase text-[#7B4CED]">Occupied</p>
-                    <p className="text-sm font-semibold text-[#7B4CED]">{r.occupied}</p>
+                  <div className="rounded-lg bg-[#210963]/10 py-2">
+                    <p className="text-[10px] uppercase text-[#210963]">Occupied</p>
+                    <p className="text-sm font-semibold text-[#210963]">{r.occupied}</p>
                   </div>
                   <div className="rounded-lg bg-[#22C55E]/10 py-2">
                     <p className="text-[10px] uppercase text-[#16A34A]">Available</p>
@@ -108,7 +194,7 @@ function OccupancyPage() {
                   </div>
                 </div>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#7B4CED]" style={{ width: `${pct}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-[#2563EB] to-[#210963]" style={{ width: `${pct}%` }} />
                 </div>
               </div>;
   })}

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@/routes/compat";
 import {
   Users,
@@ -14,7 +15,8 @@ import {
   XCircle,
   UserPlus,
   Eye,
-  Bell
+  Bell,
+  IndianRupee
 } from "lucide-react";
 import {
   Bar,
@@ -34,38 +36,73 @@ import { QuickActionCard } from "@/components/admin/QuickActionCard";
 import { ChartCard } from "@/components/admin/ChartCard";
 import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
 import { StatusPill } from "@/components/hostel/StatusPill";
-import {
-  complaintOverview,
-  hostelActivities,
-  leaveRequestOverview,
-  leaveRequests,
-  occupancyByBlock,
-  complaints,
-  visitorRequests
-} from "@/lib/hostel-data";
+import { dashboardApi } from "@/services/api";
+
 const Route = createFileRoute("/warden/")({
   component: WardenDashboard
 });
-const stats = [
-  { label: "Total Students", value: "142", delta: "+6 this week", trend: "up", icon: Users, tint: "#2563EB" },
-  { label: "Occupied Rooms", value: "78", delta: "+3 this week", trend: "up", icon: BedDouble, tint: "#7B4CED" },
-  { label: "Available Rooms", value: "22", delta: "-2 this week", trend: "down", icon: DoorOpen, tint: "#22C55E" },
-  { label: "Pending Leaves", value: "6", delta: "3 urgent", trend: "down", icon: CalendarDays, tint: "#F97316" },
-  { label: "Active Complaints", value: "5", delta: "-2 vs last week", trend: "up", icon: MessageSquareWarning, tint: "#EF4444" },
-  { label: "Visitors Today", value: "18", delta: "+5 vs yesterday", trend: "up", icon: UserCheck, tint: "#06B6D4" },
-  { label: "Furniture Maintenance", value: "9", delta: "2 completed today", trend: "up", icon: Wrench, tint: "#EAB308" },
-  { label: "Notices Published", value: "12", delta: "+3 this month", trend: "up", icon: Megaphone, tint: "#0EA5E9" }
-];
 const quickActions = [
-  { title: "Approve Leave", description: "Review pending requests", icon: CheckCircle2, tint: "#22C55E" },
-  { title: "View Complaints", description: "Take action on tickets", icon: MessageSquareWarning, tint: "#EF4444" },
-  { title: "Register Visitor", description: "Log new campus visitor", icon: UserPlus, tint: "#06B6D4" },
-  { title: "Report Furniture Damage", description: "Raise maintenance", icon: Armchair, tint: "#EAB308" },
-  { title: "Publish Notice", description: "Send to residents", icon: Bell, tint: "#0EA5E9" }
+  { title: "Approve Leave", description: "Review pending requests", icon: CheckCircle2, tint: "#22C55E", link: "/hostel-admin/leave-approval" },
+  { title: "View Complaints", description: "Take action on tickets", icon: MessageSquareWarning, tint: "#EF4444", link: "/hostel-admin/complaints" },
+  { title: "Register Visitor", description: "Log new campus visitor", icon: UserPlus, tint: "#06B6D4", link: "/hostel-admin/visitors" },
+  { title: "Report Furniture Damage", description: "Raise maintenance", icon: Armchair, tint: "#EAB308", link: "/hostel-admin/furniture" },
+  { title: "Publish Notice", description: "Send to residents", icon: Bell, tint: "#0EA5E9", link: "/hostel-admin/notices" }
 ];
+
 function WardenDashboard() {
-  const recentComplaints = complaints.slice(0, 4);
-  const recentVisitors = visitorRequests.slice(0, 4);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    dashboardApi.getHostelAdminStats()
+      .then((res) => {
+        setData(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load warden stats", err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div className="flex h-screen items-center justify-center text-muted-foreground">Loading dashboard...</div>;
+  }
+
+  const stats = [
+    { label: "Total Students", value: data?.studentsCount || 0, delta: "Enrolled", trend: "up", icon: Users, tint: "#2563EB" },
+    { label: "Occupied Rooms", value: data?.occupiedRoomsCount || 0, delta: "Active", trend: "up", icon: BedDouble, tint: "#7B4CED" },
+    { label: "Available Rooms", value: data?.availableRoomsCount || 0, delta: "Free", trend: "down", icon: DoorOpen, tint: "#22C55E" },
+    { label: "Pending Leaves", value: data?.pendingLeaves || 0, delta: "Requires Action", trend: "down", icon: CalendarDays, tint: "#F97316" },
+    { label: "Active Complaints", value: data?.pendingComplaints || 0, delta: "Unresolved", trend: "up", icon: MessageSquareWarning, tint: "#EF4444" },
+    { label: "Visitors Today", value: data?.visitorsToday || 0, delta: "Checked in", trend: "up", icon: UserCheck, tint: "#06B6D4" },
+    { label: "Fee Collection", value: `₹${(data?.feeCollection || 0).toLocaleString()}`, delta: "Total", trend: "up", icon: IndianRupee || Armchair, tint: "#10B981" }
+  ];
+
+  const occupancyByBlock = data?.blocks?.map(b => {
+    let capacity = 0;
+    let occupied = 0;
+    b.rooms?.forEach(r => {
+      capacity += r.capacity || 0;
+      occupied += r.beds?.length || 0; // rough proxy for occupied beds returned from API
+    });
+    return { name: b.name, capacity, occupied };
+  }) || [];
+  
+  const complaintOverview = data?.complaintDistribution?.map(c => ({
+    name: c.status,
+    value: c._count.id,
+    color: c.status === "open" ? "#EF4444" : c.status === "pending" ? "#EAB308" : c.status === "resolved" ? "#22C55E" : "#6B7280"
+  })) || [];
+
+  const leaveRequestOverview = data?.leaveDistribution?.map(l => ({
+    name: l.status,
+    value: l._count.id,
+    color: l.status === "pending" ? "#EAB308" : l.status === "approved" ? "#22C55E" : "#EF4444"
+  })) || [];
+
+  const recentLeaves = data?.recentLeaves || [];
+  const recentActivities = data?.recentAuditLogs || [];
   return <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -154,11 +191,11 @@ function WardenDashboard() {
             </Link>}
   >
           <ul className="divide-y divide-border">
-            {leaveRequests.slice(0, 5).map((l) => <li key={l.id} className="flex items-center justify-between gap-3 py-3">
+            {recentLeaves.map((l) => <li key={l.id} className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-foreground">{l.student}</p>
+                  <p className="truncate text-sm font-medium text-foreground">{l.studentName}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {l.room} · {l.from} → {l.to} · {l.reason}
+                    Room {l.room} · {l.date} · {l.reason}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -186,7 +223,7 @@ function WardenDashboard() {
             </Link>}
   >
           <ul className="divide-y divide-border">
-            {recentComplaints.map((c) => <li key={c.id} className="flex items-center justify-between gap-3 py-3">
+            {(data?.recentComplaints || []).map((c) => <li key={c.id} className="flex items-center justify-between gap-3 py-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium text-foreground">{c.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
@@ -198,6 +235,7 @@ function WardenDashboard() {
                   <StatusPill status={c.status} />
                 </div>
               </li>)}
+            {!(data?.recentComplaints?.length) && <li className="py-4 text-center text-sm text-muted-foreground">No recent complaints</li>}
           </ul>
         </ChartCard>
 
@@ -209,9 +247,9 @@ function WardenDashboard() {
             </Link>}
   >
           <ul className="divide-y divide-border">
-            {recentVisitors.map((v) => <li key={v.id} className="flex items-center gap-3 py-3">
+            {(data?.recentVisitors || []).map((v) => <li key={v.id} className="flex items-center gap-3 py-3">
                 <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#06B6D4] to-[#0EA5E9] text-xs font-semibold text-white">
-                  {v.visitorName.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+                  {v.visitorName?.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-foreground">{v.visitorName}</p>
@@ -229,7 +267,7 @@ function WardenDashboard() {
       </div>
 
       <ChartCard title="Recent Activity" description="Latest events across your assigned hostels">
-        <ActivityTimeline items={hostelActivities} />
+        <ActivityTimeline items={recentActivities} />
       </ChartCard>
     </div>;
 }

@@ -15,10 +15,22 @@ export const NoticeRepository = {
     }
   },
 
-  findMany: async () => {
+  findMany: async (user) => {
     // Automatically purge expired notices before retrieving
     await NoticeRepository.deleteExpired();
+    
+    let whereClause = {};
+    if (user?.role?.name !== "superadmin") {
+      whereClause = {
+        OR: [
+          { hostelId: null }, // Global notices
+          { hostelId: user.hostelId } // Hostel specific notices
+        ]
+      };
+    }
+    
     return prisma.notice.findMany({
+      where: whereClause,
       orderBy: { createdAt: "desc" },
       include: { createdBy: { select: { id: true, name: true, email: true } } },
     });
@@ -32,8 +44,23 @@ export const NoticeRepository = {
 
   create: (data) => prisma.notice.create({ data }),
 
-  update: (id, data) =>
-    prisma.notice.update({ where: { id: Number(id) }, data }),
+  update: async (id, data, user) => {
+    if (user?.role?.name !== "superadmin") {
+      const existing = await prisma.notice.findUnique({ where: { id: Number(id) } });
+      if (existing.hostelId !== user.hostelId) {
+        throw new Error("Unauthorized to update this notice");
+      }
+    }
+    return prisma.notice.update({ where: { id: Number(id) }, data });
+  },
 
-  delete: (id) => prisma.notice.delete({ where: { id: Number(id) } }),
+  delete: async (id, user) => {
+    if (user?.role?.name !== "superadmin") {
+      const existing = await prisma.notice.findUnique({ where: { id: Number(id) } });
+      if (existing.hostelId !== user.hostelId) {
+        throw new Error("Unauthorized to delete this notice");
+      }
+    }
+    return prisma.notice.delete({ where: { id: Number(id) } });
+  },
 };

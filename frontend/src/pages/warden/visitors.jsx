@@ -12,6 +12,7 @@ import {
   Loader2,
   Users,
   Filter,
+  Plus,
 } from "lucide-react";
 import { WardenPageHeader } from "@/components/warden/WardenPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
@@ -26,7 +27,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { visitorApi } from "@/services/api";
+import { visitorApi, userApi } from "@/services/api";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -43,7 +44,7 @@ const Route = createFileRoute("/warden/visitors")({
   component: VisitorsPage,
 });
 
-const TINT = "#06B6D4";
+const TINT = "#210963";
 const TABS = ["Pending", "History"];
 
 function VisitorsPage() {
@@ -59,6 +60,19 @@ function VisitorsPage() {
 
   // Detail view
   const [viewing, setViewing] = useState(null);
+
+  // Add Visitor state
+  const [addingVisitor, setAddingVisitor] = useState(false);
+  const [addForm, setAddForm] = useState({
+    studentName: "",
+    fullName: "",
+    relationship: "",
+    visitorPhone: "",
+    purpose: "",
+    checkIn: "",
+  });
+  const [adding, setAdding] = useState(false);
+  const [studentsList, setStudentsList] = useState([]);
 
   /* ── Fetch all visitor records ── */
   const loadData = useCallback(async () => {
@@ -101,6 +115,15 @@ function VisitorsPage() {
 
   useEffect(() => {
     loadData();
+    const fetchStudents = async () => {
+      try {
+        const res = await userApi.getStudents();
+        setStudentsList(res.data || []);
+      } catch (error) {
+        console.error("Failed to load students list", error);
+      }
+    };
+    fetchStudents();
   }, [loadData]);
 
   /* ── Filtered rows ── */
@@ -191,6 +214,37 @@ function VisitorsPage() {
     }
   };
 
+  /* ── Submit new visitor ── */
+  const submitAddVisitor = async (e) => {
+    e.preventDefault();
+    setAdding(true);
+    try {
+      const res = await visitorApi.create({
+        studentName: addForm.studentName,
+        fullName: addForm.fullName,
+        relationship: addForm.relationship,
+        visitorPhone: addForm.visitorPhone || null,
+        purpose: addForm.purpose || null,
+        checkIn: addForm.checkIn || null,
+      });
+      toast.success("Visitor added successfully!");
+      setAddingVisitor(false);
+      setAddForm({
+        studentName: "",
+        fullName: "",
+        relationship: "",
+        visitorPhone: "",
+        purpose: "",
+        checkIn: "",
+      });
+      loadData(); // Reload to fetch full mapped item
+    } catch (error) {
+      toast.error("Failed to add visitor. Check inputs.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">
       <WardenPageHeader
@@ -199,6 +253,11 @@ function VisitorsPage() {
         icon={UserRoundCheck}
         tint={TINT}
         breadcrumbs={[{ label: "Visitor Management" }]}
+        action={
+          <Button onClick={() => setAddingVisitor(true)} style={{ backgroundColor: TINT, color: "white" }}>
+            <Plus className="mr-2 h-4 w-4" /> Add Visitor
+          </Button>
+        }
       />
 
       {/* Stats */}
@@ -512,42 +571,119 @@ function VisitorsPage() {
               </div>
 
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setReviewing(null)}
-                  disabled={submitting}
-                >
+                <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setReviewing(null)} disabled={submitting}>
                   Cancel
                 </Button>
                 <Button
                   onClick={submitReview}
-                  disabled={
-                    submitting ||
-                    (reviewing.action === "Rejected" && !wardenRemarks.trim())
-                  }
-                  className={
+                  disabled={submitting}
+                  style={
                     reviewing.action === "Approved"
-                      ? "bg-[#22C55E] hover:bg-[#16a34a] text-white"
-                      : "bg-[#EF4444] hover:bg-[#dc2626] text-white"
+                      ? { backgroundColor: "#22C55E", color: "white" }
+                      : { backgroundColor: "#EF4444", color: "white" }
                   }
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> Submitting…
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting...
                     </>
                   ) : reviewing.action === "Approved" ? (
-                    <>
-                      <Check className="mr-1.5 h-4 w-4" /> Confirm Approve
-                    </>
+                    "Confirm Approval"
                   ) : (
-                    <>
-                      <X className="mr-1.5 h-4 w-4" /> Confirm Reject
-                    </>
+                    "Confirm Rejection"
                   )}
                 </Button>
+              </div>
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Add Visitor Dialog ── */}
+      <Dialog open={addingVisitor} onOpenChange={setAddingVisitor}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Add Walk-in Visitor</DialogTitle>
+            <DialogDescription>Manually log a new visitor request for a student.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submitAddVisitor}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Visitor Full Name <span className="text-red-500">*</span></label>
+                  <Input 
+                    required 
+                    placeholder="E.g. John Doe"
+                    value={addForm.fullName} 
+                    onChange={e => setAddForm({...addForm, fullName: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Student Name <span className="text-red-500">*</span></label>
+                  <Input 
+                    list="students-list"
+                    placeholder="Search or enter student name..."
+                    value={addForm.studentName}
+                    onChange={(e) => setAddForm({ ...addForm, studentName: e.target.value })}
+                    required
+                  />
+                  <datalist id="students-list">
+                    {studentsList.map((st) => (
+                      <option key={st.id} value={st.profile?.name || st.name || st.email} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Relationship <span className="text-red-500">*</span></label>
+                  <Input 
+                    required 
+                    placeholder="E.g. Father, Mother"
+                    value={addForm.relationship} 
+                    onChange={e => setAddForm({...addForm, relationship: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Visitor Phone</label>
+                  <Input 
+                    placeholder="Optional"
+                    value={addForm.visitorPhone} 
+                    onChange={e => setAddForm({...addForm, visitorPhone: e.target.value})} 
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Expected Check-in Date</label>
+                <Input 
+                  type="date"
+                  value={addForm.checkIn} 
+                  onChange={e => setAddForm({...addForm, checkIn: e.target.value})} 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Purpose of Visit</label>
+                <Textarea 
+                  placeholder="Optional details about the visit..."
+                  value={addForm.purpose} 
+                  onChange={e => setAddForm({...addForm, purpose: e.target.value})} 
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" type="button" onClick={() => setAddingVisitor(false)} disabled={adding}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={adding} style={{ backgroundColor: TINT, color: "white" }}>
+                {adding ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...</> : "Add Visitor"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

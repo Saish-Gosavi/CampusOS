@@ -167,6 +167,7 @@ model Student {
   reservations Reservation[]
   attendance  Attendance[]
   documents   StudentDocument[]
+  letterRequests OccupancyLetterRequest[]
 
   @@index([userId])
 }
@@ -180,6 +181,7 @@ model Warden {
   shift    String? @default("Day") // "Day", "Night", "Rotational"
   hostelId Int
   hostel   Hostel @relation(fields: [hostelId], references: [id])
+  letterRequests OccupancyLetterRequest[]
 
   @@index([userId])
   @@index([hostelId])
@@ -521,6 +523,22 @@ model StudentDocument {
   @@index([studentId])
 }
 
+model OccupancyLetterRequest {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status      String   @default("pending") // "pending", "approved", "rejected"
+  issuedDate  DateTime?
+  referenceNo String?  @unique
+  wardenId    Int?
+  warden      Warden?  @relation(fields: [wardenId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+}
+
 model InOutLog {
   id          Int      @id @default(autoincrement())
   userType    String   // "Student", "Staff", "Visitor"
@@ -643,3 +661,5 @@ model GeneratedReport {
   @@index([category])
   @@index([createdAt])
 }
+
+

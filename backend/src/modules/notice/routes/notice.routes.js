@@ -7,11 +7,15 @@ import { createNoticeSchema, updateNoticeSchema } from "../validations/notice.va
 
 const router = Router();
 
-// All notice routes require a valid JWT + Super Admin role
+// All notice routes require a valid JWT
 router.use(authenticate);
-router.use(authorize("superadmin"));
 
-router.get("/", NoticeController.getAll);
+// Everyone can view notices
+router.get("/", authorize("superadmin", "admin", "warden", "student", "security", "librarian", "store"), NoticeController.getAll);
+
+// Only admins and wardens can create/edit
+router.use(authorize("superadmin", "admin", "warden"));
+
 router.post("/", validate(createNoticeSchema), NoticeController.create);
 router.put("/:id", validate(updateNoticeSchema), NoticeController.update);
 router.delete("/:id", NoticeController.remove);

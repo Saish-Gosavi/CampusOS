@@ -5,7 +5,7 @@ import { AuditLogService } from "../../../core/audit/auditLog.service.js";
 export class NoticeController {
   static async getAll(req, res, next) {
     try {
-      const notices = await NoticeService.getAll();
+      const notices = await NoticeService.getAll(req.user);
       return apiResponse.success(res, notices, "Notices retrieved successfully");
     } catch (err) {
       next(err);
@@ -14,7 +14,7 @@ export class NoticeController {
 
   static async create(req, res, next) {
     try {
-      const notice = await NoticeService.create(req.body, req.user.id);
+      const notice = await NoticeService.create(req.body, req.user);
       await AuditLogService.logAction({
         userId: req.user?.id,
         module: "System",
@@ -33,7 +33,7 @@ export class NoticeController {
 
   static async update(req, res, next) {
     try {
-      const notice = await NoticeService.update(req.params.id, req.body, req.user.id);
+      const notice = await NoticeService.update(req.params.id, req.body, req.user);
       await AuditLogService.logAction({
         userId: req.user?.id,
         module: "System",
@@ -52,7 +52,7 @@ export class NoticeController {
 
   static async remove(req, res, next) {
     try {
-      await NoticeService.remove(req.params.id, req.user.id);
+      await NoticeService.remove(req.params.id, req.user);
       await AuditLogService.logAction({
         userId: req.user?.id,
         module: "System",
