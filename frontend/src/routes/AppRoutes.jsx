@@ -331,6 +331,7 @@ export default function AppRoutes() {
         <Route path="floors" element={<HostelFloors.component />} />
         <Route path="floors/add" element={<HostelFloorAdd.component />} />
         <Route path="floors/:id/edit" element={<HostelFloorEdit.component />} />
+        <Route path="mess" element={<WardenMess.component />} />
       </Route>
 
       {/* Warden Dashboard Routes */}

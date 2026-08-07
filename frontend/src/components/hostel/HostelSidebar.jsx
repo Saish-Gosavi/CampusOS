@@ -15,6 +15,7 @@ import {
   CalendarDays,
   UserRoundCheck,
   DoorOpen,
+  UtensilsCrossed,
 
   LogOut,
   Settings,
@@ -47,6 +48,7 @@ const mainItems = [
 
 const opsItems = [
   { title: "Fees & Dues", url: "/hostel-admin/fee-management", icon: IndianRupee },
+  { title: "Mess Management", url: "/hostel-admin/mess", icon: UtensilsCrossed },
   { title: "Leaves", url: "/hostel-admin/leaves", icon: CalendarDays },
   { title: "Visitors", url: "/hostel-admin/visitors", icon: UserRoundCheck },
   { title: "In/Out Logs", url: "/hostel-admin/in-out", icon: DoorOpen },

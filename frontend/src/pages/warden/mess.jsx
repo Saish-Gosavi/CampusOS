@@ -255,13 +255,6 @@ function WardenMessManagement() {
                         <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
                           07:30 AM - 09:30 AM
                         </span>
-                        <button
-                          onClick={() => setEditMenuModal({ day: m.day, mealType: "breakfast", text: m.breakfast })}
-                          className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
-                          title="Edit Breakfast Menu"
-                        >
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                       <h5 className="text-sm font-semibold text-foreground mb-1">Breakfast</h5>
                       <p className="text-xs text-muted-foreground leading-relaxed">{m.breakfast}</p>
@@ -273,13 +266,6 @@ function WardenMessManagement() {
                         <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
                           12:30 PM - 02:30 PM
                         </span>
-                        <button
-                          onClick={() => setEditMenuModal({ day: m.day, mealType: "lunch", text: m.lunch })}
-                          className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
-                          title="Edit Lunch Menu"
-                        >
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                       <h5 className="text-sm font-semibold text-foreground mb-1">Lunch</h5>
                       <p className="text-xs text-muted-foreground leading-relaxed">{m.lunch}</p>
@@ -291,13 +277,6 @@ function WardenMessManagement() {
                         <span className="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
                           05:00 PM - 06:00 PM
                         </span>
-                        <button
-                          onClick={() => setEditMenuModal({ day: m.day, mealType: "snacks", text: m.snacks })}
-                          className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
-                          title="Edit Snacks Menu"
-                        >
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                       <h5 className="text-sm font-semibold text-foreground mb-1">Evening Snacks</h5>
                       <p className="text-xs text-muted-foreground leading-relaxed">{m.snacks}</p>
@@ -309,13 +288,6 @@ function WardenMessManagement() {
                         <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
                           07:30 PM - 09:30 PM
                         </span>
-                        <button
-                          onClick={() => setEditMenuModal({ day: m.day, mealType: "dinner", text: m.dinner })}
-                          className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
-                          title="Edit Dinner Menu"
-                        >
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                       <h5 className="text-sm font-semibold text-foreground mb-1">Dinner</h5>
                       <p className="text-xs text-muted-foreground leading-relaxed">{m.dinner}</p>
