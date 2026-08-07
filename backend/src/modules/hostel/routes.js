@@ -13,6 +13,7 @@ import visitorsRouter from "./visitors/routes/visitor.routes.js";
 import furnitureRouter from "./furniture/routes/furniture.routes.js";
 import feesRouter from "./fees/routes/fee.routes.js";
 
+import wardenRouter from "./wardens/routes/warden.routes.js";
 import studentRouter from "./students/routes/student.routes.js";
 import inspectionRouter from "./inspection/routes/inspection.routes.js";
 import messRouter from "./mess/routes/mess.routes.js";
