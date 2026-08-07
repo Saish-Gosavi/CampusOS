@@ -698,3 +698,14 @@ export const wardenStaffApi = {
   getAttendance:   (id)        => apiClient.get(`/warden/staff-management/${id}/attendance`),
   markAttendance:  (id, data)  => apiClient.post(`/warden/staff-management/${id}/attendance`, data),
 };
+
+export const wardenLetterApi = {
+  getStatistics: () => apiClient.get("/warden/letter/statistics"),
+  getAll: (params) => apiClient.get("/warden/letter", { params }),
+  issueLetter: (data) => apiClient.post("/warden/letter", data),
+  updateStatus: (id, data) => apiClient.put(`/warden/letter/${id}/status`, data),
+};
+
+export const studentLetterApi = {
+  getMyLetters: () => apiClient.get("/student/letter/my-letters"),
+};
