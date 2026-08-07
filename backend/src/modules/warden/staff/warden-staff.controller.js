@@ -5,9 +5,11 @@ import { AuditLogService } from "../../../core/audit/auditLog.service.js";
 export class WardenStaffController {
   static async getAllStaff(req, res, next) {
     try {
-      // Assuming warden profile is populated in req.user, 
-      // but usually hostelId is attached directly to req.user for both wardens and admins in this system.
-      const hostelId = req.user.hostelId;
+      let hostelId = req.user.hostelId;
+      if (!hostelId && req.user?.id) {
+        const warden = await prisma.warden.findFirst({ where: { userId: req.user.id } });
+        if (warden) hostelId = warden.hostelId;
+      }
       const staffList = await WardenStaffService.getStaffByWarden(hostelId);
       return apiResponse.success(res, staffList, "Staff retrieved successfully");
     } catch (error) {

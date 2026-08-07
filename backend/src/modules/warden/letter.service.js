@@ -11,208 +11,193 @@ export class WardenLetterService {
    */
   static async generateLetterFile(letterReq, referenceNo, signedByName) {
     const pdfDoc = await PDFDocument.create();
-    // A4 size standard dimensions in points
+    // A4 size standard dimensions in points (595.276 x 841.890)
     const page = pdfDoc.addPage([595.276, 841.890]);
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const font = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
 
-    // 1. Fetch active template
+    // 1. Fetch active template uploaded by Admin
     const activeTemplate = await prisma.allotmentTemplate.findFirst({
       where: { isActive: true }
     });
 
-    // Helper to embed full A4 overlay from uploaded PDFs
-    const embedTemplateSection = async (sectionPath) => {
-      if (!sectionPath) return;
+    // Helper to embed asset (PDF or PNG/JPG image) at specific coordinates
+    const embedAsset = async (assetPath, defaultCoords = {}) => {
+      if (!assetPath) return false;
 
-      let fullPath = sectionPath;
+      let fullPath = assetPath;
       if (!path.isAbsolute(fullPath)) {
-        fullPath = path.join(process.cwd(), "uploads", "allotment-templates", sectionPath);
+        fullPath = path.join(process.cwd(), "uploads", "allotment-templates", assetPath);
       }
 
-      if (fs.existsSync(fullPath)) {
-        try {
-          const sectionBytes = fs.readFileSync(fullPath);
-          const srcDoc = await PDFDocument.load(sectionBytes);
+      if (!fs.existsSync(fullPath)) return false;
+
+      try {
+        const fileBytes = fs.readFileSync(fullPath);
+        const ext = path.extname(fullPath).toLowerCase();
+
+        if (ext === ".pdf") {
+          const srcDoc = await PDFDocument.load(fileBytes);
           if (srcDoc.getPageCount() > 0) {
             const [embeddedPage] = await pdfDoc.embedPages([srcDoc.getPages()[0]]);
-            page.drawPage(embeddedPage, {
-              x: 0,
-              y: 0,
-              width: page.getWidth(),
-              height: page.getHeight()
-            });
+            const drawOpts = {
+              x: defaultCoords.x ?? 0,
+              y: defaultCoords.y ?? 0,
+              width: defaultCoords.width ?? page.getWidth(),
+              height: defaultCoords.height ?? page.getHeight(),
+            };
+            page.drawPage(embeddedPage, drawOpts);
+            return true;
           }
-        } catch (e) {
-          console.warn("Failed to overlay PDF section: " + sectionPath, e.message);
+        } else if (ext === ".png") {
+          const img = await pdfDoc.embedPng(fileBytes);
+          page.drawImage(img, {
+            x: defaultCoords.x ?? 0,
+            y: defaultCoords.y ?? 0,
+            width: defaultCoords.width ?? img.width,
+            height: defaultCoords.height ?? img.height,
+          });
+          return true;
+        } else if (ext === ".jpg" || ext === ".jpeg") {
+          const img = await pdfDoc.embedJpg(fileBytes);
+          page.drawImage(img, {
+            x: defaultCoords.x ?? 0,
+            y: defaultCoords.y ?? 0,
+            width: defaultCoords.width ?? img.width,
+            height: defaultCoords.height ?? img.height,
+          });
+          return true;
         }
+      } catch (e) {
+        console.warn("Failed to embed section asset: " + assetPath, e.message);
       }
+      return false;
     };
 
-    // 2. Draw/embed Header
+    // 2. Embed Header Banner (Top: y = 765 to 842)
     if (activeTemplate?.headerPdfPath) {
-      await embedTemplateSection(activeTemplate.headerPdfPath);
-    } else {
-      // Vector fallback Header accent bar
-      page.drawRectangle({
-        x: 0,
-        y: 835,
-        width: 595.276,
-        height: 7,
-        color: rgb(123 / 255, 76 / 255, 237 / 255)
-      });
+      await embedAsset(activeTemplate.headerPdfPath, { x: 0, y: 765, width: 595.276, height: 76.89 });
     }
 
-    // Embed Logo/Main formatting template
+    // 3. Embed College Logo (Top Right)
     if (activeTemplate?.mainPdfPath) {
-      await embedTemplateSection(activeTemplate.mainPdfPath);
+      await embedAsset(activeTemplate.mainPdfPath, { x: 470, y: 772, width: 85, height: 55 });
     }
 
-    // Embed terms (College Stamp) template
+    // 4. Embed Footer Banner (Bottom: y = 0 to 50)
+    if (activeTemplate?.footerPdfPath) {
+      await embedAsset(activeTemplate.footerPdfPath, { x: 0, y: 0, width: 595.276, height: 50 });
+    }
+
+    // 5. Embed College Stamp (Bottom Center)
     if (activeTemplate?.termsPdfPath) {
-      await embedTemplateSection(activeTemplate.termsPdfPath);
+      await embedAsset(activeTemplate.termsPdfPath, { x: 247, y: 110, width: 100, height: 100 });
     }
 
-    // 3. Draw Document Title & Header Text
-    page.drawText("CAMPUS OS — HOSTEL ALLOCATION LETTER", {
-      x: 100,
-      y: 750,
-      size: 16,
-      font: fontBold,
-      color: rgb(15 / 255, 23 / 255, 42 / 255)
-    });
-
-    page.drawText("Official Resident Room Allocation Certificate", {
-      x: 160,
-      y: 730,
-      size: 10,
-      font,
-      color: rgb(100 / 255, 116 / 255, 139 / 255)
-    });
-
-    page.drawLine({
-      start: { x: 50, y: 715 },
-      end: { x: 545, y: 715 },
-      thickness: 0.5,
-      color: rgb(226 / 255, 232 / 255, 240 / 255)
-    });
-
-    // 4. Draw Reference Box
-    page.drawRectangle({
-      x: 50,
-      y: 640,
-      width: 495,
-      height: 60,
-      color: rgb(248 / 255, 250 / 255, 252 / 255),
-      borderColor: rgb(203 / 255, 213 / 255, 225 / 255),
-      borderWidth: 0.5
-    });
-
-    page.drawText(`Reference No: ${referenceNo}`, {
-      x: 70,
-      y: 675,
-      size: 10,
-      font: fontBold,
-      color: rgb(123 / 255, 76 / 255, 237 / 255)
-    });
-
-    page.drawText(`Issue Date: ${new Date().toLocaleDateString()}`, {
-      x: 350,
-      y: 675,
-      size: 10,
-      font: fontBold,
-      color: rgb(123 / 255, 76 / 255, 237 / 255)
-    });
-
-    page.drawText(`Status: Official Allocation Certificate`, {
-      x: 70,
-      y: 655,
-      size: 9,
-      font,
-      color: rgb(100 / 255, 116 / 255, 139 / 255)
-    });
-
-    page.drawText(`Signed By: ${signedByName}`, {
-      x: 350,
-      y: 655,
-      size: 9,
-      font,
-      color: rgb(100 / 255, 116 / 255, 139 / 255)
-    });
-
-    // 5. Draw Details Title & Grid
-    page.drawText("Resident & Allocation Details", {
-      x: 50,
-      y: 595,
-      size: 12,
-      font: fontBold,
-      color: rgb(15 / 255, 23 / 255, 42 / 255)
-    });
-
+    // Student & Allocation details
     const student = letterReq.student;
     const studentName = student?.fullName || student?.user?.name || "N/A";
-    const studentEmail = student?.user?.email || "N/A";
     const collegeId = student?.collegeId || "N/A";
     const alloc = student?.allocations?.[0];
-    const hostelName = letterReq.hostel?.name || alloc?.bed?.room?.floor?.block?.hostel?.name || "Main Campus Hostel";
-    const blockName = alloc?.bed?.room?.floor?.block?.name || "Block A";
-    const floorNum = alloc?.bed?.room?.floor?.number ? `Floor ${alloc.bed.room.floor.number}` : "Ground Floor";
-    const roomNum = alloc?.bed?.room?.number ? `Room ${alloc.bed.room.number}` : "Unassigned";
-    const bedNum = alloc?.bed?.number ? `Bed ${alloc.bed.number}` : "Bed 1";
+    const hostelName = letterReq.hostel?.name || alloc?.bed?.room?.floor?.block?.hostel?.name || "Hostel";
+    const roomNum = alloc?.bed?.room?.number ? `${alloc.bed.room.number}` : "Unassigned";
+    const bedNum = alloc?.bed?.number ? ` (Bed ${alloc.bed.number})` : "";
+    const collegeName = letterReq.hostel?.name || "Vasantdada Patil Pratishthan's College of Engineering and Visual Arts";
 
-    let gridY = 565;
-    const drawRow = (label1, val1, label2, val2) => {
-      page.drawText(label1, { x: 70, y: gridY, size: 9, font: fontBold, color: rgb(100 / 255, 116 / 255, 139 / 255) });
-      page.drawText(val1, { x: 180, y: gridY, size: 9, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
-      page.drawText(label2, { x: 320, y: gridY, size: 9, font: fontBold, color: rgb(100 / 255, 116 / 255, 139 / 255) });
-      page.drawText(val2, { x: 420, y: gridY, size: 9, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
-      gridY -= 20;
-    };
+    const issueDateStr = new Date().toLocaleDateString("en-GB");
+    const reportingDateStr = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("en-GB");
 
-    drawRow("Student Name:", studentName, "Hostel Name:", hostelName);
-    drawRow("College ID:", collegeId, "Block / Wing:", blockName);
-    drawRow("Email Address:", studentEmail, "Floor / Level:", floorNum);
-    drawRow("Approval Status:", "Approved & Valid", "Room & Bed:", `${roomNum} (${bedNum})`);
-
-    // 6. Draw Guidelines Box
-    page.drawRectangle({
+    // Title Section matching official letter format sample
+    page.drawText(`[${collegeName}]`, {
       x: 50,
-      y: 330,
-      width: 495,
-      height: 120,
-      color: rgb(248 / 255, 250 / 255, 252 / 255),
-      borderColor: rgb(226 / 255, 232 / 255, 240 / 255),
-      borderWidth: 0.5
-    });
-
-    page.drawText("Rules & Regulations Guidelines", {
-      x: 70,
-      y: 430,
-      size: 10,
+      y: 730,
+      size: 14,
       font: fontBold,
-      color: rgb(15 / 255, 23 / 255, 42 / 255)
+      color: rgb(15 / 255, 23 / 255, 42 / 255),
     });
 
-    const guidelines = [
-      "1. Resident must strictly adhere to hostel curfew rules and maintain peace.",
-      "2. Unauthorized transfer of room or bed assignment is strictly prohibited.",
-      "3. Residents are responsible for keeping their room and common areas clean.",
-      "4. This allocation letter is valid for the academic semester and subject to warden review.",
-      "5. Possession of prohibited substances or damaging hostel property will cause immediate cancellation."
-    ];
-
-    let guideY = 405;
-    guidelines.forEach((g) => {
-      page.drawText(g, { x: 70, y: guideY, size: 8, font, color: rgb(71 / 255, 85 / 255, 105 / 255) });
-      guideY -= 15;
+    page.drawText("Hostel Administration", {
+      x: 50,
+      y: 708,
+      size: 13,
+      font: fontBold,
+      color: rgb(30 / 255, 41 / 255, 59 / 255),
     });
 
-    // 7. Draw Signatures
-    page.drawLine({ start: { x: 70, y: 220 }, end: { x: 220, y: 220 }, thickness: 0.5, color: rgb(203 / 255, 213 / 255, 225 / 255) });
-    page.drawText("Student Signature", { x: 100, y: 205, size: 9, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText("Room Allocation Letter", {
+      x: 50,
+      y: 686,
+      size: 13,
+      font: fontBold,
+      color: rgb(30 / 255, 41 / 255, 59 / 255),
+    });
 
-    page.drawLine({ start: { x: 375, y: 220 }, end: { x: 525, y: 220 }, thickness: 0.5, color: rgb(203 / 255, 213 / 255, 225 / 255) });
-    page.drawText("Warden Signature & Stamp", { x: 385, y: 205, size: 9, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText(`Date: ${issueDateStr}`, {
+      x: 50,
+      y: 656,
+      size: 11,
+      font: fontBold,
+      color: rgb(30 / 255, 41 / 255, 59 / 255),
+    });
+
+    page.drawText(`Ref: ${referenceNo}`, {
+      x: 420,
+      y: 656,
+      size: 9,
+      font: fontBold,
+      color: rgb(100 / 255, 116 / 255, 139 / 255),
+    });
+
+    // Recipient Details
+    page.drawText("To,", {
+      x: 50,
+      y: 625,
+      size: 11,
+      font: fontBold,
+      color: rgb(15 / 255, 23 / 255, 42 / 255),
+    });
+
+    page.drawText(`Student Name: ${studentName}`, {
+      x: 50,
+      y: 605,
+      size: 11,
+      font: fontBold,
+      color: rgb(15 / 255, 23 / 255, 42 / 255),
+    });
+
+    page.drawText(`Roll No.: ${collegeId}`, {
+      x: 50,
+      y: 585,
+      size: 11,
+      font: fontBold,
+      color: rgb(15 / 255, 23 / 255, 42 / 255),
+    });
+
+    // Wording matching exact sample format
+    const bodyLine1 = `This is to inform you that you have been allotted Room No. ${roomNum}${bedNum} in ${hostelName} for`;
+    const bodyLine2 = `the current academic year.`;
+    const bodyLine3 = `You are requested to report on or before ${reportingDateStr} and complete the necessary hostel`;
+    const bodyLine4 = `formalities. Please follow all hostel rules and maintain discipline during your stay.`;
+    const bodyLine5 = `We wish you a comfortable and successful academic year.`;
+
+    page.drawText(bodyLine1, { x: 50, y: 550, size: 10.5, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText(bodyLine2, { x: 50, y: 535, size: 10.5, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+
+    page.drawText(bodyLine3, { x: 50, y: 500, size: 10.5, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText(bodyLine4, { x: 50, y: 485, size: 10.5, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+
+    page.drawText(bodyLine5, { x: 50, y: 450, size: 10.5, font, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+
+    page.drawText("Warden", { x: 50, y: 410, size: 11, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText("Hostel Administration", { x: 50, y: 395, size: 11, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+    page.drawText("Signature & Seal", { x: 50, y: 380, size: 11, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+
+    // Bottom Signatures line
+    page.drawLine({ start: { x: 50, y: 220 }, end: { x: 200, y: 220 }, thickness: 0.5, color: rgb(100 / 255, 116 / 255, 139 / 255) });
+    page.drawText("Head, T&P Department", { x: 65, y: 205, size: 9, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
+
+    page.drawLine({ start: { x: 395, y: 220 }, end: { x: 545, y: 220 }, thickness: 0.5, color: rgb(100 / 255, 116 / 255, 139 / 255) });
+    page.drawText("Principal", { x: 440, y: 205, size: 9, font: fontBold, color: rgb(15 / 255, 23 / 255, 42 / 255) });
 
     // Embed Footer
     if (activeTemplate?.footerPdfPath) {

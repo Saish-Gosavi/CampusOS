@@ -53,13 +53,28 @@ function OccupancyPage() {
     });
   }, [rooms]);
 
-  const filtered = useMemo(() => block === "All" ? formattedRooms : formattedRooms.filter((r) => r.block === block), [block, formattedRooms]);
+  const isBlockMatch = (roomBlock, selectedBlock) => {
+    if (!selectedBlock || selectedBlock === "All") return true;
+    const rb = String(roomBlock || "").toLowerCase().trim();
+    const sb = String(selectedBlock || "").toLowerCase().trim();
+    return (
+      rb === sb ||
+      rb === `block ${sb}` ||
+      `block ${rb}` === sb ||
+      rb.replace(/^block\s+/, "") === sb.replace(/^block\s+/, "")
+    );
+  };
+
+  const filtered = useMemo(
+    () => (block === "All" ? formattedRooms : formattedRooms.filter((r) => isBlockMatch(r.block, block))),
+    [block, formattedRooms]
+  );
   const totalBeds = formattedRooms.reduce((s, r) => s + r.beds, 0);
   const occupied = formattedRooms.reduce((s, r) => s + r.occupied, 0);
   const maintenance = formattedRooms.filter((r) => r.status === "Maintenance").length;
   const available = totalBeds - occupied;
 
-  const blocksList = Array.from(new Set(formattedRooms.map(r => r.block)));
+  const blocksList = Array.from(new Set(formattedRooms.map((r) => r.block)));
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6">

@@ -32,15 +32,18 @@ export class UsersController {
 
   static async getAllUsers(req, res, next) {
     try {
-      const creatorRoleName = req.user.role.toLowerCase();
-      let users;
-      if (req.query.role) {
-        users = await UsersService.getAllUsers(req.query.role);
-      } else if (creatorRoleName === "senioradmin") {
-        users = await UsersService.getAllUsers("admin");
-      } else {
-        users = await UsersService.getAllUsers();
+      const creatorRoleName = typeof req.user.role === "string"
+        ? req.user.role.toLowerCase()
+        : (req.user.role?.name?.toLowerCase() || "");
+
+      let hostelId = req.query.hostelId ? Number(req.query.hostelId) : null;
+      if (creatorRoleName !== "superadmin" && req.user.hostelId) {
+        hostelId = req.user.hostelId;
       }
+
+      const roleFilter = req.query.role || (creatorRoleName === "senioradmin" ? "admin" : null);
+
+      const users = await UsersService.getAllUsers(roleFilter, hostelId);
       return apiResponse.success(res, users, "Users list retrieved successfully");
     } catch (error) {
       next(error);

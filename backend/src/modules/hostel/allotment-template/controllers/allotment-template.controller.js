@@ -203,8 +203,10 @@ export class AllotmentTemplateController {
         return apiResponse.error(res, `No PDF file received for field "${fieldName}". Please upload a valid PDF.`, 400);
       }
 
-      if (pdfFile.mimetype !== "application/pdf") {
-        return apiResponse.error(res, "Only PDF files are accepted.", 400);
+      const isPdf = pdfFile.mimetype === "application/pdf";
+      const isImage = ["image/png", "image/jpeg", "image/jpg"].includes(pdfFile.mimetype);
+      if (!isPdf && !isImage) {
+        return apiResponse.error(res, "Only PDF, PNG, and JPG files are accepted.", 400);
       }
 
       if (pdfFile.size > 10 * 1024 * 1024) {

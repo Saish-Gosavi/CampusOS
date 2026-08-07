@@ -837,6 +837,9 @@ export const allotmentTemplateApi = {
       timeout: 30000,
     });
   },
+  async delete(id) {
+    return apiClient.delete(`/hostel/allotment-template/${id}`);
+  },
 };
 
 export const visitorApi = {
@@ -919,10 +922,14 @@ export const wardenStaffApi = {
 };
 
 export const wardenLetterApi = {
-  getStatistics: () => apiClient.get("/warden/letter/statistics"),
-  getAll: (params) => apiClient.get("/warden/letter", { params }),
-  issueLetter: (data) => apiClient.post("/warden/letter", data),
-  updateStatus: (id, data) => apiClient.put(`/warden/letter/${id}/status`, data),
+  getStatistics: () => apiClient.get("/letters/warden"),
+  getAll: (params) => apiClient.get("/letters/warden", { params }),
+  getRequests: (params) => apiClient.get("/letters/warden", { params }),
+  issueLetter: (data) => apiClient.post("/letters/request", data),
+  updateStatus: (id, data) => apiClient.put(`/letters/${id}/approve`, data),
+  approve: (id) => apiClient.put(`/letters/${id}/approve`),
+  reject: (id, reason) => apiClient.put(`/letters/${id}/approve`, { status: "Rejected", reason }),
+  getActiveTemplate: () => apiClient.get("/hostel/allotment-template/active"),
 };
 
 export const studentLetterApi = {

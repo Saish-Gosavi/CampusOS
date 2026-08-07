@@ -3,14 +3,13 @@ import AppError from "../../../utils/AppError.js";
 
 export class WardenStaffService {
   static async getStaffByWarden(hostelId) {
-    if (!hostelId) {
-      throw new AppError("Hostel ID is required", 400);
+    const where = {};
+    if (hostelId && !isNaN(Number(hostelId))) {
+      where.hostelId = Number(hostelId);
     }
 
     const staffList = await prisma.staff.findMany({
-      where: {
-        hostelId: parseInt(hostelId),
-      },
+      where,
       orderBy: {
         createdAt: 'desc',
       },

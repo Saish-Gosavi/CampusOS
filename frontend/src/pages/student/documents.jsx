@@ -12,36 +12,7 @@ const Route = createFileRoute("/student/documents")({
   component: DocumentsPage
 });
 
-// --- DUMMY DATA FOR TESTING ---
-const DUMMY_STUDENT_REQUESTS = [
-  {
-    id: "dummy-1",
-    createdAt: new Date().toISOString(),
-    status: "Pending",
-    hostel: { name: "Main Campus Hostel" },
-  },
-  {
-    id: "dummy-2",
-    createdAt: new Date().toISOString(),
-    status: "Approved",
-    hostel: { name: "Main Campus Hostel" },
-  },
-  {
-    id: "dummy-3",
-    createdAt: new Date().toISOString(),
-    status: "Generated",
-    hostel: { name: "Main Campus Hostel" },
-    allotmentLetter: { pdfPath: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", id: "dummy-3", referenceNo: "REF-2026-003" }
-  },
-  {
-    id: "dummy-4",
-    createdAt: new Date().toISOString(),
-    status: "Rejected",
-    rejectionReason: "Incomplete documentation",
-    hostel: { name: "Main Campus Hostel" },
-  }
-];
-// ------------------------------
+import { DUMMY_REQUESTS } from "../warden/allocation-letter";
 
 function DocumentsPage() {
   const [requests, setRequests] = useState([]);
@@ -51,11 +22,12 @@ function DocumentsPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const res = await studentLetterApi.getRequests().catch(() => ({ data: [] }));
-      const apiData = res?.data || [];
-      setRequests([...DUMMY_STUDENT_REQUESTS, ...apiData]);
+      const res = await (studentLetterApi.getMyLetters ? studentLetterApi.getMyLetters() : studentLetterApi.getRequests()).catch(() => ({ data: [] }));
+      const apiData = res?.data || (Array.isArray(res) ? res : []);
+      setRequests(apiData.length > 0 ? apiData : DUMMY_REQUESTS);
     } catch (err) {
       console.error(err);
+      setRequests(DUMMY_REQUESTS);
     } finally {
       setLoading(false);
     }

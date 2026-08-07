@@ -16,14 +16,18 @@ export class UsersService {
     return UsersRepository.updateProfile(userId, data);
   }
 
-  static async getAllUsers(roleName) {
+  static async getAllUsers(roleName, hostelId) {
+    const where = {};
     if (roleName) {
-      return prisma.user.findMany({
-        where: { role: { name: roleName } },
-        include: { role: true, studentProfile: true },
-      });
+      where.role = { name: { equals: roleName } };
     }
-    return UsersRepository.findAll();
+    if (hostelId) {
+      where.hostelId = Number(hostelId);
+    }
+    return prisma.user.findMany({
+      where,
+      include: { role: true, hostel: true, studentProfile: true, wardenProfile: true },
+    });
   }
 
   static async createUser(creator, data) {
@@ -72,6 +76,7 @@ export class UsersService {
       throw new AppError(`A user with the email "${userData.email}" already exists. Please use a different email.`, 409);
     }
 
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(userData.password, salt);
     try {
       return await UsersRepository.create({

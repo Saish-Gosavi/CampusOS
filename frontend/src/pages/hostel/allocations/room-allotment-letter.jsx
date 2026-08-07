@@ -6,6 +6,7 @@ import {
   Trash2,
   Printer,
   Building,
+  Building2,
   User,
   Calendar,
   CheckCircle2,
@@ -22,7 +23,6 @@ import { toast } from "sonner";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
 import { Card, CardContent } from "@/components/ui/card";
-import { DUMMY_REQUESTS } from "../../warden/allocation-letter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -201,19 +201,92 @@ function SectionUploadRow({ section, uploadedFileName, uploadedUrl, onUploaded }
   );
 }
 
-// --- DUMMY DATA FOR TESTING ---
-// Compute dummy letters dynamically from the shared dummy requests 
-// so state changes (like Rejections) sync across the frontend.
-const DUMMY_LETTERS = DUMMY_REQUESTS.filter(r => r.status === "Generated" || r.status === "Rejected").map(r => ({
-  id: "dummy-letter-" + r.id,
-  referenceNo: r.allotmentLetter?.referenceNo || "N/A",
-  issuedDate: r.allotmentLetter?.issuedDate || r.createdAt,
-  pdfPath: r.allotmentLetter?.pdfPath || null,
-  generatedBy: { name: "Warden" },
-  allocation: r.student.allocations?.[0] || {},
-  letterRequest: { status: r.status, rejectionReason: r.rejectionReason }
-}));
-// ------------------------------
+const renderHeaderBlock = (template) => {
+  const url = template?.headerPdfUrl;
+  
+  if (url) {
+    const lower = url.toLowerCase();
+    const isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".svg");
+    if (isImage) {
+      return <img src={url} alt="Header" className="h-16 max-w-full object-contain" />;
+    }
+  }
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center gap-2">
+        <span className="h-6 w-1.5 bg-[#7B4CED] rounded-full" />
+        <h1 className="text-sm md:text-base font-bold uppercase tracking-tight text-slate-900 leading-snug">
+          Hostel Administration & Resident Services
+        </h1>
+      </div>
+      <p className="text-xs font-semibold text-[#7B4CED] pl-3">Official Room Allocation Document</p>
+    </div>
+  );
+};
+
+const renderLogoBlock = (template) => {
+  const url = template?.mainPdfUrl;
+
+  if (url) {
+    const lower = url.toLowerCase();
+    const isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".svg");
+    if (isImage) {
+      return <img src={url} alt="College Logo" className="h-14 w-16 object-contain" />;
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center h-12 w-12 rounded-xl border border-purple-200 bg-purple-50/70 p-1 shrink-0">
+      <Building2 className="h-6 w-6 text-[#7B4CED]" />
+    </div>
+  );
+};
+
+const renderStampBlock = (template) => {
+  const url = template?.termsPdfUrl;
+
+  if (url) {
+    const lower = url.toLowerCase();
+    const isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".svg");
+    if (isImage) {
+      return <img src={url} alt="College Stamp" className="h-16 w-16 object-contain" />;
+    }
+  }
+
+  return (
+    <div className="h-16 w-16 rounded-full border-2 border-dashed border-purple-300 bg-purple-50/50 flex flex-col items-center justify-center text-[8px] font-sans font-bold text-purple-800 leading-tight p-1 text-center shadow-inner">
+      <span>COLLEGE</span>
+      <span className="text-[7px] text-purple-700">STAMP</span>
+    </div>
+  );
+};
+
+const renderFooterBlock = (template) => {
+  const url = template?.footerPdfUrl;
+
+  if (url) {
+    const lower = url.toLowerCase();
+    const isImage = lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".webp") || lower.endsWith(".svg");
+    if (isImage) {
+      return (
+        <div className="border-t border-slate-200 pt-3">
+          <img src={url} alt="Footer" className="h-12 w-full object-contain" />
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className="border-t border-slate-200 pt-3 text-center text-[10px] font-sans text-slate-500">
+      Hostel Administration • Official Allotment Certificate
+    </div>
+  );
+};
+
+import { DUMMY_REQUESTS } from "../../warden/allocation-letter";
+
+const DUMMY_LETTERS = [];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 function HostelRoomAllotmentLetterPage() {
@@ -227,8 +300,6 @@ function HostelRoomAllotmentLetterPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedLetter, setSelectedLetter] = useState(null);
-
-  /* ── fetch data ── */
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -239,15 +310,16 @@ function HostelRoomAllotmentLetterPage() {
 
       if (lettersRes.status === "fulfilled" && lettersRes.value?.data) {
         const apiLetters = Array.isArray(lettersRes.value.data) ? lettersRes.value.data : [];
-        setLetters([...DUMMY_LETTERS, ...apiLetters]);
+        setLetters(apiLetters);
       } else {
-        setLetters([...DUMMY_LETTERS]);
+        setLetters([]);
       }
       if (templateRes.status === "fulfilled" && templateRes.value?.data) {
         setActiveTemplate(templateRes.value.data);
       }
     } catch {
       toast.error("Failed to load page data");
+      setLetters([]);
     } finally {
       setLoading(false);
     }
@@ -656,63 +728,116 @@ function HostelRoomAllotmentLetterPage() {
 
       {/* ───────── Preview & Print Modal ───────── */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-[860px] w-full p-0 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <DialogContent className="max-w-[860px] w-full p-0 overflow-hidden bg-muted/20">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
             <div>
               <h2 className="text-lg font-bold text-foreground">
                 Allocation Letter Preview
               </h2>
               {selectedLetter && (
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Ref: {selectedLetter.referenceNo} · Issued {new Date(selectedLetter.issuedDate).toLocaleDateString()}
+                  Ref: {selectedLetter.referenceNo} · Issued {new Date(selectedLetter.issuedDate || Date.now()).toLocaleDateString()}
                 </p>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {selectedLetter?.pdfPath && (
-                <>
-                  <a
-                    href={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
-                    download
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
-                  >
-                    <Download className="h-3.5 w-3.5" /> Download PDF
-                  </a>
-                  <a
-                    href={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors"
-                  >
-                    <Printer className="h-3.5 w-3.5" /> Open & Print
-                  </a>
-                </>
-              )}
+              <Button
+                size="sm"
+                onClick={() => window.print()}
+                className="gap-1.5 bg-[#7B4CED] hover:bg-[#6a3fd1] text-white font-semibold"
+              >
+                <Printer className="h-3.5 w-3.5" /> Print Letter
+              </Button>
               <button
                 onClick={() => setIsPreviewOpen(false)}
-                className="ml-1 rounded-md p-1 text-muted-foreground hover:bg-muted"
+                className="ml-1 rounded-md p-1.5 text-muted-foreground hover:bg-muted"
               >
                 ✕
               </button>
             </div>
           </div>
 
-          {selectedLetter?.pdfPath ? (
-            <iframe
-              src={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
-              title="Allocation Letter PDF"
-              className="w-full border-0"
-              style={{ height: "75vh" }}
-            />
-          ) : (
-            <div className="flex h-64 flex-col items-center justify-center gap-3 text-muted-foreground">
-              <FileText className="h-10 w-10 stroke-1" />
-              <p className="text-sm font-semibold">PDF not available</p>
-              <p className="text-xs">
-                The Warden has not generated the PDF for this letter yet.
-              </p>
-            </div>
-          )}
+          <div className="p-4 md:p-6 max-h-[82vh] overflow-y-auto bg-slate-950/20">
+            {selectedLetter && (
+              <div id="printable-allocation-letter" className="mx-auto max-w-[760px] bg-white text-slate-900 p-8 md:p-12 rounded-lg shadow-xl border border-slate-200/80 space-y-7 font-serif relative">
+                {/* Decorative Paper Accent Header */}
+                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-t-lg" />
+
+                {/* Top Header Banner & Logo */}
+                <div className="flex items-center justify-between border-b border-slate-200 pb-5 gap-4">
+                  <div className="flex-1 min-w-0">
+                    {renderHeaderBlock(activeTemplate)}
+                  </div>
+                  <div className="shrink-0">
+                    {renderLogoBlock(activeTemplate)}
+                  </div>
+                </div>
+
+                {/* Letter Title & Date Metadata Bar */}
+                <div className="bg-slate-50 border border-slate-200/60 rounded-lg p-3.5 space-y-1">
+                  <h2 className="text-center text-base md:text-lg font-bold text-slate-900 tracking-wide uppercase">
+                    Room Allocation Letter
+                  </h2>
+                  <div className="flex justify-between items-center text-xs font-sans text-slate-600 pt-1.5 border-t border-slate-200/50">
+                    <span className="font-medium"><strong className="text-slate-800">Date:</strong> {selectedLetter.issuedDate ? new Date(selectedLetter.issuedDate).toLocaleDateString("en-GB") : new Date().toLocaleDateString("en-GB")}</span>
+                    <span className="font-semibold text-purple-700 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded">Ref No: {selectedLetter.referenceNo || "N/A"}</span>
+                  </div>
+                </div>
+
+                {/* Recipient Details */}
+                <div className="space-y-1.5 text-xs md:text-sm font-sans text-slate-800 bg-white p-2">
+                  <p className="font-bold text-slate-900 text-sm">To,</p>
+                  <p><span className="font-semibold text-slate-700">Student Name:</span> <strong className="text-slate-900">{selectedLetter.allocation?.student?.fullName || selectedLetter.letterRequest?.student?.fullName || selectedLetter.student?.fullName || "N/A"}</strong></p>
+                  <p><span className="font-semibold text-slate-700">Roll No.:</span> <strong className="text-slate-900">{selectedLetter.allocation?.student?.collegeId || selectedLetter.letterRequest?.student?.collegeId || selectedLetter.student?.collegeId || "N/A"}</strong></p>
+                </div>
+
+                {/* Body Wording */}
+                <div className="space-y-4 text-xs md:text-sm font-sans leading-relaxed text-slate-800 text-justify px-1">
+                  <p>
+                    This is to inform you that you have been allotted Room No.{" "}
+                    <strong className="underline decoration-purple-500 font-bold text-slate-900">
+                      {selectedLetter.allocation?.bed?.room?.number || "N/A"}{selectedLetter.allocation?.bed?.number ? ` (Bed ${selectedLetter.allocation.bed.number})` : ""}
+                    </strong>{" "}
+                    in{" "}
+                    <strong className="underline decoration-purple-500 font-bold text-slate-900">
+                      {selectedLetter.allocation?.bed?.room?.floor?.block?.hostel?.name || selectedLetter.hostel?.name || "N/A"}
+                    </strong>{" "}
+                    for the current academic year.
+                  </p>
+                  <p>
+                    You are requested to report on or before{" "}
+                    <strong className="text-slate-900 font-bold">{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString("en-GB")}</strong> and complete the necessary hostel formalities. Please follow all hostel rules and maintain discipline during your stay.
+                  </p>
+                  <p className="font-semibold text-slate-900">We wish you a comfortable and successful academic year.</p>
+                </div>
+
+                {/* Signoff */}
+                <div className="pt-2 text-xs md:text-sm font-sans font-semibold space-y-0.5 text-slate-900">
+                  <p className="text-purple-900 font-bold">Warden</p>
+                  <p>Hostel Administration</p>
+                  <p className="text-[11px] font-normal italic text-slate-500">Signature & Seal</p>
+                </div>
+
+                {/* Bottom Signatures & Stamp */}
+                <div className="grid grid-cols-3 items-end pt-10 pb-2 text-center text-xs font-sans gap-2">
+                  <div>
+                    <div className="border-t border-slate-400 pt-1.5 font-semibold text-slate-900">Head, T&P Department</div>
+                    <p className="text-[10px] text-slate-500">VPPCOE&VA</p>
+                  </div>
+                  <div className="flex flex-col items-center justify-center min-h-[70px]">
+                    {renderStampBlock(activeTemplate)}
+                  </div>
+                  <div>
+                    <div className="border-t border-slate-400 pt-1.5 font-semibold text-slate-900">Principal</div>
+                    <p className="text-[10px] text-slate-500">VPPCOE&VA</p>
+                  </div>
+                </div>
+
+                {/* Footer Banner */}
+                {renderFooterBlock(activeTemplate)}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

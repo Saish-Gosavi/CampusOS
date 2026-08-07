@@ -53,60 +53,7 @@ const TABS = [
   { id: "rejected", label: "Rejected" }
 ];
 
-// --- DUMMY DATA FOR TESTING ---
-// TODO: Remove after testing the complete workflow
-export const DUMMY_REQUESTS = [
-  {
-    id: "dummy-1",
-    createdAt: new Date().toISOString(),
-    status: "Pending",
-    hostel: { name: "Main Campus Hostel" },
-    student: {
-      fullName: "Rahul Sharma",
-      user: { email: "rahul@campusos.com", name: "Rahul Sharma" },
-      collegeId: "STU-2026-001",
-      allocations: [{ bed: { number: "A1", room: { number: "A-101" } } }]
-    }
-  },
-  {
-    id: "dummy-2",
-    createdAt: new Date().toISOString(),
-    status: "Approved",
-    hostel: { name: "Main Campus Hostel" },
-    student: {
-      fullName: "Priya Patel",
-      user: { email: "priya@campusos.com", name: "Priya Patel" },
-      collegeId: "STU-2026-002",
-      allocations: [{ bed: { number: "B2", room: { number: "B-203" } } }]
-    }
-  },
-  {
-    id: "dummy-3",
-    createdAt: new Date().toISOString(),
-    status: "Generated",
-    hostel: { name: "Main Campus Hostel" },
-    student: {
-      fullName: "Aarav Mehta",
-      user: { email: "aarav@campusos.com", name: "Aarav Mehta" },
-      collegeId: "STU-2026-003",
-      allocations: [{ bed: { number: "C1", room: { number: "C-305" } } }]
-    },
-    allotmentLetter: { pdfPath: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" }
-  },
-  {
-    id: "dummy-4",
-    createdAt: new Date().toISOString(),
-    status: "Rejected",
-    rejectionReason: "Incomplete documentation provided.",
-    hostel: { name: "Main Campus Hostel" },
-    student: {
-      fullName: "Sneha Verma",
-      user: { email: "sneha@campusos.com", name: "Sneha Verma" },
-      collegeId: "STU-2026-004",
-      allocations: [{ bed: { number: "D2", room: { number: "D-108" } } }]
-    }
-  }
-];
+export const DUMMY_REQUESTS = [];
 // ------------------------------
 
 export function WardenAllocationLetterPage() {
@@ -129,9 +76,9 @@ export function WardenAllocationLetterPage() {
         wardenLetterApi.getActiveTemplate().catch(() => null)
       ]);
       
-      // Combine API data with dummy data for testing
-      const apiData = reqRes?.data || [];
-      setRequests([...DUMMY_REQUESTS, ...apiData]);
+      const rawApiData = reqRes?.data || reqRes || [];
+      const apiData = Array.isArray(rawApiData) ? rawApiData : [];
+      setRequests(apiData);
       
       if (tempRes?.data) {
         setActiveTemplate(tempRes.data);

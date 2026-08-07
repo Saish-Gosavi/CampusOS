@@ -9,61 +9,8 @@ const Route = createFileRoute("/warden/in-out")({
   component: WardenInOutRegisterPage
 });
 
-const DUMMY_IN_OUT_LOGS = [
-  {
-    id: "log-1",
-    name: "Rahul Sharma (STU-2026-001)",
-    userType: "Student",
-    direction: "OUT",
-    reason: "Going home for weekend",
-    date: new Date().toLocaleDateString(),
-    time: "10:30 AM",
-    loggedBy: "Warden Office"
-  },
-  {
-    id: "log-2",
-    name: "Priya Patel (STU-2026-002)",
-    userType: "Student",
-    direction: "IN",
-    reason: "Returned from library",
-    date: new Date().toLocaleDateString(),
-    time: "11:15 AM",
-    loggedBy: "Warden Office"
-  },
-  {
-    id: "log-3",
-    name: "Aarav Mehta (STU-2026-003)",
-    userType: "Student",
-    direction: "OUT",
-    reason: "Medical appointment",
-    date: new Date().toLocaleDateString(),
-    time: "12:00 PM",
-    loggedBy: "Warden Office"
-  },
-  {
-    id: "log-4",
-    name: "Dr. Rajesh K. Verma",
-    userType: "Staff",
-    direction: "IN",
-    reason: "Hostel Inspection",
-    date: new Date().toLocaleDateString(),
-    time: "01:30 PM",
-    loggedBy: "Warden Office"
-  },
-  {
-    id: "log-5",
-    name: "Suresh Gupta (Parent)",
-    userType: "Visitor",
-    direction: "IN",
-    reason: "Visiting student Aarav Mehta",
-    date: new Date().toLocaleDateString(),
-    time: "02:45 PM",
-    loggedBy: "Warden Office"
-  }
-];
-
 function WardenInOutRegisterPage() {
-  const [logs, setLogs] = useState(DUMMY_IN_OUT_LOGS);
+  const [logs, setLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDirection, setFilterDirection] = useState("All");
   const [filterType, setFilterType] = useState("All");
@@ -71,14 +18,14 @@ function WardenInOutRegisterPage() {
   const fetchLogs = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/warden/inout", { withCredentials: true });
-      if (res.data.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
-        setLogs([...res.data.data, ...DUMMY_IN_OUT_LOGS]);
+      if (res.data.success && Array.isArray(res.data.data)) {
+        setLogs(res.data.data);
       } else {
-        setLogs(DUMMY_IN_OUT_LOGS);
+        setLogs([]);
       }
     } catch (err) {
       console.error("Failed to load warden logs:", err);
-      setLogs(DUMMY_IN_OUT_LOGS);
+      setLogs([]);
     }
   };
 

@@ -118,12 +118,52 @@ export class HostelRepository {
 
   static async delete(id) {
     const hostelId = Number(id);
-    await prisma.user.updateMany({
-      where: { hostelId },
-      data: { hostelId: null },
-    });
-    return prisma.hostel.delete({
-      where: { id: hostelId },
+    if (!hostelId || isNaN(hostelId)) return null;
+
+    return prisma.$transaction(async (tx) => {
+      // 1. Unlink users
+      await tx.user.updateMany({
+        where: { hostelId },
+        data: { hostelId: null },
+      });
+
+      // 2. Unlink or delete notices
+      await tx.notice.updateMany({
+        where: { hostelId },
+        data: { hostelId: null },
+      });
+
+      // 3. Unlink or delete inOutLogs
+      await tx.inOutLog.updateMany({
+        where: { hostelId },
+        data: { hostelId: null },
+      });
+
+      // 4. Unlink admissionApplications
+      await tx.admissionApplication.updateMany({
+        where: { hostelId },
+        data: { hostelId: null },
+      });
+
+      // 5. Delete staff (which cascades staff attendance)
+      await tx.staff.deleteMany({
+        where: { hostelId },
+      });
+
+      // 6. Delete wardens
+      await tx.warden.deleteMany({
+        where: { hostelId },
+      });
+
+      // 7. Delete blocks (which cascades floors, rooms, beds)
+      await tx.block.deleteMany({
+        where: { hostelId },
+      });
+
+      // 8. Delete the hostel record
+      return tx.hostel.delete({
+        where: { id: hostelId },
+      });
     });
   }
 }

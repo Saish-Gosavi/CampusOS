@@ -157,10 +157,15 @@ import { Route as InventoryStock } from "@/pages/inventory/stock/index";
 import { Route as Error403 } from "@/pages/errors/403";
 import { Route as Error404 } from "@/pages/errors/404";
 
-function SeniorAdminTypoRedirect() {
+function NormalizeUrlRedirect() {
   const location = useLocation();
-  const cleanPath = location.pathname.replace(/\/senior%20admin|\/senior admin/gi, "/senior-admin");
-  return <Navigate to={cleanPath + location.search} replace />;
+  const cleanPath = location.pathname
+    .replace(/\/super_admin/gi, "/super-admin")
+    .replace(/\/senior_admin|\/senior%20admin|\/senior admin/gi, "/senior-admin")
+    .replace(/\/hostel_admin/gi, "/hostel-admin")
+    .replace(/\/library_admin/gi, "/library-admin")
+    .replace(/\/inventory_admin/gi, "/inventory-admin");
+  return <Navigate to={cleanPath + location.search + location.hash} replace />;
 }
 
 function GenericModuleShell({ title, description }) {
@@ -253,11 +258,21 @@ export default function AppRoutes() {
         <Route path="profile" element={<SeniorAdminProfile.component />} />
       </Route>
 
-      {/* Graceful redirects for senior admin spacing typos */}
-      <Route path="/senior admin" element={<SeniorAdminTypoRedirect />} />
-      <Route path="/senior admin/*" element={<SeniorAdminTypoRedirect />} />
-      <Route path="/senior%20admin" element={<SeniorAdminTypoRedirect />} />
-      <Route path="/senior%20admin/*" element={<SeniorAdminTypoRedirect />} />
+      {/* Graceful redirects for underscore and spacing typos in URLs */}
+      <Route path="/super_admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/super_admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior_admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior_admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior%20admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/senior%20admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/hostel_admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/hostel_admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/library_admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/library_admin/*" element={<NormalizeUrlRedirect />} />
+      <Route path="/inventory_admin" element={<NormalizeUrlRedirect />} />
+      <Route path="/inventory_admin/*" element={<NormalizeUrlRedirect />} />
 
       {/* Hostel Admin Dashboard Routes */}
       <Route

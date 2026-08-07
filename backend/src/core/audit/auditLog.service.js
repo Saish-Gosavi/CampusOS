@@ -19,7 +19,7 @@ export class AuditLogService {
       const formatDataStr = (val) => {
         if (!val) return null;
         const str = typeof val === "string" ? val : JSON.stringify(val);
-        return str.length > 500 ? str.slice(0, 497) + "..." : str;
+        return str.length > 180 ? str.slice(0, 177) + "..." : str;
       };
 
       await prisma.auditLog.create({

@@ -12,24 +12,26 @@ export const LettersRepository = {
   },
 
   findForHostel: async (hostelId) => {
-    return prisma.occupancyLetterRequest.findMany({
-      where: {
-        student: {
-          allocations: {
-            some: {
-              bed: {
-                room: {
-                  floor: {
-                    block: {
-                      hostelId: Number(hostelId),
-                    },
+    const where = {};
+    if (hostelId && !isNaN(Number(hostelId))) {
+      where.student = {
+        allocations: {
+          some: {
+            bed: {
+              room: {
+                floor: {
+                  block: {
+                    hostelId: Number(hostelId),
                   },
                 },
               },
             },
           },
         },
-      },
+      };
+    }
+    return prisma.occupancyLetterRequest.findMany({
+      where,
       orderBy: { createdAt: "desc" },
       include: {
         student: { select: { fullName: true, collegeId: true } },

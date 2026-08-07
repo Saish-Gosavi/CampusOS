@@ -9,7 +9,8 @@ export class ComplaintRepository {
         student: {
           select: {
             id: true,
-            enrollmentNo: true,
+            collegeId: true,
+            fullName: true,
             user: {
               select: {
                 id: true,
@@ -53,7 +54,8 @@ export class ComplaintRepository {
         student: {
           select: {
             id: true,
-            enrollmentNo: true,
+            collegeId: true,
+            fullName: true,
             user: {
               select: {
                 id: true,
@@ -75,7 +77,8 @@ export class ComplaintRepository {
         student: {
           select: {
             id: true,
-            enrollmentNo: true,
+            collegeId: true,
+            fullName: true,
             user: {
               select: {
                 name: true,
@@ -96,7 +99,8 @@ export class ComplaintRepository {
         student: {
           select: {
             id: true,
-            enrollmentNo: true,
+            collegeId: true,
+            fullName: true,
             user: {
               select: {
                 name: true,

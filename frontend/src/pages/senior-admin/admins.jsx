@@ -58,18 +58,24 @@ function AdminsPage() {
       const res = await userApi.getAll();
       const list = Array.isArray(res.data) ? res.data : (Array.isArray(res) ? res : []);
 
-      // Filter out the currently logged-in Senior Admin so they never appear in their own list
+      // Filter out logged-in user and scope to the Senior Admin's college (if defined)
       const mapped = list
         .filter((u) => u.id !== currentUser?.id)
+        .filter((u) => {
+          if (!currentUser?.hostelId) return true;
+          const uHostelId = u.hostelId || u.hostel?.id;
+          return !uHostelId || uHostelId === currentUser.hostelId;
+        })
         .map((u) => {
           const rawRole = u.role?.name || "General";
+          const campusName = u.hostel?.name || u.college?.name || "—";
           return {
             id: u.id,
             name: u.name || u.email?.split("@")[0] || "User",
             email: u.email || "",
             module: rawRole,
-            campus: u.college?.name
-              ? `${u.college.name}${u.college.city ? " — " + u.college.city : ""}`
+            campus: campusName !== "—"
+              ? `${campusName}${u.hostel?.city || u.college?.city ? " — " + (u.hostel?.city || u.college?.city) : ""}`
               : "—",
             raw: u
           };

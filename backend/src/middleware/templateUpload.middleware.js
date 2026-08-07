@@ -46,7 +46,7 @@ const fileFilter = (_req, file, cb) => {
 
   const isSectionPdf =
     PDF_SECTION_FIELDS.includes(file.fieldname) &&
-    file.mimetype === "application/pdf";
+    (file.mimetype === "application/pdf" || Object.keys(ALLOWED_IMAGE_TYPES).includes(file.mimetype));
 
   const isImage =
     file.fieldname === "templateImage" &&
@@ -57,7 +57,7 @@ const fileFilter = (_req, file, cb) => {
   } else {
     cb(
       new Error(
-        `Invalid file type for ${file.fieldname}. Only PDF files are accepted.`
+        `Invalid file type for ${file.fieldname}. Only PDF and PNG/JPG files are accepted.`
       ),
       false
     );
