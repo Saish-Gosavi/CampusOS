@@ -618,6 +618,200 @@ export const allotmentTemplateApi = {
     });
   },
   /**
+export const auditLogApi = {
+  async getLogs(params) {
+    return apiClient.get("/audit-logs", { params });
+  }
+};
+
+export const rolesApi = {
+  async getAll() {
+    return apiClient.get("/roles");
+  }
+};
+
+export const reportsApi = {
+  async getSummary(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async getSuperAdminStats(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/super_admin/reports", { params });
+  },
+  async exportCsv(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  },
+  async downloadSuperAdminReport(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.post("/super_admin/reports", { hostelId }, { responseType: "blob", params });
+  }
+};
+
+export const staffApi = {
+  async getAll() {
+    return apiClient.get("/admin/staff-management");
+  },
+  async create(data) {
+    return apiClient.post("/admin/staff-management", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/admin/staff-management/${id}`);
+  },
+  async getAttendance(id, isWarden = false) {
+    return apiClient.get(`/admin/staff-management/${id}/attendance`, { params: { isWarden } });
+  },
+  async createCredentials(id, data) {
+    return apiClient.post(`/admin/staff-management/${id}/credentials`, data);
+  },
+  async resetPassword(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}/password`, data);
+  },
+  async updateLoginStatus(id, data) {
+    return apiClient.put(`/admin/staff-management/${id}/login-status`, data);
+  }
+};
+
+export const complaintApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/admin/complaints", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/admin/complaints/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/admin/complaints", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/admin/complaints/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/admin/complaints/${id}`);
+  }
+};
+
+export const admissionApi = {
+  // Public (no auth)
+  async getConfig(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/admission/config", { params });
+  },
+  async apply(formData) {
+    return apiClient.post("/admission/apply", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  },
+  // Admin (auth required)
+  async listApplications(params = {}) {
+    return apiClient.get("/admission/admin/admissions", { params });
+  },
+  async getApplication(id) {
+    return apiClient.get(`/admission/admin/admissions/${id}`);
+  },
+  async updateStatus(id, status, remarks = "") {
+    return apiClient.put(`/admission/admin/admissions/${id}/status`, { status, remarks });
+  },
+  async getAdminConfig(hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.get("/admission/admin/admission-config", { params });
+  },
+  async updateAdminConfig(config, hostelId = null) {
+    const params = hostelId ? { hostelId } : {};
+    return apiClient.put("/admission/admin/admission-config", config, { params });
+  }
+};
+
+export const leaveApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/hostel/leaves", { params });
+  },
+  async getStats() {
+    return apiClient.get("/hostel/leaves/stats");
+  },
+  async getById(id) {
+    return apiClient.get(`/hostel/leaves/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/hostel/leaves", data);
+  },
+  async updateStatus(id, statusPayload, remarks = "") {
+    const payload = typeof statusPayload === "object" ? statusPayload : { status: statusPayload, remarks };
+    return apiClient.put(`/hostel/leaves/${id}/status`, payload);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/leaves/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/leaves/${id}`);
+  }
+};
+
+export const feeApi = {
+  async getDashboardStats() {
+    return apiClient.get("/admin/fee-management/statistics");
+  },
+  async getAllFeeRecords() {
+    return apiClient.get("/admin/fee-management");
+  },
+  async getStudentFeeRecords(studentId) {
+    return apiClient.get(`/admin/fee-management/${studentId}`);
+  },
+  async verifyPayment(id) {
+    return apiClient.put(`/admin/fee-management/${id}/verify`);
+  },
+  async rejectPayment(id, reason) {
+    return apiClient.put(`/admin/fee-management/${id}/reject`, { reason });
+  },
+  async releaseReceipt(receiptId) {
+    return apiClient.put(`/admin/fee-management/${receiptId}/release-receipt`);
+  }
+};
+
+export const studentFeeApi = {
+  async getMyReceipts() {
+    return apiClient.get("/student/fees/my-receipts");
+  }
+};
+
+export const allotmentLetterApi = {
+  async getAll() {
+    return apiClient.get("/hostel/room-allotment-letters");
+  },
+  async getById(id) {
+    return apiClient.get(`/hostel/room-allotment-letters/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/hostel/room-allotment-letters", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/room-allotment-letters/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/room-allotment-letters/${id}`);
+  }
+};
+
+export const allotmentTemplateApi = {
+  async getActive() {
+    return apiClient.get("/hostel/allotment-template/active");
+  },
+  async getAll() {
+    return apiClient.get("/hostel/allotment-template");
+  },
+  async saveFormat(data) {
+    return apiClient.post("/hostel/allotment-template/save-format", data);
+  },
+  async uploadPdf(formData) {
+    return apiClient.post("/hostel/allotment-template/upload-pdf", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+      timeout: 60000,
+    });
+  },
+  /**
    * Upload a single section PDF.
    * @param {string} section - "header" | "footer" | "main" | "terms"
    * @param {File} file - The PDF file object
@@ -704,24 +898,24 @@ export const adminReportsApi = {
 };
 
 export const wardenRoomChangeApi = {
-  getStatistics: async () => apiClient.get("/warden/room-change/statistics"),
-  getRequests: async (params) => apiClient.get("/warden/room-change", { params }),
-  approveRequest: async (id, data) => apiClient.put(`/warden/room-change/${id}/approve`, data),
-  rejectRequest: async (id, data) => apiClient.put(`/warden/room-change/${id}/reject`, data),
+  getStatistics: () => apiClient.get("/warden/room-change/statistics"),
+  getRequests: (params) => apiClient.get("/warden/room-change", { params }),
+  approveRequest: (id, data) => apiClient.put(`/warden/room-change/${id}/approve`, data),
+  rejectRequest: (id, data) => apiClient.put(`/warden/room-change/${id}/reject`, data),
 };
 
 export const studentRoomChangeApi = {
-  submitRequest: async (data) => apiClient.post("/student/room-change-request", data),
-  getMyRequests: async () => apiClient.get("/student/room-change-request"),
+  submitRequest: (data) => apiClient.post("/student/room-change-request", data),
+  getMyRequests: () => apiClient.get("/student/room-change-request"),
 };
 
 export const wardenStaffApi = {
-  getAll:          ()          => apiClient.get("/warden/staff-management"),
-  create:          (data)      => apiClient.post("/warden/staff-management", data),
-  update:          (id, data)  => apiClient.put(`/warden/staff-management/${id}`, data),
-  delete:          (id)        => apiClient.delete(`/warden/staff-management/${id}`),
-  getAttendance:   (id)        => apiClient.get(`/warden/staff-management/${id}/attendance`),
-  markAttendance:  (id, data)  => apiClient.post(`/warden/staff-management/${id}/attendance`, data),
+  getAll: () => apiClient.get("/warden/staff-management"),
+  create: (data) => apiClient.post("/warden/staff-management", data),
+  update: (id, data) => apiClient.put(`/warden/staff-management/${id}`, data),
+  delete: (id) => apiClient.delete(`/warden/staff-management/${id}`),
+  getAttendance: (id) => apiClient.get(`/warden/staff-management/${id}/attendance`),
+  markAttendance: (id, data) => apiClient.post(`/warden/staff-management/${id}/attendance`, data),
 };
 
 export const wardenLetterApi = {
@@ -735,9 +929,6 @@ export const studentLetterApi = {
   getMyLetters: () => apiClient.get("/student/letter/my-letters"),
 };
 
-// ==========================================
-// Notices API
-// ==========================================
 export const noticeApi = {
   getNotices: () => apiClient.get("/notices"),
   createNotice: (data) => apiClient.post("/notices", data),
@@ -745,9 +936,6 @@ export const noticeApi = {
   deleteNotice: (id) => apiClient.delete(`/notices/${id}`),
 };
 
-// ==========================================
-// Letter API
-// ==========================================
 export const letterApi = {
   getStudentRequests: () => apiClient.get("/letters/student"),
   getHostelRequests: () => apiClient.get("/letters/warden"),
