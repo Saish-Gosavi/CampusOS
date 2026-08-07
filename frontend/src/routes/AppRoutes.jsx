@@ -199,8 +199,9 @@ function GenericModuleShell({ title, description }) {
 
 // Root navigator helper
 const RootNavigator = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   
+  if (loading) return null;
   if (!user) return <Navigate to="/login" replace />;
   
   const rawRole = typeof user.role === "string" ? user.role : (user.role?.name || "");
@@ -210,6 +211,7 @@ const RootNavigator = () => {
   if (role === "senioradmin") return <Navigate to="/senior-admin" replace />;
   if (role === "admin") return <Navigate to="/hostel-admin" replace />;
   if (role === "warden") return <Navigate to="/warden" replace />;
+  if (role === "mess" || role === "messmanager" || role === "mess_manager") return <Navigate to="/mess" replace />;
   if (role === "librarian") return <Navigate to="/library-admin" replace />;
   if (role === "store") return <Navigate to="/inventory-admin" replace />;
   if (role === "student") return <Navigate to="/student" replace />;
