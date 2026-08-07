@@ -5,7 +5,6 @@ import {
   BedDouble,
   Armchair,
   CalendarDays,
-  UtensilsCrossed,
   MessageSquareWarning,
   UserRoundCheck,
   Megaphone,
@@ -13,7 +12,9 @@ import {
   ShieldCheck,
   ArrowRightLeft,
   UserCog,
-  Settings
+  Settings,
+  FileText,
+  UtensilsCrossed
 } from "lucide-react";
 import {
   Sidebar,
@@ -41,12 +42,14 @@ const residentsAndAssets = [
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
   { title: "Mess Management", url: "/warden/mess", icon: UtensilsCrossed },
+  { title: "In Out Register", url: "/warden/in-out", icon: ArrowRightLeft },
+  { title: "Letter Allocation", url: "/warden/allocation-letter", icon: FileText },
   { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
   { title: "Room Change", url: "/warden/room-change", icon: ArrowRightLeft },
   { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
   { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
-  { title: "Reports", url: "/warden/reports", icon: BarChart3 }
 ];
+
 
 function WardenSidebar() {
   const { logout } = useAuth();

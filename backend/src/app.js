@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Import Custom Middlewares
-// CampusOS Backend Entry App - Mess Management Module Active
+// CampusOS Backend Entry App
 import notFoundMiddleware from "./middleware/notFound.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 
@@ -78,6 +78,9 @@ import adminReportsRouter from "./modules/reports/routes/admin-reports.routes.js
 import studentRouter from "./modules/hostel/students/routes/student.routes.js";
 import furnitureRouter from "./modules/hostel/furniture/routes/furniture.routes.js";
 import inspectionRouter from "./modules/hostel/inspection/routes/inspection.routes.js";
+import wardenLetterRouter from "./modules/warden/letter.routes.js";
+import wardenInOutRouter from "./modules/warden/inout.routes.js";
+import allotmentTemplateRouter from "./modules/hostel/allotment-template/routes/allotment-template.routes.js";
 
 // Register routers
 app.use("/api/auth", authRouter);
@@ -89,7 +92,11 @@ app.use("/api/hostel", hostelRouter);
 app.use("/api/warden/students", studentRouter);
 app.use("/api/warden/furniture", furnitureRouter);
 app.use("/api/warden/room-inspection", inspectionRouter);
+app.use("/api/warden/allotment-template", allotmentTemplateRouter);
+app.use("/api/warden/inout", wardenInOutRouter);
+app.use("/api/warden", wardenLetterRouter);
 app.use("/api/admin/visitor-management", visitorsRouter);
+
 app.use("/api/admin/reports", adminReportsRouter);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
