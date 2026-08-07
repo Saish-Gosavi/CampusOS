@@ -98,7 +98,6 @@ import { Route as WardenMess } from "@/pages/warden/mess";
 import { Route as MessIndex } from "@/pages/mess/index";
 import { Route as MessMenu } from "@/pages/mess/menu";
 import { Route as MessOffDays } from "@/pages/mess/off-days";
-import { Route as MessInventory } from "@/pages/mess/inventory";
 import { Route as MessFeedback } from "@/pages/mess/feedback";
 import { Route as MessProfile } from "@/pages/mess/profile";
 
@@ -374,7 +373,6 @@ export default function AppRoutes() {
         <Route index element={<MessIndex.component />} />
         <Route path="menu" element={<MessMenu.component />} />
         <Route path="off-days" element={<MessOffDays.component />} />
-        <Route path="inventory" element={<MessInventory.component />} />
         <Route path="feedback" element={<MessFeedback.component />} />
         <Route path="profile" element={<MessProfile.component />} />
       </Route>
