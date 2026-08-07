@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
+import { apiClient } from '@/services/api';
 import { BookOpen, RefreshCw, Bookmark, AlertCircle } from 'lucide-react';
 
 const LibraryDashboardPage = () => {
@@ -10,7 +10,7 @@ const LibraryDashboardPage = () => {
   const fetchBooks = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/library/books');
+      const response = await apiClient.get('/library/books');
       setData(response);
       setError(null);
     } catch (err) {
@@ -23,6 +23,8 @@ const LibraryDashboardPage = () => {
   useEffect(() => {
     fetchBooks();
   }, []);
+
+  const totalBooks = Array.isArray(data?.data) ? data.data.length : (Array.isArray(data) ? data.length : 0);
 
   return (
     <div className="space-y-6">
@@ -48,7 +50,7 @@ const LibraryDashboardPage = () => {
             </div>
             <div>
               <p className="text-brand-muted text-xs uppercase font-semibold tracking-wider">Catalog Size</p>
-              <h3 className="text-2xl font-bold text-brand-text">14,250</h3>
+              <h3 className="text-2xl font-bold text-brand-text">{totalBooks}</h3>
             </div>
           </div>
           <p className="text-xs text-brand-muted mt-2">Books, Journals, and digital assets registered</p>
@@ -61,7 +63,7 @@ const LibraryDashboardPage = () => {
             </div>
             <div>
               <p className="text-brand-muted text-xs uppercase font-semibold tracking-wider">Books Issued</p>
-              <h3 className="text-2xl font-bold text-brand-text">1,120</h3>
+              <h3 className="text-2xl font-bold text-brand-text">0</h3>
             </div>
           </div>
           <p className="text-xs text-brand-muted mt-2">Currently on loan to students & faculty</p>
@@ -74,7 +76,7 @@ const LibraryDashboardPage = () => {
             </div>
             <div>
               <p className="text-brand-muted text-xs uppercase font-semibold tracking-wider">Overdue Issues</p>
-              <h3 className="text-2xl font-bold text-brand-text">45</h3>
+              <h3 className="text-2xl font-bold text-brand-text">0</h3>
             </div>
           </div>
           <p className="text-xs text-brand-muted mt-2">Fines pending calculation</p>

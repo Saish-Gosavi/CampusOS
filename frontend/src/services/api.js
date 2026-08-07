@@ -303,6 +303,54 @@ export const userApi = {
   }
 };
 
+export const wardenStudentApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/warden/students", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/warden/students/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/warden/students", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/warden/students/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/warden/students/${id}`);
+  }
+};
+
+export const wardenFurnitureApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/warden/furniture", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/warden/furniture/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/warden/furniture", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/warden/furniture/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/warden/furniture/${id}`);
+  }
+};
+
+export const wardenInspectionApi = {
+  async getAll(params = {}) {
+    return apiClient.get("/warden/room-inspection", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/warden/room-inspection/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/warden/room-inspection", data);
+  }
+};
+
 export const settingsApi = {
   async get() {
     return apiClient.get("/settings");

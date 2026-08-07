@@ -39,7 +39,7 @@ import {
 } from "recharts";
 import { apiClient } from "@/services/api";
 import { toast } from "sonner";
-import jsPDF from "jspdf";
+import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
 

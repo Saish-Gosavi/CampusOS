@@ -35,22 +35,8 @@ const Route = createFileRoute("/senior-admin/library")({
   component: LibraryManagementPage
 });
 
-const MOCK_LIBRARY_TREND = [
-  { month: "Jan", Checkouts: 420, Returns: 390, DigitalReads: 1100 },
-  { month: "Feb", Checkouts: 580, Returns: 510, DigitalReads: 1450 },
-  { month: "Mar", Checkouts: 640, Returns: 610, DigitalReads: 1800 },
-  { month: "Apr", Checkouts: 720, Returns: 680, DigitalReads: 2100 },
-  { month: "May", Checkouts: 810, Returns: 790, DigitalReads: 2400 },
-  { month: "Jun", Checkouts: 890, Returns: 850, DigitalReads: 2850 }
-];
-
-const MOCK_BOOKS = [
-  { isbn: "978-0131103627", title: "The C Programming Language", author: "Kernighan & Ritchie", category: "Computer Science", totalQty: 45, issued: 38, status: "Available" },
-  { isbn: "978-0262033848", title: "Introduction to Algorithms", author: "Cormen, Leiserson", category: "Algorithms", totalQty: 60, issued: 56, status: "High Demand" },
-  { isbn: "978-0134685991", title: "Effective Java (3rd Ed)", author: "Joshua Bloch", category: "Software Eng", totalQty: 30, issued: 30, status: "Out of Stock" },
-  { isbn: "978-0132350884", title: "Clean Code", author: "Robert C. Martin", category: "Software Eng", totalQty: 50, issued: 42, status: "Available" },
-  { isbn: "978-0596007126", title: "Head First Design Patterns", author: "Eric Freeman", category: "Software Eng", totalQty: 40, issued: 25, status: "Available" },
-];
+const MOCK_LIBRARY_TREND = [];
+const MOCK_BOOKS = [];
 
 function LibraryManagementPage() {
   const [loading, setLoading] = useState(true);

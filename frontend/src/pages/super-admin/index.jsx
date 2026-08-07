@@ -29,14 +29,6 @@ import { ChartCard } from "@/components/admin/ChartCard";
 import { ActivityTimeline } from "@/components/admin/ActivityTimeline";
 import { useAuth } from "@/context/AuthContext";
 import { dashboardApi } from "@/services/api";
-import {
-  activities,
-  adminDistribution,
-  collegeDistribution,
-  moduleUsage,
-  recentColleges,
-  studentDistribution
-} from "@/lib/admin-data";
 
 const Route = createFileRoute("/super-admin/")({
   component: DashboardPage
@@ -118,25 +110,35 @@ function DashboardPage() {
           description="Active sessions across modules (last 6 months)"
         >
           <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={statsData?.moduleUsage || moduleUsage} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
-                <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                <Tooltip
-                  contentStyle={{
-                    background: "var(--card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 8,
-                    fontSize: 12
-                  }}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="Hostel" stroke="#7B4CED" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Library" stroke="#3B82F6" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Inventory" stroke="#22C55E" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            {statsData?.moduleUsage && statsData.moduleUsage.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={statsData.moduleUsage} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.4} />
+                  <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={12} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 8,
+                      fontSize: 12
+                    }}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Line type="monotone" dataKey="Hostel" stroke="#7B4CED" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="Library" stroke="#3B82F6" strokeWidth={2} dot={false} />
+                  <Line type="monotone" dataKey="Inventory" stroke="#22C55E" strokeWidth={2} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-center p-4 text-muted-foreground">
+                <ActivityIcon className="h-10 w-10 stroke-[1.5] mb-2 opacity-40 text-primary" />
+                <p className="text-sm font-medium text-foreground">No Platform Activity Yet</p>
+                <p className="text-xs text-muted-foreground mt-1 max-w-[210px]">
+                  Module usage trends will be logged as system activities accumulate.
+                </p>
+              </div>
+            )}
           </div>
         </ChartCard>
 

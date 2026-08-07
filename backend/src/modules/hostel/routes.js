@@ -14,6 +14,8 @@ import furnitureRouter from "./furniture/routes/furniture.routes.js";
 import feesRouter from "./fees/routes/fee.routes.js";
 
 import wardenRouter from "./wardens/routes/warden.routes.js";
+import studentRouter from "./students/routes/student.routes.js";
+import inspectionRouter from "./inspection/routes/inspection.routes.js";
 
 const router = Router();
 
@@ -23,6 +25,7 @@ router.use("/floors", floorsRouter);
 router.use("/rooms", roomsRouter);
 router.use("/beds", bedsRouter);
 router.use("/wardens", wardenRouter);
+router.use("/students", studentRouter);
 router.use("/allocations", allocationsRouter);
 router.use("/room-allotment-letters", allotmentRouter);
 router.use("/room-allotment-letter", allotmentRouter);
@@ -31,6 +34,7 @@ router.use("/complaints", complaintsRouter);
 router.use("/leaves", leaveRouter);
 router.use("/visitors", visitorsRouter);
 router.use("/furniture", furnitureRouter);
+router.use("/room-inspection", inspectionRouter);
 router.use("/fees", feesRouter);
 
 export default router;

@@ -36,22 +36,8 @@ const Route = createFileRoute("/senior-admin/inventory")({
   component: InventoryManagementPage
 });
 
-const MOCK_INVENTORY_TREND = [
-  { month: "Jan", Requisitions: 120, Fulfilled: 110, Restocked: 45 },
-  { month: "Feb", Requisitions: 145, Fulfilled: 138, Restocked: 60 },
-  { month: "Mar", Requisitions: 160, Fulfilled: 152, Restocked: 80 },
-  { month: "Apr", Requisitions: 185, Fulfilled: 175, Restocked: 95 },
-  { month: "May", Requisitions: 210, Fulfilled: 200, Restocked: 110 },
-  { month: "Jun", Requisitions: 240, Fulfilled: 228, Restocked: 130 }
-];
-
-const MOCK_ITEMS = [
-  { sku: "SKU-ENG-001", name: "Dell Latitude Laptops (i7)", category: "Electronics", inStock: 42, unitVal: "$850", status: "In Stock", supplier: "Dell Commercial India" },
-  { sku: "SKU-LAB-045", name: "Digital Oscilloscopes (50MHz)", category: "Lab Equipment", inStock: 5, unitVal: "$420", status: "Low Stock", supplier: "Tektronix Equipment" },
-  { sku: "SKU-OFF-102", name: "Ergonomic Mesh Chairs", category: "Furniture", inStock: 85, unitVal: "$120", status: "In Stock", supplier: "Godrej Interio" },
-  { sku: "SKU-STN-220", name: "A4 White Paper Reams (500s)", category: "Stationery", inStock: 0, unitVal: "$6", status: "Out of Stock", supplier: "PaperOne Supplies" },
-  { sku: "SKU-IT-089", name: "Cisco Gigabit Switches (24-Port)", category: "Networking", inStock: 14, unitVal: "$340", status: "In Stock", supplier: "Cisco Systems" },
-];
+const MOCK_INVENTORY_TREND = [];
+const MOCK_ITEMS = [];
 
 function InventoryManagementPage() {
   const [loading, setLoading] = useState(true);

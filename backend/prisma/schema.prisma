@@ -55,6 +55,7 @@ model User {
   generatedReceipts FeeReceipt[]
   allotmentTemplates AllotmentTemplate[]
   generatedReports  GeneratedReport[]
+  roomInspections   RoomInspection[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -132,8 +133,9 @@ model Room {
   floor     Floor       @relation(fields: [floorId], references: [id], onDelete: Cascade)
   capacity  Int
   rent      Decimal     @db.Decimal(10, 2)
-  beds      Bed[]
-  furniture Furniture[]
+  beds        Bed[]
+  furniture   Furniture[]
+  inspections RoomInspection[]
 
   @@index([floorId])
 }
@@ -287,13 +289,20 @@ model Visitor {
 }
 
 model Furniture {
-  id     Int    @id @default(autoincrement())
-  name   String
-  roomId Int
-  room   Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  status String @default("good") // "good", "damaged", "under-maintenance"
+  id           Int      @id @default(autoincrement())
+  assetCode    String?  @unique
+  name         String
+  category     String   @default("General") // "Bed", "Desk", "Chair", "Cupboard", "Appliance", "Other"
+  condition    String   @default("Good") // "Good", "Needs Repair", "Damaged", "Under Maintenance"
+  quantity     Int      @default(1)
+  roomId       Int?
+  room         Room?    @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  remarks      String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([roomId])
+  @@index([condition])
 }
 
 model Fee {
@@ -642,4 +651,29 @@ model GeneratedReport {
   @@index([createdById])
   @@index([category])
   @@index([createdAt])
+}
+
+// ==========================================
+// 14. Room Inspection Logs
+// ==========================================
+
+model RoomInspection {
+  id                 Int      @id @default(autoincrement())
+  inspectionCode     String   @unique
+  roomId             Int
+  room               Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  inspectedById      Int
+  inspectedBy        User     @relation(fields: [inspectedById], references: [id])
+  inspectionDate     DateTime @default(now())
+  cleanlinessScore   String   @default("Good") // "Excellent", "Good", "Fair", "Poor"
+  status             String   @default("Pass") // "Pass", "Follow-up Required", "Fail"
+  furnitureCondition String   @default("Good") // "Good", "Damaged Items Found"
+  remarks            String?  @db.Text
+  actionRequired     String?  @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([roomId])
+  @@index([inspectedById])
+  @@index([status])
 }

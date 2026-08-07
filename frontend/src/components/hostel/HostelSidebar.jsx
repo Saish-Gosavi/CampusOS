@@ -22,6 +22,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -32,6 +33,7 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 const mainItems = [
   { title: "Dashboard", url: "/hostel-admin", icon: LayoutDashboard, exact: true },
@@ -54,6 +56,13 @@ const opsItems = [
 
 
 function HostelSidebar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -121,6 +130,21 @@ function HostelSidebar() {
             <SidebarGroupContent>{renderMenu(opsItems)}</SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        <SidebarFooter className="border-t border-white/10 p-3">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={handleLogout}
+                tooltip="Logout"
+                className="cursor-pointer text-white/80 hover:bg-white/10 hover:text-white transition-colors duration-200 mt-2"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
       </div>
     </Sidebar>
   );

@@ -27,11 +27,11 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
-const overview = [
+const residentsAndAssets = [
   { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true },
-  { title: "Students", url: "/warden/students", icon: Users },
+  { title: "Students Roster", url: "/warden/students", icon: Users },
   { title: "Room Occupancy", url: "/warden/occupancy", icon: BedDouble },
-  { title: "Furniture", url: "/warden/furniture", icon: Armchair }
+  { title: "Furniture & Inspection", url: "/warden/furniture", icon: Armchair }
 ];
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
@@ -99,8 +99,8 @@ function WardenSidebar() {
 
         <SidebarContent className="px-3 py-4 space-y-4">
           <SidebarGroup>
-            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Overview</SidebarGroupLabel>}
-            <SidebarGroupContent>{renderMenu(overview)}</SidebarGroupContent>
+            {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Residents & Assets</SidebarGroupLabel>}
+            <SidebarGroupContent>{renderMenu(residentsAndAssets)}</SidebarGroupContent>
           </SidebarGroup>
           <SidebarGroup>
             {!collapsed && <SidebarGroupLabel className="text-white/50 text-[10px] uppercase tracking-widest font-bold mb-1">Operations</SidebarGroupLabel>}

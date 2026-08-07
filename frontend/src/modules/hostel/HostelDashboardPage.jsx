@@ -24,8 +24,8 @@ export default function HostelDashboardPage() {
     blocksCount: 0,
     totalCapacity: 0,
     occupiedBeds: 0,
-    pendingApprovals: 4,
-    pendingLeaves: 3,
+    pendingApprovals: 0,
+    pendingLeaves: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -65,8 +65,8 @@ export default function HostelDashboardPage() {
           ...prev,
           hostelsCount: hostelsList.length,
           blocksCount: totalBlks,
-          totalCapacity: totalCap || 120,
-          occupiedBeds: totalOcc || 85,
+          totalCapacity: totalCap,
+          occupiedBeds: totalOcc,
         }));
       } catch (err) {
         console.error("Dashboard stats load failed:", err);

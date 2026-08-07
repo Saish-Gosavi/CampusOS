@@ -6,17 +6,118 @@ export class UsersRepository {
       where: { id },
       include: {
         role: true,
-        studentProfile: true,
-        wardenProfile: true,
+        studentProfile: {
+          include: {
+            allocations: {
+              include: {
+                bed: {
+                  include: {
+                    room: {
+                      include: {
+                        floor: {
+                          include: {
+                            block: true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        wardenProfile: {
+          include: {
+            hostel: true
+          }
+        },
         securityProfile: true,
+        hostel: true,
       },
     });
   }
 
   static async updateProfile(id, data) {
-    return prisma.user.update({
+    const { name, email, phone, ...rest } = data;
+    const userUpdate = {};
+    if (name !== undefined) userUpdate.name = name;
+    if (email !== undefined) userUpdate.email = email;
+    if (Object.keys(rest).length > 0) {
+      Object.assign(userUpdate, rest);
+    }
+
+    const updatedUser = await prisma.user.update({
       where: { id },
-      data,
+      data: userUpdate,
+      include: {
+        role: true,
+        studentProfile: true,
+        wardenProfile: { include: { hostel: true } },
+        securityProfile: true,
+        hostel: true,
+      },
+    });
+
+    if (name || phone) {
+      if (updatedUser.wardenProfile) {
+        await prisma.warden.update({
+          where: { userId: id },
+          data: {
+            ...(name && { fullName: name }),
+            ...(phone && { phone }),
+          },
+        });
+      }
+      if (updatedUser.studentProfile) {
+        await prisma.student.update({
+          where: { userId: id },
+          data: {
+            ...(name && { fullName: name }),
+            ...(phone && { phone }),
+          },
+        });
+      }
+      if (updatedUser.securityProfile) {
+        await prisma.securityStaff.update({
+          where: { userId: id },
+          data: {
+            ...(name && { fullName: name }),
+            ...(phone && { phone }),
+          },
+        });
+      }
+    }
+
+    return prisma.user.findUnique({
+      where: { id },
+      include: {
+        role: true,
+        studentProfile: {
+          include: {
+            allocations: {
+              include: {
+                bed: {
+                  include: {
+                    room: {
+                      include: {
+                        floor: {
+                          include: {
+                            block: true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        wardenProfile: { include: { hostel: true } },
+        securityProfile: true,
+        hostel: true,
+      },
     });
   }
 

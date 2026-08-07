@@ -9,6 +9,9 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  optimizeDeps: {
+    include: ['jspdf', 'jspdf-autotable', 'html2canvas']
+  },
   resolve: {
     alias: {
       '@/lib/utils': path.resolve(__dirname, './src/utils/cn.js'),
