@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, Edit3, Save, Plus, Trash2, Clock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -61,7 +61,23 @@ const daysList = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satur
 
 function MessMenuPage() {
   const [selectedDay, setSelectedDay] = useState("Monday");
-  const [weeklyMenu, setWeeklyMenu] = useState(initialMenuData);
+  const [weeklyMenu, setWeeklyMenu] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("campus_mess_weekly_menu");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error("Failed to parse saved weekly menu", e);
+        }
+      }
+    }
+    return initialMenuData;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("campus_mess_weekly_menu", JSON.stringify(weeklyMenu));
+  }, [weeklyMenu]);
 
   // Edit Modal State
   const [editingMeal, setEditingMeal] = useState(null); // meal object
@@ -86,23 +102,31 @@ function MessMenuPage() {
 
   const handleSaveEdit = () => {
     if (!editingMeal) return;
-    setWeeklyMenu((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].map((m) =>
-        m.id === editingMeal.id
-          ? { ...m, name: formName, time: formTime, dishes: formDishes }
-          : m
-      )
-    }));
+    setWeeklyMenu((prev) => {
+      const updated = {
+        ...prev,
+        [selectedDay]: prev[selectedDay].map((m) =>
+          m.id === editingMeal.id
+            ? { ...m, name: formName, time: formTime, dishes: formDishes }
+            : m
+        )
+      };
+      localStorage.setItem("campus_mess_weekly_menu", JSON.stringify(updated));
+      return updated;
+    });
     toast.success(`Updated ${formName} for ${selectedDay}!`);
     setEditingMeal(null);
   };
 
   const handleDeleteMeal = (id, name) => {
-    setWeeklyMenu((prev) => ({
-      ...prev,
-      [selectedDay]: prev[selectedDay].filter((m) => m.id !== id)
-    }));
+    setWeeklyMenu((prev) => {
+      const updated = {
+        ...prev,
+        [selectedDay]: prev[selectedDay].filter((m) => m.id !== id)
+      };
+      localStorage.setItem("campus_mess_weekly_menu", JSON.stringify(updated));
+      return updated;
+    });
     toast.success(`Deleted ${name} slot from ${selectedDay}`);
     setEditingMeal(null);
   };
@@ -119,13 +143,22 @@ function MessMenuPage() {
       time: newMealTime,
       dishes: newMealDishes
     };
-    setWeeklyMenu((prev) => ({
-      ...prev,
-      [selectedDay]: [...(prev[selectedDay] || []), newSlot]
-    }));
+    setWeeklyMenu((prev) => {
+      const updated = {
+        ...prev,
+        [selectedDay]: [...(prev[selectedDay] || []), newSlot]
+      };
+      localStorage.setItem("campus_mess_weekly_menu", JSON.stringify(updated));
+      return updated;
+    });
     toast.success(`Added ${newMealName} slot to ${selectedDay}!`);
     setAddModal(false);
     setNewMealDishes("");
+  };
+
+  const handlePublish = () => {
+    localStorage.setItem("campus_mess_weekly_menu", JSON.stringify(weeklyMenu));
+    toast.success("Weekly meal schedule saved & published to students!");
   };
 
   return (
@@ -136,7 +169,7 @@ function MessMenuPage() {
           <p className="text-xs text-muted-foreground">Manage and publish weekly dining menus, meal slots, and timings for all 7 days</p>
         </div>
         <button
-          onClick={() => toast.success("Weekly meal schedule saved & published to students!")}
+          onClick={handlePublish}
           className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors shadow-sm"
         >
           <Save className="h-4 w-4" /> Save & Publish Schedule

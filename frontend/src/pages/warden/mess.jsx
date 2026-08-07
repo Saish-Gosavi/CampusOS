@@ -220,81 +220,117 @@ function WardenMessManagement() {
                   <p className="text-xs text-muted-foreground">Hostel dining schedule for Breakfast, Lunch, Snacks, and Dinner</p>
                 </div>
                 <div className="flex items-center gap-1.5 overflow-x-auto">
-                  {weeklyMenu.map((m) => (
+                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
                     <button
-                      key={m.day}
-                      onClick={() => setSelectedDay(m.day)}
+                      key={day}
+                      onClick={() => setSelectedDay(day)}
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                        selectedDay === m.day
+                        selectedDay === day
                           ? "bg-purple-600 text-white font-semibold"
                           : "bg-card border border-border text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      {m.day}
+                      {day}
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Day Detailed Card */}
-              {weeklyMenu.filter(m => m.day === selectedDay).map((m) => (
-                <div key={m.day} className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary font-bold text-sm">
-                        {m.day.slice(0, 3)}
-                      </span>
-                      <h4 className="text-lg font-bold text-foreground">{m.day} Meal Plan</h4>
+              {(() => {
+                const savedMenuStr = typeof window !== "undefined" ? localStorage.getItem("campus_mess_weekly_menu") : null;
+                const savedMenu = savedMenuStr ? JSON.parse(savedMenuStr) : null;
+                const currentDaySlots = savedMenu ? (savedMenu[selectedDay] || []) : null;
+
+                if (currentDaySlots) {
+                  return (
+                    <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+                      <div className="flex items-center justify-between border-b border-border pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary font-bold text-sm">
+                            {selectedDay.slice(0, 3)}
+                          </span>
+                          <h4 className="text-lg font-bold text-foreground">{selectedDay} Meal Plan</h4>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {currentDaySlots.map((m) => (
+                          <div key={m.id} className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors space-y-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                {m.time}
+                              </span>
+                            </div>
+                            <h5 className="text-sm font-semibold text-foreground">{m.name}</h5>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{m.dishes}</p>
+                          </div>
+                        ))}
+                        {currentDaySlots.length === 0 && (
+                          <div className="col-span-full py-8 text-center text-xs text-muted-foreground">
+                            No meal slots scheduled for {selectedDay}.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return weeklyMenu.filter(m => m.day === selectedDay).map((m) => (
+                  <div key={m.day} className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between border-b border-border pb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary/10 text-primary font-bold text-sm">
+                          {m.day.slice(0, 3)}
+                        </span>
+                        <h4 className="text-lg font-bold text-foreground">{m.day} Meal Plan</h4>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
+                            07:30 AM - 09:30 AM
+                          </span>
+                        </div>
+                        <h5 className="text-sm font-semibold text-foreground mb-1">Breakfast</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{m.breakfast}</p>
+                      </div>
+
+                      <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
+                            12:30 PM - 02:30 PM
+                          </span>
+                        </div>
+                        <h5 className="text-sm font-semibold text-foreground mb-1">Lunch</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{m.lunch}</p>
+                      </div>
+
+                      <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
+                            05:00 PM - 06:00 PM
+                          </span>
+                        </div>
+                        <h5 className="text-sm font-semibold text-foreground mb-1">Evening Snacks</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{m.snacks}</p>
+                      </div>
+
+                      <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
+                            07:30 PM - 09:30 PM
+                          </span>
+                        </div>
+                        <h5 className="text-sm font-semibold text-foreground mb-1">Dinner</h5>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{m.dinner}</p>
+                      </div>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* Breakfast */}
-                    <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-amber-600 bg-amber-50 px-2 py-0.5 rounded">
-                          07:30 AM - 09:30 AM
-                        </span>
-                      </div>
-                      <h5 className="text-sm font-semibold text-foreground mb-1">Breakfast</h5>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{m.breakfast}</p>
-                    </div>
-
-                    {/* Lunch */}
-                    <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
-                          12:30 PM - 02:30 PM
-                        </span>
-                      </div>
-                      <h5 className="text-sm font-semibold text-foreground mb-1">Lunch</h5>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{m.lunch}</p>
-                    </div>
-
-                    {/* Evening Snacks */}
-                    <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
-                          05:00 PM - 06:00 PM
-                        </span>
-                      </div>
-                      <h5 className="text-sm font-semibold text-foreground mb-1">Evening Snacks</h5>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{m.snacks}</p>
-                    </div>
-
-                    {/* Dinner */}
-                    <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                          07:30 PM - 09:30 PM
-                        </span>
-                      </div>
-                      <h5 className="text-sm font-semibold text-foreground mb-1">Dinner</h5>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{m.dinner}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           )}
 
