@@ -44,6 +44,7 @@ model User {
   studentProfile    Student?
   wardenProfile     Warden?
   securityProfile   SecurityStaff?
+  staffProfile      Staff?
   
   // Audits & Utilities
   notifications     Notification[]
@@ -56,6 +57,7 @@ model User {
   allotmentTemplates AllotmentTemplate[]
   generatedReports  GeneratedReport[]
   roomInspections   RoomInspection[]
+  reviewedRoomChanges RoomChangeRequest[]
 
   @@index([roleId])
   @@index([hostelId])
@@ -133,9 +135,11 @@ model Room {
   floor     Floor       @relation(fields: [floorId], references: [id], onDelete: Cascade)
   capacity  Int
   rent      Decimal     @db.Decimal(10, 2)
-  beds        Bed[]
-  furniture   Furniture[]
-  inspections RoomInspection[]
+  beds                  Bed[]
+  furniture             Furniture[]
+  inspections           RoomInspection[]
+  currentRoomRequests   RoomChangeRequest[] @relation("CurrentRoom")
+  requestedRoomRequests RoomChangeRequest[] @relation("RequestedRoom")
 
   @@index([floorId])
 }
@@ -169,6 +173,7 @@ model Student {
   reservations Reservation[]
   attendance  Attendance[]
   documents   StudentDocument[]
+  roomChangeRequests RoomChangeRequest[]
 
   @@index([userId])
 }
@@ -552,8 +557,11 @@ model InOutLog {
 // Physical staff (cleaners, maintenance, etc.) — no system login
 model Staff {
   id          Int              @id @default(autoincrement())
+  userId      Int?             @unique
+  user        User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   name        String
   phone       String?
+  email       String?
   designation String           // e.g., "Cleaning", "Maintenance", "Cook", "Guard"
   hostelId    Int
   hostel      Hostel           @relation(fields: [hostelId], references: [id], onDelete: Cascade)
@@ -676,4 +684,31 @@ model RoomInspection {
   @@index([roomId])
   @@index([inspectedById])
   @@index([status])
+}
+
+// ==========================================
+// 15. Room Change Request
+// ==========================================
+
+model RoomChangeRequest {
+  id              Int      @id @default(autoincrement())
+  studentId       Int
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  currentRoomId   Int
+  currentRoom     Room     @relation("CurrentRoom", fields: [currentRoomId], references: [id])
+  requestedRoomId Int?
+  requestedRoom   Room?    @relation("RequestedRoom", fields: [requestedRoomId], references: [id])
+  reason          String   @db.Text
+  status          String   @default("Pending") // "Pending", "Approved", "Rejected"
+  remarks         String?  @db.Text
+  rejectionReason String?  @db.Text
+  reviewedById    Int?
+  reviewedBy      User?    @relation(fields: [reviewedById], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([status])
+  @@index([currentRoomId])
+  @@index([reviewedById])
 }

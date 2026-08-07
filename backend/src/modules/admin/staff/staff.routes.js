@@ -15,4 +15,9 @@ router.put("/:id", StaffController.updateStaff);
 router.delete("/:id", StaffController.deleteStaff);
 router.get("/:id/attendance", StaffController.getAttendance);
 
+// Credentials
+router.post("/:id/credentials", StaffController.createCredentials);
+router.put("/:id/password", StaffController.resetPassword);
+router.put("/:id/login-status", StaffController.updateLoginStatus);
+
 export default router;

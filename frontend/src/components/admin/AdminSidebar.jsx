@@ -36,7 +36,8 @@ function AdminSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isSeniorAdmin = user?.role?.toLowerCase() === "senioradmin";
+  const rawRole = typeof user?.role === "string" ? user.role : (user?.role?.name || "");
+  const isSeniorAdmin = rawRole.toLowerCase() === "senioradmin";
   const userRoleLabel = isSeniorAdmin ? "Senior Admin" : "Super Admin";
 
   const mainItems = isSeniorAdmin

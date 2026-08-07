@@ -17,6 +17,7 @@ import {
   DoorOpen,
 
   LogOut,
+  Settings,
   GraduationCap
 } from "lucide-react";
 import {
