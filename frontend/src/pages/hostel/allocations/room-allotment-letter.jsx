@@ -15,10 +15,14 @@ import {
   File,
   AlertCircle,
   Eye,
+  Download,
 } from "lucide-react";
 import { allotmentLetterApi, allotmentTemplateApi } from "@/services/api";
 import { toast } from "sonner";
+
+const BACKEND_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
 import { Card, CardContent } from "@/components/ui/card";
+import { DUMMY_REQUESTS } from "../../warden/allocation-letter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -197,6 +201,20 @@ function SectionUploadRow({ section, uploadedFileName, uploadedUrl, onUploaded }
   );
 }
 
+// --- DUMMY DATA FOR TESTING ---
+// Compute dummy letters dynamically from the shared dummy requests 
+// so state changes (like Rejections) sync across the frontend.
+const DUMMY_LETTERS = DUMMY_REQUESTS.filter(r => r.status === "Generated" || r.status === "Rejected").map(r => ({
+  id: "dummy-letter-" + r.id,
+  referenceNo: r.allotmentLetter?.referenceNo || "N/A",
+  issuedDate: r.allotmentLetter?.issuedDate || r.createdAt,
+  pdfPath: r.allotmentLetter?.pdfPath || null,
+  generatedBy: { name: "Warden" },
+  allocation: r.student.allocations?.[0] || {},
+  letterRequest: { status: r.status, rejectionReason: r.rejectionReason }
+}));
+// ------------------------------
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 function HostelRoomAllotmentLetterPage() {
   const [letters, setLetters] = useState([]);
@@ -220,7 +238,10 @@ function HostelRoomAllotmentLetterPage() {
       ]);
 
       if (lettersRes.status === "fulfilled" && lettersRes.value?.data) {
-        setLetters(Array.isArray(lettersRes.value.data) ? lettersRes.value.data : []);
+        const apiLetters = Array.isArray(lettersRes.value.data) ? lettersRes.value.data : [];
+        setLetters([...DUMMY_LETTERS, ...apiLetters]);
+      } else {
+        setLetters([...DUMMY_LETTERS]);
       }
       if (templateRes.status === "fulfilled" && templateRes.value?.data) {
         setActiveTemplate(templateRes.value.data);
@@ -416,81 +437,99 @@ function HostelRoomAllotmentLetterPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredLetters.map((l) => (
-            <Card
-              key={l.id}
-              className="border-border bg-card shadow-sm hover:border-primary/45 transition-colors"
-            >
-              <CardContent className="p-5 flex flex-col h-full justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
-                      {l.referenceNo}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(l.issuedDate).toLocaleDateString()}
-                    </span>
+          {filteredLetters.map((l) => {
+            const student = l.allocation?.student || l.letterRequest?.student;
+            const studentName = student?.fullName || student?.user?.name || "Assigned Student";
+            const studentId = student?.collegeId || "N/A";
+            const hostelName = l.allocation?.bed?.room?.floor?.block?.hostel?.name || l.letterRequest?.hostel?.name || "Main Campus Hostel";
+            const roomNum = l.allocation?.bed?.room?.number || "Unassigned";
+            const bedNum = l.allocation?.bed?.number || "Unassigned";
+            const startDate = l.allocation?.startDate ? new Date(l.allocation.startDate).toLocaleDateString() : null;
+            const endDate = l.allocation?.endDate ? new Date(l.allocation.endDate).toLocaleDateString() : null;
+            const wardenName = l.generatedBy?.name || l.signedBy || "Warden Office";
+            const status = l.letterRequest?.status || "Approved";
+
+            return (
+              <Card
+                key={l.id}
+                className="border-border bg-card shadow-sm hover:border-primary/45 transition-colors"
+              >
+                <CardContent className="p-5 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+                          {l.referenceNo}
+                        </span>
+                        {status === "Rejected" && (
+                          <span className="font-mono text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-full border border-rose-200" title={l.letterRequest?.rejectionReason}>
+                            Rejected
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(l.issuedDate).toLocaleDateString()}
+                      </span>
+                    </div>
+
+                    <h3 className="font-bold text-lg text-foreground mb-1">
+                      {studentName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Student ID: {studentId}
+                    </p>
+
+                    <div className="space-y-2 border-t border-border pt-4">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Building className="h-4 w-4 text-purple-500" />
+                        <span>Hostel: {hostelName}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <User className="h-4 w-4 text-blue-500" />
+                        <span>
+                          Room: {roomNum} | Bed: {bedNum}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 text-emerald-500" />
+                        <span>
+                          {startDate && endDate ? `Valid: ${startDate} – ${endDate}` : `Status: ${status}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground border-t border-dashed border-border pt-2 mt-2">
+                        <span className="text-xs text-slate-500">
+                          Issued By: <strong className="text-foreground">{wardenName}</strong>
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <h3 className="font-bold text-lg text-foreground mb-1">
-                    {l.allocation?.student?.fullName || "Assigned Student"}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mb-4">
-                    Student ID: {l.allocation?.student?.collegeId || "N/A"}
-                  </p>
-
-                  <div className="space-y-2 border-t border-border pt-4">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Building className="h-4 w-4 text-purple-500" />
-                      <span>
-                        Hostel:{" "}
-                        {l.allocation?.bed?.room?.floor?.block?.hostel?.name ||
-                          "Main Campus Hostel"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <User className="h-4 w-4 text-blue-500" />
-                      <span>
-                        Room: {l.allocation?.bed?.room?.number || "Room"} | Bed:{" "}
-                        {l.allocation?.bed?.number || "Bed"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 text-emerald-500" />
-                      <span>
-                        Valid:{" "}
-                        {new Date(l.allocation?.startDate).toLocaleDateString()} –{" "}
-                        {new Date(l.allocation?.endDate).toLocaleDateString()}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2 border-t border-border pt-4 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 gap-1.5"
+                      onClick={() => {
+                        setSelectedLetter(l);
+                        setIsPreviewOpen(true);
+                      }}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      Preview & Print
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
+                      onClick={() => handleDeleteLetter(l.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 border-t border-border pt-4 mt-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 gap-1.5"
-                    onClick={() => {
-                      setSelectedLetter(l);
-                      setIsPreviewOpen(true);
-                    }}
-                  >
-                    <Printer className="h-3.5 w-3.5" />
-                    Preview & Print
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50"
-                    onClick={() => handleDeleteLetter(l.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -617,125 +656,63 @@ function HostelRoomAllotmentLetterPage() {
 
       {/* ───────── Preview & Print Modal ───────── */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-[700px] w-full p-0 overflow-hidden">
-          <div className="p-6 overflow-y-auto max-h-[80vh]" id="allotment-print-section">
-            <div className="text-center pb-6 border-b border-gray-300">
-              <h2 className="text-2xl font-bold tracking-wide uppercase">
-                CampusOS University Portal
+        <DialogContent className="max-w-[860px] w-full p-0 overflow-hidden">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                Allocation Letter Preview
               </h2>
-              <p className="text-xs text-muted-foreground uppercase">
-                Official Hostel Room Allotment Letter
+              {selectedLetter && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Ref: {selectedLetter.referenceNo} · Issued {new Date(selectedLetter.issuedDate).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedLetter?.pdfPath && (
+                <>
+                  <a
+                    href={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
+                    download
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download PDF
+                  </a>
+                  <a
+                    href={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors"
+                  >
+                    <Printer className="h-3.5 w-3.5" /> Open & Print
+                  </a>
+                </>
+              )}
+              <button
+                onClick={() => setIsPreviewOpen(false)}
+                className="ml-1 rounded-md p-1 text-muted-foreground hover:bg-muted"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {selectedLetter?.pdfPath ? (
+            <iframe
+              src={selectedLetter.pdfPath.startsWith("http") ? selectedLetter.pdfPath : BACKEND_URL + selectedLetter.pdfPath}
+              title="Allocation Letter PDF"
+              className="w-full border-0"
+              style={{ height: "75vh" }}
+            />
+          ) : (
+            <div className="flex h-64 flex-col items-center justify-center gap-3 text-muted-foreground">
+              <FileText className="h-10 w-10 stroke-1" />
+              <p className="text-sm font-semibold">PDF not available</p>
+              <p className="text-xs">
+                The Warden has not generated the PDF for this letter yet.
               </p>
             </div>
-
-            {selectedLetter && (
-              <div className="pt-6 space-y-6">
-                <div className="flex justify-between text-sm">
-                  <div>
-                    <p className="font-bold">Reference No:</p>
-                    <p className="font-mono text-primary font-semibold">
-                      {selectedLetter.referenceNo}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold">Issued Date:</p>
-                    <p>
-                      {new Date(selectedLetter.issuedDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                  <h4 className="font-semibold border-b border-border pb-1.5">
-                    Student Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Full Name:</span>
-                      <p className="font-medium">
-                        {selectedLetter.allocation?.student?.fullName ||
-                          "Student Name"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">College ID:</span>
-                      <p className="font-medium">
-                        {selectedLetter.allocation?.student?.collegeId || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-muted/30 p-4 rounded-lg space-y-3">
-                  <h4 className="font-semibold border-b border-border pb-1.5">
-                    Allotment Details
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">Hostel:</span>
-                      <p className="font-medium">
-                        {selectedLetter.allocation?.bed?.room?.floor?.block
-                          ?.hostel?.name || "Main Campus Hostel"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Room & Bed No:</span>
-                      <p className="font-medium">
-                        Room{" "}
-                        {selectedLetter.allocation?.bed?.room?.number || "Room"}{" "}
-                        | Bed {selectedLetter.allocation?.bed?.number || "Bed"}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">
-                        Allocation Valid Till:
-                      </span>
-                      <p className="font-medium">
-                        {new Date(
-                          selectedLetter.allocation?.endDate
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {selectedLetter.terms && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm border-b border-border pb-1">
-                      Terms & Conditions
-                    </h4>
-                    <p className="text-xs text-muted-foreground whitespace-pre-line leading-relaxed">
-                      {selectedLetter.terms}
-                    </p>
-                  </div>
-                )}
-
-                <div className="pt-12 flex justify-between items-end">
-                  <div className="text-xs text-muted-foreground">
-                    <p>Signature of Student</p>
-                    <div className="w-36 border-b border-gray-400 mt-8" />
-                  </div>
-                  <div className="text-right text-xs text-muted-foreground">
-                    <p>Authorized Signatory</p>
-                    <p className="font-bold text-foreground mt-4">
-                      {selectedLetter.signedBy}
-                    </p>
-                    <div className="w-36 border-b border-gray-400 mt-2 ml-auto" />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-muted px-6 py-4 flex justify-end gap-2 border-t border-border">
-            <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
-              Close
-            </Button>
-            <Button onClick={handlePrint} className="gap-2">
-              <Printer className="h-4 w-4" />
-              Print Letter
-            </Button>
-          </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

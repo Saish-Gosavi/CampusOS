@@ -5,12 +5,13 @@ import {
   BedDouble,
   Armchair,
   CalendarDays,
-  UtensilsCrossed,
   MessageSquareWarning,
   UserRoundCheck,
   Megaphone,
   BarChart3, LogOut,
-  ShieldCheck
+  FileText,
+  ShieldCheck,
+  ArrowRightLeft
 } from "lucide-react";
 import {
   Sidebar,
@@ -29,12 +30,21 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 
 const overview = [
-  { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true }
+  { title: "Dashboard", url: "/warden", icon: LayoutDashboard, exact: true },
+  { title: "Students", url: "/warden/students", icon: Users },
+  { title: "Room Occupancy", url: "/warden/occupancy", icon: BedDouble },
+  { title: "Furniture", url: "/warden/furniture", icon: Armchair }
 ];
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
-  { title: "Mess Management", url: "/warden/mess", icon: UtensilsCrossed }
+  { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
+  { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
+  { title: "In Out Register", url: "/warden/in-out", icon: ArrowRightLeft },
+  { title: "Letter Allocation", url: "/warden/allocation-letter", icon: FileText },
+  { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
+  { title: "Reports", url: "/warden/reports", icon: BarChart3 }
 ];
+
 
 function WardenSidebar() {
   const { logout } = useAuth();
