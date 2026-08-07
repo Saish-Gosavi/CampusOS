@@ -107,4 +107,8 @@ export class DashboardService {
       }
     };
   }
+
+  static async getWardenDashboard(userId = null, hostelId = null) {
+    return DashboardRepository.getWardenStats(userId, hostelId);
+  }
 }

@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Import Custom Middlewares
-// CampusOS Backend Entry App
+// CampusOS Backend Entry App - Mess Management Module Active
 import notFoundMiddleware from "./middleware/notFound.middleware.js";
 import errorMiddleware from "./middleware/error.middleware.js";
 

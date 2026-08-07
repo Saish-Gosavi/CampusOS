@@ -78,6 +78,7 @@ import { Route as HostelNotices } from "@/pages/hostel/notices/index";
 // Warden Pages
 import { Route as WardenIndex } from "@/pages/warden/index";
 import { Route as WardenStudents } from "@/pages/warden/students";
+import { Route as WardenMess } from "@/pages/warden/mess";
 import { Route as WardenLeaves } from "@/pages/warden/leaves";
 import { Route as WardenVisitors } from "@/pages/warden/visitors";
 import { Route as WardenComplaints } from "@/pages/warden/complaints";
@@ -261,7 +262,7 @@ export default function AppRoutes() {
           </RoleRoute>
         }
       >
-        <Route index element={<HostelDashboardPage />} />
+        <Route index element={<HostelDashboard.component />} />
         <Route path="students" element={<HostelStudents.component />} />
         <Route path="rooms" element={<HostelRooms.component />} />
         <Route path="rooms/:id" element={<HostelRoomDetail.component />} />
@@ -305,13 +306,14 @@ export default function AppRoutes() {
       <Route
         path="/warden"
         element={
-          <RoleRoute allowedRoles={["superadmin", "warden"]}>
+          <RoleRoute allowedRoles={["superadmin", "senioradmin", "admin", "warden"]}>
             <DashboardLayout />
           </RoleRoute>
         }
       >
         <Route index element={<WardenIndex.component />} />
         <Route path="students" element={<WardenStudents.component />} />
+        <Route path="mess" element={<WardenMess.component />} />
         <Route path="leaves" element={<WardenLeaves.component />} />
         <Route path="visitors" element={<WardenVisitors.component />} />
         <Route path="complaints" element={<WardenComplaints.component />} />

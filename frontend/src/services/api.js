@@ -160,6 +160,9 @@ export const dashboardApi = {
   },
   async getHostelAdminStats() {
     return apiClient.get("/dashboard/hosteladmin");
+  },
+  async getWardenStats() {
+    return apiClient.get("/dashboard/warden");
   }
 };
 
@@ -264,6 +267,39 @@ export const wardenApi = {
   },
   async delete(id) {
     return apiClient.delete(`/hostel/wardens/${id}`);
+  }
+};
+
+export const messApi = {
+  async getDashboard() {
+    return apiClient.get("/hostel/mess/dashboard");
+  },
+  async getMenu() {
+    return apiClient.get("/hostel/mess/menu");
+  },
+  async updateMenu(day, mealType, menuText) {
+    return apiClient.put("/hostel/mess/menu", { day, mealType, menuText });
+  },
+  async getRebates() {
+    return apiClient.get("/hostel/mess/rebates");
+  },
+  async updateRebateStatus(id, status) {
+    return apiClient.put(`/hostel/mess/rebates/${id}/status`, { status });
+  },
+  async getAttendance() {
+    return apiClient.get("/hostel/mess/attendance");
+  },
+  async getFeedback() {
+    return apiClient.get("/hostel/mess/feedback");
+  },
+  async getInventory() {
+    return apiClient.get("/hostel/mess/inventory");
+  },
+  async updateInventory(id, quantity, status) {
+    return apiClient.put(`/hostel/mess/inventory/${id}`, { quantity, status });
+  },
+  async createInventoryItem(data) {
+    return apiClient.post("/hostel/mess/inventory", data);
   }
 };
 
@@ -474,8 +510,9 @@ export const leaveApi = {
   async create(data) {
     return apiClient.post("/hostel/leaves", data);
   },
-  async updateStatus(id, status, remarks = "") {
-    return apiClient.put(`/hostel/leaves/${id}/status`, { status, remarks });
+  async updateStatus(id, statusPayload, remarks = "") {
+    const payload = typeof statusPayload === "object" ? statusPayload : { status: statusPayload, remarks };
+    return apiClient.put(`/hostel/leaves/${id}/status`, payload);
   },
   async update(id, data) {
     return apiClient.put(`/hostel/leaves/${id}`, data);

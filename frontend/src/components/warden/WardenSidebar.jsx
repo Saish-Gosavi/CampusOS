@@ -5,6 +5,7 @@ import {
   BedDouble,
   Armchair,
   CalendarDays,
+  UtensilsCrossed,
   MessageSquareWarning,
   UserRoundCheck,
   Megaphone,
@@ -35,6 +36,7 @@ const residentsAndAssets = [
 ];
 const ops = [
   { title: "Leave Requests", url: "/warden/leaves", icon: CalendarDays },
+  { title: "Mess Management", url: "/warden/mess", icon: UtensilsCrossed },
   { title: "Complaints", url: "/warden/complaints", icon: MessageSquareWarning },
   { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
   { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
