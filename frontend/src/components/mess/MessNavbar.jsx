@@ -49,7 +49,7 @@ export function MessNavbar() {
           className="grid h-9 w-9 place-items-center rounded-lg border border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           title="Toggle theme"
         >
-          {isDark ? <Sun className="h-4 w-4 text-amber-500" /> : <Moon className="h-4 w-4" />}
+          {isDark ? <Sun className="h-4 w-4 text-yellow-400" /> : <Moon className="h-4 w-4" />}
         </button>
 
         <Separator orientation="vertical" className="mx-1 h-6" />
@@ -57,7 +57,7 @@ export function MessNavbar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 rounded-lg border border-border bg-background p-1.5 hover:bg-muted text-left transition-colors">
-              <div className="grid h-7 w-7 place-items-center rounded-md bg-amber-600 font-bold text-white text-xs">
+              <div className="grid h-7 w-7 place-items-center rounded-md bg-primary font-bold text-white text-xs">
                 M
               </div>
               <div className="hidden flex-col md:flex text-xs">

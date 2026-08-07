@@ -45,7 +45,7 @@ function MessMenuPage() {
         </div>
         <button
           onClick={() => toast.success("Weekly meal schedule saved & published to students!")}
-          className="flex items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors shadow-sm"
         >
           <Save className="h-4 w-4" /> Save & Publish Schedule
         </button>
@@ -59,7 +59,7 @@ function MessMenuPage() {
             onClick={() => setSelectedDay(m.day)}
             className={`rounded-xl px-4 py-2.5 text-xs font-semibold transition-all whitespace-nowrap ${
               selectedDay === m.day
-                ? "bg-amber-600 text-white shadow-sm"
+                ? "bg-primary text-white shadow-sm"
                 : "bg-card border border-border text-muted-foreground hover:bg-muted hover:text-foreground"
             }`}
           >
@@ -73,7 +73,7 @@ function MessMenuPage() {
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-6">
           <div className="flex items-center justify-between border-b border-border pb-3">
             <div className="flex items-center gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-600 text-white font-bold text-base">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white font-bold text-base">
                 {activeDaySchedule.day.slice(0, 3)}
               </span>
               <div>
@@ -85,7 +85,7 @@ function MessMenuPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Breakfast */}
-            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-amber-500 transition-colors">
+            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
                   07:30 AM - 09:30 AM
@@ -95,7 +95,7 @@ function MessMenuPage() {
                     setEditingMeal("breakfast");
                     setMealText(activeDaySchedule.breakfast);
                   }}
-                  className="rounded p-1 text-muted-foreground hover:text-amber-700 hover:bg-muted"
+                  className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
@@ -105,7 +105,7 @@ function MessMenuPage() {
             </div>
 
             {/* Lunch */}
-            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-amber-500 transition-colors">
+            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
                   12:30 PM - 02:30 PM
@@ -115,7 +115,7 @@ function MessMenuPage() {
                     setEditingMeal("lunch");
                     setMealText(activeDaySchedule.lunch);
                   }}
-                  className="rounded p-1 text-muted-foreground hover:text-amber-700 hover:bg-muted"
+                  className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
@@ -125,7 +125,7 @@ function MessMenuPage() {
             </div>
 
             {/* Evening Snacks */}
-            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-amber-500 transition-colors">
+            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
                   05:00 PM - 06:00 PM
@@ -135,7 +135,7 @@ function MessMenuPage() {
                     setEditingMeal("snacks");
                     setMealText(activeDaySchedule.snacks);
                   }}
-                  className="rounded p-1 text-muted-foreground hover:text-amber-700 hover:bg-muted"
+                  className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
@@ -145,7 +145,7 @@ function MessMenuPage() {
             </div>
 
             {/* Dinner */}
-            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-amber-500 transition-colors">
+            <div className="rounded-xl border border-border bg-background p-4 relative group hover:border-primary/50 transition-colors">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
                   07:30 PM - 09:30 PM
@@ -155,7 +155,7 @@ function MessMenuPage() {
                     setEditingMeal("dinner");
                     setMealText(activeDaySchedule.dinner);
                   }}
-                  className="rounded p-1 text-muted-foreground hover:text-amber-700 hover:bg-muted"
+                  className="rounded p-1 text-muted-foreground hover:text-primary hover:bg-muted"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
                 </button>
@@ -181,12 +181,12 @@ function MessMenuPage() {
                 value={mealText}
                 onChange={(e) => setMealText(e.target.value)}
                 rows={4}
-                className="w-full rounded-xl border border-border bg-background p-3 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-xl border border-border bg-background p-3 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <button onClick={() => setEditingMeal(null)} className="rounded-xl border border-border px-4 py-2 text-xs font-medium hover:bg-muted">Cancel</button>
-              <button onClick={handleUpdateMeal} className="rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700">Save</button>
+              <button onClick={handleUpdateMeal} className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90">Save</button>
             </div>
           </div>
         </div>

@@ -38,7 +38,7 @@ function MessProfilePage() {
         {/* Account Information */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-3 border-b border-border pb-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-600 font-bold text-white text-lg">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl bg-primary font-bold text-white text-lg">
               M
             </div>
             <div>
@@ -50,7 +50,7 @@ function MessProfilePage() {
           <div className="space-y-3 text-xs">
             <div>
               <label className="font-semibold text-muted-foreground">System Role</label>
-              <div className="mt-1 flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-amber-800 font-bold">
+              <div className="mt-1 flex items-center gap-2 rounded-xl bg-primary/10 px-3 py-2 text-primary font-bold">
                 <Shield className="h-4 w-4" /> Mess Manager (Staff)
               </div>
             </div>
@@ -66,7 +66,7 @@ function MessProfilePage() {
         {/* Change Password Form */}
         <form onSubmit={handlePasswordSubmit} className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
           <div className="flex items-center gap-2 border-b border-border pb-3">
-            <Lock className="h-4 w-4 text-amber-600" />
+            <Lock className="h-4 w-4 text-primary" />
             <h3 className="text-base font-bold text-foreground">Change Password</h3>
           </div>
 
@@ -78,7 +78,7 @@ function MessProfilePage() {
                 required
                 value={passwords.current}
                 onChange={(e) => setPasswords({ ...passwords, current: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div>
@@ -88,7 +88,7 @@ function MessProfilePage() {
                 required
                 value={passwords.newPass}
                 onChange={(e) => setPasswords({ ...passwords, newPass: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <div>
@@ -98,13 +98,13 @@ function MessProfilePage() {
                 required
                 value={passwords.confirmPass}
                 onChange={(e) => setPasswords({ ...passwords, confirmPass: e.target.value })}
-                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                className="w-full rounded-xl border border-border bg-background p-2.5 mt-1 focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
 
           <div className="pt-2">
-            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-600 py-2.5 text-xs font-semibold text-white hover:bg-amber-700 transition-colors">
+            <button type="submit" className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary py-2.5 text-xs font-semibold text-white hover:bg-primary/90 transition-colors">
               <Save className="h-4 w-4" /> Update Security Password
             </button>
           </div>
