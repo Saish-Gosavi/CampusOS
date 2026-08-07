@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   Bell,
   Search,
@@ -52,6 +52,25 @@ function useDarkMode() {
 function HostelNavbar() {
   const { isDark, toggle } = useDarkMode();
   const { logout } = useAuth();
+  const location = useLocation();
+
+  const getSearchPlaceholder = () => {
+    const path = location.pathname.toLowerCase();
+    if (path.includes("/students") || path.includes("/student")) return "Search students, ID...";
+    if (path.includes("/room")) return "Search rooms, blocks...";
+    if (path.includes("/occupancy")) return "Search occupancy...";
+    if (path.includes("/furniture")) return "Search furniture, status...";
+    if (path.includes("/leaves") || path.includes("/leave")) return "Search leave requests...";
+    if (path.includes("/complaints") || path.includes("/complaint")) return "Search complaints...";
+    if (path.includes("/visitors") || path.includes("/visitor")) return "Search visitors...";
+    if (path.includes("/notices") || path.includes("/notice")) return "Search notices...";
+    if (path.includes("/reports") || path.includes("/report")) return "Search reports...";
+    if (path.includes("/fee") || path.includes("/payment")) return "Search fees, invoices...";
+    if (path.includes("/staff")) return "Search staff, roles...";
+    if (path.includes("/block")) return "Search blocks...";
+    return "Search dashboard...";
+  };
+
   return <header className="sticky top-0 z-20 flex h-16 items-center gap-2 border-b border-border bg-card/90 px-3 backdrop-blur sm:px-6">
       <SidebarTrigger className="text-muted-foreground" />
       <Separator orientation="vertical" className="mx-1 h-6" />
@@ -59,7 +78,7 @@ function HostelNavbar() {
       <div className="relative hidden max-w-md flex-1 md:block">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-    placeholder="Search students, rooms, complaints..."
+    placeholder={getSearchPlaceholder()}
     className="h-10 rounded-lg border-border bg-muted/40 pl-9 focus-visible:ring-primary"
   />
       </div>

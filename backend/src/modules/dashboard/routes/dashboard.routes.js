@@ -8,7 +8,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get("/superadmin", authorize("superadmin", "senioradmin"), DashboardController.getSuperAdminStats);
-router.get("/hosteladmin", authorize("superadmin", "senioradmin", "admin"), DashboardController.getHostelAdminStats);
+router.get("/hosteladmin", authorize("superadmin", "senioradmin", "admin", "warden"), DashboardController.getHostelAdminStats);
 router.get("/warden", authorize("superadmin", "senioradmin", "admin", "warden"), DashboardController.getWardenStats);
 
 export default router;

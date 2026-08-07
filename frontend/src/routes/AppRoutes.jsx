@@ -91,6 +91,7 @@ import { Route as WardenReports } from "@/pages/warden/reports";
 import { Route as WardenSettings } from "@/pages/warden/settings";
 import { Route as WardenRoomChange } from "@/pages/warden/room-change";
 import { Route as WardenStaff } from "@/pages/warden/staff";
+import { Route as WardenLetters } from "@/pages/warden/letters";
 
 // Student Pages
 import { Route as StudentIndex } from "@/pages/student/index";
@@ -112,6 +113,7 @@ import { Route as StudentLibraryNotices } from "@/pages/student/library-notices"
 import { Route as StudentNotifications } from "@/pages/student/notifications";
 import { Route as StudentReserve } from "@/pages/student/reserve";
 import { Route as StudentRoomChange } from "@/pages/student/room-change";
+import { Route as StudentLetters } from "@/pages/student/letters";
 
 // Security Pages
 import { Route as SecurityIndex } from "@/pages/security/index";
@@ -330,6 +332,7 @@ export default function AppRoutes() {
         <Route path="settings" element={<WardenSettings.component />} />
         <Route path="room-change" element={<WardenRoomChange.component />} />
         <Route path="staff" element={<WardenStaff.component />} />
+        <Route path="letters" element={<WardenLetters.component />} />
       </Route>
 
       {/* Student Dashboard Routes */}
@@ -360,6 +363,7 @@ export default function AppRoutes() {
         <Route path="notifications" element={<StudentNotifications.component />} />
         <Route path="reserve" element={<StudentReserve.component />} />
         <Route path="room-change" element={<StudentRoomChange.component />} />
+        <Route path="letters" element={<StudentLetters.component />} />
       </Route>
 
       {/* Security Routes */}

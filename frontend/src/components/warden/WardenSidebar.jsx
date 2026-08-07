@@ -48,6 +48,7 @@ const ops = [
   { title: "Room Change", url: "/warden/room-change", icon: ArrowRightLeft },
   { title: "Visitors", url: "/warden/visitors", icon: UserRoundCheck },
   { title: "Notice Board", url: "/warden/notices", icon: Megaphone },
+  { title: "Reports", url: "/warden/reports", icon: BarChart3 }
 ];
 
 

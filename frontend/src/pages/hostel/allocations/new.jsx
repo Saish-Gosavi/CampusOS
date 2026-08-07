@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { createFileRoute } from "@/routes/compat";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,14 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusPill } from "@/components/hostel/StatusPill";
 import { cn } from "@/lib/utils";
-import {
-  beds,
-  blocks,
-  floors,
-  hostels,
-  rooms,
-  students
-} from "@/lib/hostel-data";
+import { hostelApi, blockApi, userApi, allocationApi } from "@/services/api";
 import { toast } from "sonner";
 const Route = createFileRoute("/hostel-admin/allocation/new")({
   component: AllocateWizardPage
@@ -47,32 +40,66 @@ function AllocateWizardPage() {
   const [floorId, setFloorId] = useState(null);
   const [roomId, setRoomId] = useState(null);
   const [bedId, setBedId] = useState(null);
+  const [students, setStudents] = useState([]);
+  const [hostels, setHostels] = useState([]);
+  const [blocksData, setBlocksData] = useState([]);
+
+  useEffect(() => {
+    userApi.getStudents().then(res => setStudents(res.data)).catch(console.error);
+    hostelApi.getAll().then(res => setHostels(res.data)).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (hostelId) {
+      blockApi.getAll(hostelId).then(res => setBlocksData(res.data)).catch(console.error);
+    }
+  }, [hostelId]);
+
   const student = students.find((s) => s.id === studentId);
   const hostel = hostels.find((h) => h.id === hostelId);
-  const block = blocks.find((b) => b.id === blockId);
-  const floor = floors.find((f) => f.id === floorId);
-  const room = rooms.find((r) => r.id === roomId);
-  const bed = beds.find((b) => b.id === bedId);
+  const block = blocksData.find((b) => b.id === blockId);
+  const floor = block?.floors?.find((f) => f.id === floorId);
+  const room = floor?.rooms?.find((r) => r.id === roomId);
+  const bed = room?.beds?.find((b) => b.id === bedId);
+
   const filteredStudents = useMemo(
     () => students.filter((s) => {
-      const hay = `${s.name} ${s.enrollment} ${s.department}`.toLowerCase();
+      const hay = `${s.fullName} ${s.collegeId} ${s.department || ''}`.toLowerCase();
       return hay.includes(q.toLowerCase());
     }),
-    [q]
+    [students, q]
   );
-  const blocksInHostel = blocks.filter((b) => b.hostelId === hostelId);
-  const floorsInBlock = floors.filter((f) => f.blockId === blockId);
-  const roomsOnFloor = rooms.filter((r) => r.floorId === floorId);
-  const bedsInRoom = beds.filter((b) => b.roomId === roomId);
+  
+  const blocksInHostel = blocksData;
+  const floorsInBlock = block?.floors || [];
+  const roomsOnFloor = floor?.rooms || [];
+  const bedsInRoom = room?.beds || [];
+
   const canNext = step === 0 && !!studentId || step === 1 && !!hostelId || step === 2 && !!blockId || step === 3 && !!floorId || step === 4 && !!roomId || step === 5 && !!bedId;
   const next = () => setStep((s) => Math.min(5, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
-  const submit = () => {
+
+  const submit = async () => {
     if (!student || !hostel || !block || !floor || !room || !bed) return;
-    toast.success(
-      `${student.name} allocated \u2192 ${hostel.name} \xB7 ${block.name} \xB7 Floor ${floor.number} \xB7 Room ${room.number} \xB7 ${bed.number}`
-    );
-    navigate("/hostel-admin/allocation");
+    try {
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setFullYear(endDate.getFullYear() + 1); // 1 year allocation
+
+      await allocationApi.create({
+        studentId: student.id,
+        bedId: bed.id,
+        startDate,
+        endDate,
+        status: "active"
+      });
+      toast.success(
+        `${student.fullName} allocated \u2192 ${hostel.name} \xB7 ${block.name} \xB7 Floor ${floor.number} \xB7 Room ${room.number} \xB7 ${bed.number}`
+      );
+      navigate("/hostel-admin/allocation");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create allocation");
+    }
   };
   const availPct = (occ, cap) => cap === 0 ? 0 : Math.round((cap - occ) / cap * 100);
   return <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_320px]">
@@ -172,9 +199,9 @@ function AllocateWizardPage() {
                         {s.photo}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-foreground">{s.name}</p>
+                        <p className="truncate text-sm font-medium text-foreground">{s.fullName}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {s.enrollment} · {s.department} · Year {s.year}
+                          {s.collegeId} {s.department ? `· ${s.department}` : ''} {s.year ? `· Year ${s.year}` : ''}
                         </p>
                       </div>
                       {selected && <Check className="h-4 w-4 text-[#7B4CED]" />}
@@ -237,8 +264,18 @@ function AllocateWizardPage() {
               {blocksInHostel.map((b) => {
     const selected = blockId === b.id;
     const disabled = b.status !== "Active";
-    const avail = b.totalRooms - b.occupiedRooms;
-    const pct = availPct(b.occupiedRooms, b.totalRooms);
+    
+    let totalRooms = 0;
+    let occRooms = 0;
+    b.floors?.forEach(f => {
+      f.rooms?.forEach(r => {
+        totalRooms++;
+        if (r.beds?.some(bed => bed.allocations?.length > 0)) occRooms++;
+      });
+    });
+    
+    const avail = totalRooms - occRooms;
+    const pct = availPct(occRooms, totalRooms);
     return <button
       key={b.id}
       type="button"
@@ -260,7 +297,7 @@ function AllocateWizardPage() {
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-foreground">{b.name}</p>
-                        <p className="text-xs text-muted-foreground">{b.floors} floors</p>
+                        <p className="text-xs text-muted-foreground">{b.floors?.length || 0} floors</p>
                       </div>
                     </div>
                     <div className="mt-3 flex justify-between text-xs">
@@ -281,7 +318,14 @@ function AllocateWizardPage() {
               {floorsInBlock.map((f) => {
     const selected = floorId === f.id;
     const disabled = f.status !== "Active";
-    const avail = f.totalRooms - f.occupiedRooms;
+    
+    let totalRooms = f.rooms?.length || 0;
+    let occRooms = 0;
+    f.rooms?.forEach(r => {
+      if (r.beds?.some(bed => bed.allocations?.length > 0)) occRooms++;
+    });
+    
+    const avail = totalRooms - occRooms;
     return <button
       key={f.id}
       type="button"
@@ -302,7 +346,7 @@ function AllocateWizardPage() {
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-foreground">Floor {f.number}</p>
-                        <p className="text-xs text-muted-foreground">{f.totalRooms} rooms</p>
+                        <p className="text-xs text-muted-foreground">{totalRooms} rooms</p>
                       </div>
                     </div>
                     <p className="mt-3 text-xs text-muted-foreground">{avail} rooms available</p>
@@ -316,8 +360,11 @@ function AllocateWizardPage() {
           {step === 4 && <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {roomsOnFloor.map((r) => {
     const selected = roomId === r.id;
-    const disabled = r.status === "Maintenance" || r.occupied >= r.beds;
-    const avail = r.beds - r.occupied;
+    const totalBeds = r.beds?.length || 0;
+    const occBeds = r.beds?.filter(b => b.allocations?.length > 0).length || 0;
+    
+    const disabled = occBeds >= totalBeds;
+    const avail = totalBeds - occBeds;
     return <button
       key={r.id}
       type="button"
@@ -336,22 +383,21 @@ function AllocateWizardPage() {
                         <p className="text-sm font-semibold text-foreground">Room {r.number}</p>
                         <p className="text-xs text-muted-foreground">{r.type} · ₹{r.rent?.toLocaleString()}/mo</p>
                       </div>
-                      <StatusPill status={r.status} />
                     </div>
                     <div className="mt-3 flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">
-                        {r.occupied}/{r.beds} occupied
+                        {occBeds}/{totalBeds} occupied
                       </span>
                       <span className={cn("font-medium", avail > 0 ? "text-[#22C55E]" : "text-[#DC2626]")}>
                         {avail} free
                       </span>
                     </div>
                     <div className="mt-2 flex gap-1">
-                      {Array.from({ length: r.beds }).map((_, i) => <span
+                      {Array.from({ length: totalBeds }).map((_, i) => <span
       key={i}
       className={cn(
         "h-2 flex-1 rounded",
-        i < r.occupied ? "bg-[#7B4CED]" : "bg-[#22C55E]/40"
+        i < occBeds ? "bg-[#7B4CED]" : "bg-[#22C55E]/40"
       )}
     />)}
                     </div>
@@ -365,7 +411,9 @@ function AllocateWizardPage() {
           {step === 5 && <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {bedsInRoom.map((b) => {
     const selected = bedId === b.id;
-    const disabled = b.status !== "Available";
+    const isAllocated = b.allocations?.length > 0;
+    const disabled = isAllocated;
+    
     return <button
       key={b.id}
       type="button"
@@ -379,16 +427,12 @@ function AllocateWizardPage() {
                     <BedDouble
       className={cn(
         "mx-auto h-8 w-8",
-        b.status === "Available" && "text-[#22C55E]",
-        b.status === "Occupied" && "text-[#7B4CED]",
-        b.status === "Reserved" && "text-[#3B82F6]",
-        b.status === "Maintenance" && "text-[#EAB308]"
+        !isAllocated ? "text-[#22C55E]" : "text-[#7B4CED]"
       )}
     />
                     <p className="mt-2 text-sm font-semibold text-foreground">{b.number}</p>
-                    <p className="text-[11px] text-muted-foreground">{b.type}</p>
                     <div className="mt-2 flex justify-center">
-                      <StatusPill status={b.status} />
+                      <StatusPill status={!isAllocated ? "Available" : "Occupied"} />
                     </div>
                   </button>;
   })}
@@ -424,7 +468,7 @@ function AllocateWizardPage() {
         <h3 className="text-sm font-semibold text-foreground">Allocation Summary</h3>
         <p className="text-xs text-muted-foreground">Review before confirming.</p>
         <ul className="mt-4 space-y-3 text-sm">
-          <SummaryRow icon={User} label="Student" value={student ? `${student.name} \xB7 ${student.enrollment}` : "\u2014"} />
+          <SummaryRow icon={User} label="Student" value={student ? `${student.fullName} \xB7 ${student.collegeId}` : "\u2014"} />
           <SummaryRow icon={Building2} label="Hostel" value={hostel?.name ?? "\u2014"} />
           <SummaryRow icon={BlocksIcon} label="Block" value={block?.name ?? "\u2014"} />
           <SummaryRow icon={Layers} label="Floor" value={floor ? `Floor ${floor.number}` : "\u2014"} />

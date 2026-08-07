@@ -23,6 +23,7 @@ import settingsRouter from "./modules/settings/routes/settings.routes.js";
 import auditRouter from "./modules/audit/audit.routes.js";
 import noticeRouter from "./modules/notice/routes/notice.routes.js";
 import reportsRouter from "./modules/reports/routes/reports.routes.js";
+import letterRoutes from "./modules/letters/routes/letters.routes.js";
 import rolesRouter from "./modules/roles/roles.routes.js";
 import staffRouter from "./modules/admin/staff/staff.routes.js";
 import complaintsRouter from "./modules/hostel/complaints/routes/complaint.routes.js";
@@ -98,6 +99,7 @@ app.use("/api/warden", wardenLetterRouter);
 app.use("/api/admin/visitor-management", visitorsRouter);
 
 app.use("/api/admin/reports", adminReportsRouter);
+app.use("/api/letters", letterRoutes);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api/settings", settingsRouter);
 app.use("/api/audit-logs", auditRouter);

@@ -129,7 +129,9 @@ apiClient.interceptors.response.use(
       }
     }
 
-    return Promise.reject(errorDetails);
+    // Augment original error to support both err.message and err.response.data.message
+    Object.assign(error, errorDetails);
+    return Promise.reject(error);
   }
 );
 
@@ -254,6 +256,25 @@ export const bedApi = {
   }
 };
 
+export const allocationApi = {
+  async getAll(params) {
+    return apiClient.get("/hostel/allocations", { params });
+  },
+  async getById(id) {
+    return apiClient.get(`/hostel/allocations/${id}`);
+  },
+  async create(data) {
+    return apiClient.post("/hostel/allocations", data);
+  },
+  async update(id, data) {
+    return apiClient.put(`/hostel/allocations/${id}`, data);
+  },
+  async delete(id) {
+    return apiClient.delete(`/hostel/allocations/${id}`);
+  }
+};
+
+
 export const wardenApi = {
   async getAll(hostelId) {
     const params = hostelId ? { hostelId } : {};
@@ -317,7 +338,11 @@ export const globalNoticeApi = {
     return apiClient.delete(`/super_admin/global-notice/${id}`);
   },
 };
+
 export const userApi = {
+  async getStudents() {
+    return apiClient.get("/users/students");
+  },
   async getAll(role = "") {
     const params = role ? { role } : {};
     return apiClient.get("/users", { params });
@@ -708,4 +733,24 @@ export const wardenLetterApi = {
 
 export const studentLetterApi = {
   getMyLetters: () => apiClient.get("/student/letter/my-letters"),
+};
+
+// ==========================================
+// Notices API
+// ==========================================
+export const noticeApi = {
+  getNotices: () => apiClient.get("/notices"),
+  createNotice: (data) => apiClient.post("/notices", data),
+  updateNotice: (id, data) => apiClient.put(`/notices/${id}`, data),
+  deleteNotice: (id) => apiClient.delete(`/notices/${id}`),
+};
+
+// ==========================================
+// Letter API
+// ==========================================
+export const letterApi = {
+  getStudentRequests: () => apiClient.get("/letters/student"),
+  getHostelRequests: () => apiClient.get("/letters/warden"),
+  requestLetter: () => apiClient.post("/letters/request"),
+  approveLetter: (id) => apiClient.put(`/letters/${id}/approve`),
 };

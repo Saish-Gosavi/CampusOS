@@ -45,7 +45,8 @@ const hostelItems = [
   { title: "Room Change", url: "/student/room-change", icon: ArrowRightLeft },
   { title: "Hostel Fees", url: "/student/fees", icon: IndianRupee },
   { title: "My Furniture", url: "/student/furniture", icon: Armchair },
-  { title: "Hostel Notices", url: "/student/hostel-notices", icon: Megaphone }
+  { title: "Hostel Notices", url: "/student/hostel-notices", icon: Megaphone },
+  { title: "Occupancy Letter", url: "/student/letters", icon: FileText }
 ];
 const libraryItems = [
   { title: "Search Books", url: "/student/books", icon: Search },

@@ -156,7 +156,9 @@ export class DashboardRepository {
       leaves,
       recentLeaves,
       recentAuditLogs,
-      recentStudents
+      recentStudents,
+      recentVisitors,
+      furnitureStats
     ] = await Promise.all([
       prisma.student.count().catch(() => 0),
       prisma.room.count().catch(() => 0),
@@ -213,6 +215,14 @@ export class DashboardRepository {
           }
         }
       }).catch(() => []),
+      prisma.visitor.findMany({
+        where: { createdAt: { gte: new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000) } },
+        select: { createdAt: true, status: true }
+      }).catch(() => []),
+      prisma.furniture.groupBy({
+        by: ["status"],
+        _count: { id: true }
+      }).catch(() => [])
     ]);
 
     // Calculate Fees (Mocking fee total for now, or fetch from a Fee model if it exists)
@@ -226,8 +236,14 @@ export class DashboardRepository {
       pendingComplaints,
       pendingLeaves,
       visitorsToday,
-      feeCollection,
-      recentStudents
+      blocks,
+      complaintDistribution: complaints,
+      leaveDistribution: leaves,
+      recentLeaves,
+      recentAuditLogs,
+      recentStudents,
+      recentVisitors,
+      furnitureStats
     };
   }
 
