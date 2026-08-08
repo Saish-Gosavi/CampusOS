@@ -3,6 +3,7 @@ import { createFileRoute } from "@/routes/compat";
 import {
   UtensilsCrossed,
   Calendar,
+  Users,
   CheckCircle2,
   XCircle,
   Star,
