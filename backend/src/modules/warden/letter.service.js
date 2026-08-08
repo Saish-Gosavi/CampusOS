@@ -282,11 +282,7 @@ export class WardenLetterService {
    * Approve a letter request.
    */
   static async approveRequest(requestId, user, reqMeta = {}) {
-    // --- Mock Data Handling for Frontend Testing ---
-    if (String(requestId).startsWith("dummy-")) {
-      return { id: requestId, status: "Approved" };
-    }
-    // -----------------------------------------------
+
     const id = Number(requestId);
     const existing = await prisma.letterRequest.findUnique({
       where: { id },
@@ -328,14 +324,7 @@ export class WardenLetterService {
    * Reject a letter request with reason.
    */
   static async rejectRequest(requestId, user, rejectionReason, reqMeta = {}) {
-    // --- Mock Data Handling for Frontend Testing ---
-    if (String(requestId).startsWith("dummy-")) {
-      if (!rejectionReason || !rejectionReason.trim()) {
-        throw new AppError("Rejection reason is required", 400);
-      }
-      return { id: requestId, status: "Rejected", rejectionReason };
-    }
-    // -----------------------------------------------
+
     const id = Number(requestId);
     const existing = await prisma.letterRequest.findUnique({
       where: { id },
@@ -380,25 +369,7 @@ export class WardenLetterService {
    * Generate Allotment Letter for an approved request.
    */
   static async generateLetter(requestId, user, reqMeta = {}) {
-    // --- Mock Data Handling for Frontend Testing ---
-    if (String(requestId).startsWith("dummy-")) {
-      const referenceNo = `MOCK-AL-${new Date().getFullYear()}-001`;
-      const signedByName = user?.name || "Warden Office";
-      
-      const mockReq = {
-        student: {
-          fullName: "Test Student (Dummy)",
-          user: { email: "test@campusos.com", name: "Test Student (Dummy)" },
-          collegeId: "STU-TEST-001",
-          allocations: [{ bed: { number: "T1", room: { number: "T-100", floor: { number: 1, block: { name: "Test Block", hostel: { name: "Main Campus Hostel" } } } } } }]
-        },
-        hostel: { name: "Main Campus Hostel" }
-      };
-      
-      const pdfPath = await this.generateLetterFile(mockReq, referenceNo, signedByName);
-      return { pdfPath, referenceNo };
-    }
-    // -----------------------------------------------
+
 
     const id = Number(requestId);
     const letterReq = await prisma.letterRequest.findUnique({

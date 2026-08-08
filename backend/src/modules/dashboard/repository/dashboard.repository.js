@@ -225,8 +225,7 @@ export class DashboardRepository {
       }).catch(() => [])
     ]);
 
-    // Calculate Fees (Mocking fee total for now, or fetch from a Fee model if it exists)
-    const feeCollection = 1980000; // Mock 19.8L as requested in design
+    const feeCollection = 0; // Removed mock data
 
     return {
       studentsCount,

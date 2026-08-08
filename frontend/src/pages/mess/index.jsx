@@ -24,18 +24,18 @@ const Route = {
 function MessDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    enrolledStudents: 142,
-    mealsServedToday: 420,
-    offDaysToday: 2,
-    avgRating: 4.5
+    enrolledStudents: 0,
+    mealsServedToday: 0,
+    offDaysToday: 0,
+    avgRating: 0
   });
 
   const [todaysMenu, setTodaysMenu] = useState({
     day: "Today",
-    breakfast: "Idli, Sambar, Coconut Chutney, Tea / Coffee",
-    lunch: "Paneer Butter Masala, Dal Tadka, Steamed Rice, Chapati, Salad",
-    snacks: "Veg Samosa, Mint Chutney, Tea",
-    dinner: "Veg Biryani, Boondi Raita, Gulab Jamun"
+    breakfast: "",
+    lunch: "",
+    snacks: "",
+    dinner: ""
   });
 
 
