@@ -3,7 +3,6 @@ import { createFileRoute } from "@/routes/compat";
 import {
   UtensilsCrossed,
   Calendar,
-  Users,
   CheckCircle2,
   XCircle,
   Star,
@@ -16,7 +15,6 @@ import {
   TrendingUp,
   Clock,
   Check,
-  Search,
   Filter
 } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
@@ -31,7 +29,7 @@ const Route = createFileRoute("/warden/mess")({
 function WardenMessManagement() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState("menu"); // "menu", "rebates", "attendance", "feedback", "inventory"
+  const [activeTab, setActiveTab] = useState("menu"); // "menu", "rebates", "feedback", "inventory"
 
   // Modals state
   const [editMenuModal, setEditMenuModal] = useState(null); // { day, mealType, text }
@@ -39,8 +37,7 @@ function WardenMessManagement() {
   const [inventoryForm, setInventoryForm] = useState({ name: "", category: "Grains", quantity: "", unit: "kg", minThreshold: "10" });
   const [submitting, setSubmitting] = useState(false);
 
-  // Search & Filter state
-  const [searchQuery, setSearchQuery] = useState("");
+
   const [selectedDay, setSelectedDay] = useState("Monday");
 
   const fetchData = async () => {
@@ -137,16 +134,11 @@ function WardenMessManagement() {
 
   const weeklyMenu = data?.menu || [];
   const rebates = data?.rebates || [];
-  const attendance = data?.attendance || [];
+
   const feedback = data?.feedback || [];
   const inventory = data?.inventory || [];
 
-  const filteredAttendance = attendance.filter(a =>
-    a.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.rollNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.room.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.mealType.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+
 
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-6 p-2 sm:p-4">
@@ -182,7 +174,7 @@ function WardenMessManagement() {
             {[
               { id: "menu", label: "Weekly Meal Menu", icon: Calendar, badge: null },
               { id: "rebates", label: "Mess Off-Day Notifications", icon: Clock, badge: `${rebates.length} Not Coming` },
-              { id: "attendance", label: "Meal Attendance Logs", icon: Users, badge: null },
+
               { id: "feedback", label: "Food Quality & Ratings", icon: Star, badge: null }
             ].map((tab) => {
               const Icon = tab.icon;
@@ -390,58 +382,7 @@ function WardenMessManagement() {
             </div>
           )}
 
-          {/* Tab 3: Meal Attendance Logs */}
-          {activeTab === "attendance" && (
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border pb-3">
-                <div>
-                  <h3 className="text-base font-semibold text-foreground">Live Meal Attendance Logs</h3>
-                  <p className="text-xs text-muted-foreground">Real-time entry scans of residents at mess counters</p>
-                </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search student, room or meal..."
-                    className="w-full rounded-lg border border-border bg-background py-1.5 pl-8 pr-3 text-xs outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border bg-muted/50 text-muted-foreground">
-                    <tr>
-                      <th className="p-3 font-semibold">Student Name</th>
-                      <th className="p-3 font-semibold">Roll No</th>
-                      <th className="p-3 font-semibold">Room</th>
-                      <th className="p-3 font-semibold">Meal Type</th>
-                      <th className="p-3 font-semibold">Scan Timestamp</th>
-                      <th className="p-3 font-semibold">Verification</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {filteredAttendance.map((a) => (
-                      <tr key={a.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="p-3 font-medium text-foreground">{a.studentName}</td>
-                        <td className="p-3 text-muted-foreground">{a.rollNo}</td>
-                        <td className="p-3 text-muted-foreground">{a.room}</td>
-                        <td className="p-3">
-                          <span className="rounded bg-primary/10 px-2 py-0.5 font-medium text-primary">
-                            {a.mealType}
-                          </span>
-                        </td>
-                        <td className="p-3 text-muted-foreground">{a.scanTime}</td>
-                        <td className="p-3"><StatusPill status={a.status} /></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
 
           {/* Tab 4: Food Quality & Ratings */}
           {activeTab === "feedback" && (
