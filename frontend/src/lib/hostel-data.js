@@ -34,7 +34,6 @@ const complaints = [
     hostel: "Boys Hostel 1",
     contact: "+91 98765 43210",
     createdAt: "2026-08-04 09:30",
-    assigned: null,
     resolution: null,
     updates: [
       { at: "2026-08-04 09:30", by: "Rohan Sharma", note: "Complaint registered." }
@@ -54,11 +53,10 @@ const complaints = [
     hostel: "Boys Hostel 1",
     contact: "+91 98123 45678",
     createdAt: "2026-08-03 14:15",
-    assigned: "Ramesh Kumar",
     resolution: null,
     updates: [
       { at: "2026-08-03 14:15", by: "Aarav Patel", note: "Complaint registered." },
-      { at: "2026-08-03 16:00", by: "Hostel Admin", note: "Assigned to Ramesh Kumar (Electrician)." }
+      { at: "2026-08-03 16:00", by: "Hostel Admin", note: "Marked as In Progress." }
     ]
   },
   {
@@ -68,18 +66,17 @@ const complaints = [
     description: "3rd floor Wi-Fi access point in Block C drops internet connection every 10-15 minutes.",
     category: "Internet",
     priority: "Medium",
-    status: "In Progress",
+    status: "Approved",
     raisedBy: "Priya Verma",
     enrollment: "EN20249210",
     room: "Room 308 (Block C)",
     hostel: "Girls Hostel 1",
     contact: "+91 97654 32109",
     createdAt: "2026-08-03 11:20",
-    assigned: "Suresh Patil",
     resolution: null,
     updates: [
       { at: "2026-08-03 11:20", by: "Priya Verma", note: "Complaint registered." },
-      { at: "2026-08-03 13:00", by: "Hostel Admin", note: "Assigned to Suresh Patil (IT Tech)." }
+      { at: "2026-08-03 13:00", by: "Hostel Admin", note: "Complaint approved." }
     ]
   },
   {
@@ -89,17 +86,18 @@ const complaints = [
     description: "Right front leg of study table bed #2 in Room 105 is cracked and unstable.",
     category: "Furniture",
     priority: "Low",
-    status: "Open",
+    status: "Rejected",
     raisedBy: "Vikram Malhotra",
     enrollment: "EN20246543",
     room: "Room 105 (Block A)",
     hostel: "Boys Hostel 1",
     contact: "+91 99887 76655",
     createdAt: "2026-08-05 08:45",
-    assigned: null,
     resolution: null,
+    rejectionReason: "Student broke the table due to negligence. Fine needs to be paid first.",
     updates: [
-      { at: "2026-08-05 08:45", by: "Vikram Malhotra", note: "Complaint registered." }
+      { at: "2026-08-05 08:45", by: "Vikram Malhotra", note: "Complaint registered." },
+      { at: "2026-08-05 10:00", by: "Hostel Admin", note: "Rejected - Student broke the table due to negligence." }
     ]
   },
   {
@@ -116,12 +114,11 @@ const complaints = [
     hostel: "Girls Hostel 1",
     contact: "+91 98989 89898",
     createdAt: "2026-08-02 20:30",
-    assigned: "Mahesh Shinde",
     resolution: "Inspection conducted by Mess Committee. Contractor issued warning and kitchen standards upgraded.",
     resolvedAt: "2026-08-03 18:00",
     updates: [
       { at: "2026-08-02 20:30", by: "Ananya Deshmukh", note: "Complaint registered." },
-      { at: "2026-08-03 10:00", by: "Hostel Admin", note: "Forwarded to Mess Committee." },
+      { at: "2026-08-03 10:00", by: "Hostel Admin", note: "Approved and marked in progress." },
       { at: "2026-08-03 18:00", by: "Hostel Admin", note: "Resolved — Warning issued to contractor." }
     ]
   },
@@ -139,12 +136,12 @@ const complaints = [
     hostel: "Boys Hostel 1",
     contact: "+91 91234 56789",
     createdAt: "2026-08-01 16:00",
-    assigned: "Ramesh Kumar",
     resolution: "Replaced fused bulb with 15W LED bulb.",
     resolvedAt: "2026-08-02 11:00",
     updates: [
       { at: "2026-08-01 16:00", by: "Karan Singh", note: "Complaint registered." },
-      { at: "2026-08-02 11:00", by: "Ramesh Kumar", note: "Replaced fused bulb." }
+      { at: "2026-08-02 11:00", by: "Hostel Admin", note: "Replaced fused bulb." },
+      { at: "2026-08-02 14:00", by: "Hostel Admin", note: "Closed." }
     ]
   }
 ];

@@ -55,6 +55,8 @@ export class ComplaintService {
     if (data.category !== undefined) payload.category = data.category;
     if (data.priority !== undefined) payload.priority = data.priority;
     if (data.status !== undefined) payload.status = data.status;
+    if (data.rejectionReason !== undefined) payload.rejectionReason = data.rejectionReason;
+    if (data.resolution !== undefined) payload.resolution = data.resolution;
 
     return ComplaintRepository.update(id, payload);
   }

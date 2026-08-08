@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import {
   UserCog, Plus, Search, Filter, CalendarDays,
   Pencil, Trash2, Phone, BriefcaseBusiness,
-  KeyRound, ShieldCheck, Mail, CheckCircle2
+  KeyRound, ShieldCheck, Mail, CheckCircle2, Download
 } from "lucide-react";
 import { HostelPageHeader } from "@/components/hostel/HostelPageHeader";
 import { StatusPill } from "@/components/hostel/StatusPill";
@@ -20,6 +20,8 @@ import { Label } from "@/components/ui/label";
 import { staffApi } from "@/services/api";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 export const Route = createFileRoute("/hostel-admin/staff")({
   component: StaffManagementPage,
@@ -93,7 +95,7 @@ function StaffManagementPage() {
 
   const isSystemRole = (designation) => {
     const d = designation?.toLowerCase() || "";
-    return d.includes("security") || d.includes("mess") || d.includes("librarian") || d.includes("store");
+    return d.includes("security") || d.includes("mess");
   };
 
   /* ── Modal helpers ── */
@@ -148,6 +150,51 @@ function StaffManagementPage() {
       setStaff((prev) => prev.filter((s) => s.id !== id));
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to remove.");
+    }
+  };
+
+  const downloadReport = () => {
+    try {
+      toast.info("Preparing PDF report...");
+      console.log('Generating PDF, filtered count:', filtered?.length);
+
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Staff Attendance Report", 14, 20);
+      doc.setFontSize(10);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 28);
+
+      const headers = [["Name", "Designation", "Phone", "Email", "Status"]];
+      const data = filtered.map(s => [
+        s.name || "-",
+        s.designation || "-",
+        s.phone || "-",
+        s.email || "-",
+        s.status || "-"
+      ]);
+
+      if (typeof doc.autoTable === 'function') {
+        doc.autoTable({
+          startY: 35,
+          head: headers,
+          body: data,
+          theme: 'grid',
+          headStyles: { fillColor: [123, 76, 237] },
+        });
+      } else {
+        console.warn('autoTable plugin not available, falling back to simple text');
+        let y = 35;
+        data.forEach(row => {
+          doc.text(row.join(' | '), 14, y);
+          y += 6;
+        });
+      }
+
+      doc.save(`staff_attendance_report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      toast.success("Report downloaded successfully!");
+    } catch (err) {
+      console.error('PDF download error:', err);
+      toast.error('Failed to generate PDF report.');
     }
   };
 
@@ -221,9 +268,14 @@ function StaffManagementPage() {
         tint="#7B4CED"
         breadcrumbs={[{ label: "Staff Management" }]}
         action={
-          <Button onClick={openAdd} className="bg-primary hover:bg-primary/90">
-            <Plus className="mr-1.5 h-4 w-4" /> Add Staff
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" className="bg-background" onClick={downloadReport}>
+              <Download className="mr-1.5 h-4 w-4" /> Attendance Report
+            </Button>
+            <Button onClick={openAdd} className="bg-primary hover:bg-primary/90">
+              <Plus className="mr-1.5 h-4 w-4" /> Add Staff
+            </Button>
+          </div>
         }
       />
 
@@ -420,7 +472,7 @@ function StaffManagementPage() {
                 required
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                Roles eligible for login: Security, Mess Manager, Librarian, Store Manager
+                Roles eligible for login: Security, Mess Manager
               </p>
             </div>
 

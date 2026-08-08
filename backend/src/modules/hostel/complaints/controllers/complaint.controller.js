@@ -89,5 +89,139 @@ export class ComplaintController {
       next(error);
     }
   }
+
+  static async accept(req, res, next) {
+    try {
+      const complaint = await ComplaintService.getById(req.params.id);
+      if (!complaint) {
+        return apiResponse.error(res, "Complaint not found", 404);
+      }
+      if (complaint.status !== "open") {
+        return apiResponse.error(res, `Complaint cannot be approved in status '${complaint.status}'`, 400);
+      }
+      const updated = await ComplaintService.update(req.params.id, { status: "approved" });
+      await AuditLogService.logAction({
+        userId: req.user?.id || null,
+        module: "Hostel",
+        action: "APPROVE_COMPLAINT",
+        description: `Approved complaint ID ${req.params.id}`,
+        status: "Success",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || null,
+        newData: updated,
+      });
+      return apiResponse.success(res, updated, "Complaint approved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async reject(req, res, next) {
+    try {
+      const complaint = await ComplaintService.getById(req.params.id);
+      if (!complaint) {
+        return apiResponse.error(res, "Complaint not found", 404);
+      }
+      if (complaint.status !== "open") {
+        return apiResponse.error(res, `Complaint cannot be rejected in status '${complaint.status}'`, 400);
+      }
+      const { rejectionReason } = req.body;
+      const updated = await ComplaintService.update(req.params.id, { status: "rejected", rejectionReason });
+      await AuditLogService.logAction({
+        userId: req.user?.id || null,
+        module: "Hostel",
+        action: "REJECT_COMPLAINT",
+        description: `Rejected complaint ID ${req.params.id}: ${rejectionReason}`,
+        status: "Success",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || null,
+        newData: updated,
+      });
+      return apiResponse.success(res, updated, "Complaint rejected successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async markInProgress(req, res, next) {
+    try {
+      const complaint = await ComplaintService.getById(req.params.id);
+      if (!complaint) {
+        return apiResponse.error(res, "Complaint not found", 404);
+      }
+      if (complaint.status !== "approved") {
+        return apiResponse.error(res, `Complaint cannot be moved to in-progress from status '${complaint.status}'`, 400);
+      }
+      const updated = await ComplaintService.update(req.params.id, { status: "in_progress" });
+      await AuditLogService.logAction({
+        userId: req.user?.id || null,
+        module: "Hostel",
+        action: "COMPLAINT_IN_PROGRESS",
+        description: `Marked complaint ID ${req.params.id} as in-progress`,
+        status: "Success",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || null,
+        newData: updated,
+      });
+      return apiResponse.success(res, updated, "Complaint marked as in-progress");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async resolve(req, res, next) {
+    try {
+      const complaint = await ComplaintService.getById(req.params.id);
+      if (!complaint) {
+        return apiResponse.error(res, "Complaint not found", 404);
+      }
+      if (complaint.status !== "in_progress") {
+        return apiResponse.error(res, `Complaint cannot be resolved from status '${complaint.status}'`, 400);
+      }
+      const { resolution } = req.body;
+      const updated = await ComplaintService.update(req.params.id, { status: "resolved", resolution });
+      await AuditLogService.logAction({
+        userId: req.user?.id || null,
+        module: "Hostel",
+        action: "RESOLVE_COMPLAINT",
+        description: `Resolved complaint ID ${req.params.id}: ${resolution}`,
+        status: "Success",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || null,
+        newData: updated,
+      });
+      return apiResponse.success(res, updated, "Complaint resolved successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async close(req, res, next) {
+    try {
+      const complaint = await ComplaintService.getById(req.params.id);
+      if (!complaint) {
+        return apiResponse.error(res, "Complaint not found", 404);
+      }
+      if (complaint.status !== "resolved") {
+        return apiResponse.error(res, `Complaint cannot be closed from status '${complaint.status}'`, 400);
+      }
+      const updated = await ComplaintService.update(req.params.id, { status: "closed" });
+      await AuditLogService.logAction({
+        userId: req.user?.id || null,
+        module: "Hostel",
+        action: "CLOSE_COMPLAINT",
+        description: `Closed complaint ID ${req.params.id}`,
+        status: "Success",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || null,
+        newData: updated,
+      });
+      return apiResponse.success(res, updated, "Complaint closed successfully");
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
 }
 

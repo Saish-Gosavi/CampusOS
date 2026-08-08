@@ -262,15 +262,18 @@ model LeaveRequest {
 
 
 model Complaint {
-  id          Int      @id @default(autoincrement())
-  studentId   Int
-  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  title       String
-  description String
-  category    String
-  priority    String   @default("medium") // "low", "medium", "high"
-  status      String   @default("open") // "open", "assigned", "resolved", "closed"
-  createdAt   DateTime @default(now())
+  id               Int      @id @default(autoincrement())
+  studentId        Int
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  title            String
+  description      String
+  category         String
+  priority         String   @default("medium") // "low", "medium", "high"
+  status           String   @default("open") // "open", "approved", "in_progress", "resolved", "closed", "rejected"
+  rejectionReason  String?
+  resolution       String?  @db.Text
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now()) @updatedAt
 
   @@index([studentId])
 }

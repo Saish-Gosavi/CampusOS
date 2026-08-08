@@ -33,8 +33,7 @@ import {
   DialogDescription,
   DialogFooter
 } from "@/components/ui/dialog";
-import { useComplaints, useUpdateComplaint, useCreateComplaint } from "@/services/queries/complaintHooks";
-import { staff } from "@/lib/hostel-data";
+import { useComplaints, useCreateComplaint, useApproveComplaint, useRejectComplaint, useMarkInProgress, useResolveComplaint, useCloseComplaint } from "@/services/queries/complaintHooks";
 import { toast } from "sonner";
 const Route = createFileRoute("/hostel-admin/complaints")({
   head: () => ({
@@ -45,34 +44,31 @@ const Route = createFileRoute("/hostel-admin/complaints")({
   }),
   component: ComplaintsPage
 });
-const STATUSES = ["Open", "In Progress", "Resolved", "Closed"];
+const STATUSES = ["Open", "Approved", "In Progress", "Resolved", "Closed", "Rejected"];
 const CATEGORIES = ["All", "Plumbing", "Electrical", "Cleaning", "Mess", "Internet", "Furniture", "Other"];
-const PRIORITIES = ["All", "High", "Medium", "Low"];
-const PRIORITY_TINT = {
-  High: "#EF4444",
-  Medium: "#EAB308",
-  Low: "#3B82F6"
-};
 const STATUS_TINT = {
   Open: "#EF4444",
+  Approved: "#F59E0B",
   "In Progress": "#3B82F6",
   Resolved: "#22C55E",
-  Closed: "#6B7280"
+  Closed: "#6B7280",
+  Rejected: "#EF4444"
 };
 function ComplaintsPage() {
   const { data: apiComplaints } = useComplaints();
-  const updateMutation = useUpdateComplaint();
   const createMutation = useCreateComplaint();
+  const approveMutation = useApproveComplaint();
+  const rejectMutation = useRejectComplaint();
+  const inProgressMutation = useMarkInProgress();
+  const resolveMutation = useResolveComplaint();
+  const closeMutation = useCloseComplaint();
 
   const [view, setView] = useState("kanban");
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("All");
-  const [pri, setPri] = useState("All");
   const [viewing, setViewing] = useState(null);
-  const [assigning, setAssigning] = useState(null);
-  const [resolving, setResolving] = useState(null);
-  const [assignee, setAssignee] = useState("");
   const [resolution, setResolution] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
 
   // Dynamic creation modal state
   const [isCreating, setIsCreating] = useState(false);
@@ -80,19 +76,19 @@ function ComplaintsPage() {
   const [newStudent, setNewStudent] = useState("");
   const [newRoom, setNewRoom] = useState("");
   const [newCategory, setNewCategory] = useState("Plumbing");
-  const [newPriority, setNewPriority] = useState("Medium");
   const [newDescription, setNewDescription] = useState("");
 
   const rows = useMemo(() => {
     if (apiComplaints && Array.isArray(apiComplaints)) {
       return apiComplaints.map((c) => {
-        const priorityCap = c.priority ? c.priority.charAt(0).toUpperCase() + c.priority.slice(1) : "Medium";
         const statusMap = {
           open: "Open",
+          approved: "Approved",
           "in-progress": "In Progress",
-          assigned: "In Progress",
+          in_progress: "In Progress",
           resolved: "Resolved",
           closed: "Closed",
+          rejected: "Rejected"
         };
         const statusCap = statusMap[c.status?.toLowerCase()] || (c.status ? c.status.charAt(0).toUpperCase() + c.status.slice(1) : "Open");
 
@@ -102,7 +98,6 @@ function ComplaintsPage() {
           title: c.title,
           description: c.description,
           category: c.category || "Other",
-          priority: priorityCap,
           status: statusCap,
           raisedBy: c.student?.user?.name || "Student",
           enrollment: c.student?.enrollmentNo || "N/A",
@@ -110,8 +105,8 @@ function ComplaintsPage() {
           hostel: c.student?.allocations?.[0]?.bed?.room?.floor?.block?.hostel?.name || "Hostel",
           contact: c.student?.user?.phone || "N/A",
           createdAt: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
-          assigned: c.assignedTo?.user?.name || c.assigned || null,
           resolution: c.resolution || null,
+          rejectionReason: c.rejectionReason || null,
           updates: c.updates || [
             {
               at: c.createdAt ? new Date(c.createdAt).toISOString().slice(0, 16).replace("T", " ") : new Date().toISOString().slice(0, 16).replace("T", " "),
@@ -128,7 +123,6 @@ function ComplaintsPage() {
   const filtered = useMemo(() => {
     return rows.filter((c) => {
       if (cat !== "All" && c.category !== cat) return false;
-      if (pri !== "All" && c.priority !== pri) return false;
       if (q) {
         const s = q.toLowerCase();
         if (
@@ -141,15 +135,14 @@ function ComplaintsPage() {
       }
       return true;
     });
-  }, [rows, q, cat, pri]);
+  }, [rows, q, cat]);
 
   const counts = useMemo(
     () => ({
       total: rows.length,
       open: rows.filter((r) => r.status === "Open").length,
-      progress: rows.filter((r) => r.status === "In Progress").length,
-      resolved: rows.filter((r) => r.status === "Resolved" || r.status === "Closed").length,
-      high: rows.filter((r) => r.priority === "High" && r.status !== "Resolved" && r.status !== "Closed").length
+      progress: rows.filter((r) => r.status === "Approved" || r.status === "In Progress").length,
+      resolved: rows.filter((r) => r.status === "Resolved" || r.status === "Closed").length
     }),
     [rows]
   );
@@ -158,113 +151,51 @@ function ComplaintsPage() {
     { label: "Total Complaints", value: counts.total, icon: MessageSquareWarning, tint: "#EF4444" },
     { label: "Open", value: counts.open, icon: AlertTriangle, tint: "#EF4444" },
     { label: "In Progress", value: counts.progress, icon: Clock, tint: "#3B82F6" },
-    { label: "Resolved", value: counts.resolved, icon: CheckCircle2, tint: "#22C55E" },
-    { label: "High Priority Open", value: counts.high, icon: AlertTriangle, tint: "#F97316" }
+    { label: "Resolved", value: counts.resolved, icon: CheckCircle2, tint: "#22C55E" }
   ];
 
   const nowStamp = () => new Date().toISOString().slice(0, 16).replace("T", " ");
 
-  const openAssign = (c) => {
-    setAssigning(c);
-    setAssignee(c.assigned ?? "");
+  const submitApprove = async (c) => {
+    try {
+      if (typeof c.id === "number") await approveMutation.mutateAsync(c.id);
+      toast.success(`${c.code} approved`);
+      setViewing(null);
+    } catch (e) { toast.error("Failed to approve"); }
   };
 
-  const submitAssign = () => {
-    if (!assigning || !assignee) return;
-    const newStatus = assigning.status === "Open" ? "In Progress" : assigning.status;
-
-    if (typeof assigning.id === "number") {
-      updateMutation.mutate({
-        id: assigning.id,
-        assigned: assignee,
-        status: newStatus.toLowerCase(),
-      });
-    }
-
-    setSeedRows((prev) =>
-      prev.map((r) =>
-        r.id === assigning.id
-          ? {
-              ...r,
-              assigned: assignee,
-              status: newStatus,
-              updatedAt: nowStamp(),
-              updates: [
-                ...r.updates,
-                { at: nowStamp(), by: "Hostel Admin", note: `Assigned to ${assignee}.` },
-              ],
-            }
-          : r
-      )
-    );
-    toast.success(`${assigning.code} assigned to ${assignee}`);
-    setAssigning(null);
-    setAssignee("");
+  const submitReject = async (c) => {
+    if (!rejectionReason.trim()) { toast.error("Rejection reason is required"); return; }
+    try {
+      if (typeof c.id === "number") await rejectMutation.mutateAsync({ id: c.id, rejectionReason });
+      toast.success(`${c.code} rejected`);
+      setViewing(null);
+    } catch (e) { toast.error("Failed to reject"); }
   };
 
-  const changeStatus = (c, status) => {
-    if (typeof c.id === "number") {
-      updateMutation.mutate({
-        id: c.id,
-        status: status.toLowerCase(),
-      });
-    }
-
-    setSeedRows((prev) =>
-      prev.map((r) =>
-        r.id === c.id
-          ? {
-              ...r,
-              status,
-              updatedAt: nowStamp(),
-              updates: [
-                ...r.updates,
-                { at: nowStamp(), by: "Hostel Admin", note: `Status changed to ${status}.` },
-              ],
-            }
-          : r
-      )
-    );
-    toast.success(`${c.code} → ${status}`);
+  const submitInProgress = async (c) => {
+    try {
+      if (typeof c.id === "number") await inProgressMutation.mutateAsync(c.id);
+      toast.success(`${c.code} is now in progress`);
+      setViewing(null);
+    } catch (e) { toast.error("Failed to mark in progress"); }
   };
 
-  const openResolve = (c) => {
-    setResolving(c);
-    setResolution("");
+  const submitResolve = async (c) => {
+    if (!resolution.trim()) { toast.error("Resolution note is required"); return; }
+    try {
+      if (typeof c.id === "number") await resolveMutation.mutateAsync({ id: c.id, resolution });
+      toast.success(`${c.code} marked as resolved`);
+      setViewing(null);
+    } catch (e) { toast.error("Failed to resolve"); }
   };
 
-  const submitResolve = () => {
-    if (!resolving || !resolution.trim()) return;
-    const stamp = nowStamp();
-
-    if (typeof resolving.id === "number") {
-      updateMutation.mutate({
-        id: resolving.id,
-        status: "resolved",
-        resolution: resolution.trim(),
-      });
-    }
-
-    setSeedRows((prev) =>
-      prev.map((r) =>
-        r.id === resolving.id
-          ? {
-              ...r,
-              status: "Resolved",
-              resolvedAt: stamp,
-              resolution: resolution.trim(),
-              updatedAt: stamp,
-              updates: [
-                ...r.updates,
-                { at: stamp, by: "Hostel Admin", note: `Resolved — ${resolution.trim()}` },
-              ],
-            }
-          : r
-      )
-    );
-    toast.success(`${resolving.code} marked as resolved`);
-    setResolving(null);
-    setResolution("");
+  const submitClose = async (c) => {
+    try {
+      if (typeof c.id === "number") await closeMutation.mutateAsync(c.id);
+      toast.success(`${c.code} closed`);
+      setViewing(null);
+    } catch (e) { toast.error("Failed to close"); }
   };
 
   const submitCreate = async () => {
@@ -283,7 +214,6 @@ function ComplaintsPage() {
       title: newTitle.trim(),
       description: newDescription.trim(),
       category: newCategory,
-      priority: newPriority,
       status: "Open",
       raisedBy: newStudent.trim() || "Student",
       enrollment: "EN2026" + Math.floor(1000 + Math.random() * 9000),
@@ -291,8 +221,8 @@ function ComplaintsPage() {
       hostel: "Hostel 1",
       contact: "+91 98765 43210",
       createdAt: stamp,
-      assigned: null,
       resolution: null,
+      rejectionReason: null,
       updates: [{ at: stamp, by: newStudent.trim() || "Student", note: "Complaint submitted." }],
     };
 
@@ -301,13 +231,10 @@ function ComplaintsPage() {
         title: newTitle.trim(),
         description: newDescription.trim(),
         category: newCategory,
-        priority: newPriority.toLowerCase(),
       });
     } catch (e) {
-      // Local state fallback
+      // API call failed, toast handled by mutation
     }
-
-    setSeedRows((prev) => [newObj, ...prev]);
     toast.success(`${newCode} raised successfully!`);
 
     setIsCreating(false);
@@ -316,7 +243,6 @@ function ComplaintsPage() {
     setNewStudent("");
     setNewRoom("");
     setNewCategory("Plumbing");
-    setNewPriority("Medium");
   };
 
   return (
@@ -352,7 +278,7 @@ function ComplaintsPage() {
       {
     /* Dashboard stats */
   }
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => <div key={s.label} className="rounded-xl border border-border bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
@@ -392,15 +318,6 @@ function ComplaintsPage() {
               </option>)}
           </select>
         </div>
-        <select
-    value={pri}
-    onChange={(e) => setPri(e.target.value)}
-    className="h-9 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-  >
-          {PRIORITIES.map((p) => <option key={p} value={p}>
-              {p === "All" ? "All Priorities" : `${p} Priority`}
-            </option>)}
-        </select>
         <span className="ml-auto text-xs text-muted-foreground">
           Showing {filtered.length} of {rows.length}
         </span>
@@ -432,15 +349,6 @@ function ComplaintsPage() {
       className="rounded-lg border border-border bg-background p-3 shadow-sm transition-shadow hover:shadow-md"
     >
                       <div className="flex items-center justify-between">
-                        <span
-      className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase"
-      style={{
-        backgroundColor: `${PRIORITY_TINT[c.priority]}1A`,
-        color: PRIORITY_TINT[c.priority]
-      }}
-    >
-                          {c.priority}
-                        </span>
                         <span className="text-[11px] font-mono text-muted-foreground">{c.code}</span>
                       </div>
                       <p className="mt-2 line-clamp-2 text-sm font-semibold text-foreground">{c.title}</p>
@@ -460,9 +368,7 @@ function ComplaintsPage() {
 
                       <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
                         <span className="truncate">
-                          {c.assigned ? <span className="inline-flex items-center gap-1">
-                              <UserCog className="h-3 w-3" /> {c.assigned}
-                            </span> : <span className="italic">Unassigned</span>}
+                          <StatusPill status={c.status} />
                         </span>
                         <span>{c.createdAt.slice(5, 10)}</span>
                       </div>
@@ -492,11 +398,9 @@ function ComplaintsPage() {
                 <th className="w-[23%] px-3.5 py-3">Complaint</th>
                 <th className="w-[18%] px-3.5 py-3">Student</th>
                 <th className="w-[10%] px-3.5 py-3">Category</th>
-                <th className="w-[10%] px-3.5 py-3">Priority</th>
                 <th className="w-[12%] px-3.5 py-3">Status</th>
                 <th className="w-[9%] px-3.5 py-3">Created</th>
-                <th className="w-[13%] px-3.5 py-3">Assigned Staff</th>
-                <th className="w-[15%] px-3.5 py-3 text-right pr-4">Actions</th>
+                <th className="w-[13%] px-3.5 py-3 text-right pr-4">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
@@ -520,23 +424,10 @@ function ComplaintsPage() {
                     </span>
                   </td>
                   <td className="px-3.5 py-3">
-                    <StatusPill status={c.priority} />
-                  </td>
-                  <td className="px-3.5 py-3">
                     <StatusPill status={c.status} />
                   </td>
                   <td className="px-3.5 py-3 text-[11px] text-muted-foreground font-mono">
                     {c.createdAt.slice(0, 10)}
-                  </td>
-                  <td className="px-3.5 py-3">
-                    {c.assigned ? (
-                      <span className="inline-flex items-center gap-1 truncate text-xs font-medium text-foreground">
-                        <UserCog className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                        <span className="truncate">{c.assigned}</span>
-                      </span>
-                    ) : (
-                      <span className="text-[11px] italic text-muted-foreground">Unassigned</span>
-                    )}
                   </td>
                   <td className="px-3.5 py-3 text-right pr-4">
                     <div className="inline-flex items-center justify-end">
@@ -579,7 +470,6 @@ function ComplaintsPage() {
                 <DialogDescription className="flex items-center gap-2 pt-1 flex-wrap">
                   <span className="font-mono">{viewing.code}</span> ·
                   <StatusPill status={viewing.status} />
-                  <StatusPill status={viewing.priority} />
                 </DialogDescription>
               </DialogHeader>
 
@@ -590,13 +480,19 @@ function ComplaintsPage() {
                   <InfoRow icon={Tag} label="Category" value={viewing.category} />
                   <InfoRow icon={Phone} label="Contact" value={viewing.contact} />
                   <InfoRow icon={CalendarDays} label="Created" value={viewing.createdAt} />
-                  <InfoRow icon={UserCog} label="Assigned" value={viewing.assigned ?? "Unassigned"} />
                 </div>
 
                 <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description</p>
                   <p className="mt-1.5 text-sm text-foreground leading-relaxed">{viewing.description}</p>
                 </div>
+
+                {viewing.status === "Rejected" && viewing.rejectionReason && (
+                  <div className="rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/5 p-4">
+                    <p className="text-xs font-semibold text-[#EF4444] uppercase tracking-wider">Rejection Reason</p>
+                    <p className="mt-1.5 text-sm text-foreground leading-relaxed">{viewing.rejectionReason}</p>
+                  </div>
+                )}
 
                 {viewing.resolution && (
                   <div className="rounded-xl border border-[#22C55E]/30 bg-[#22C55E]/5 p-4">
@@ -607,6 +503,21 @@ function ComplaintsPage() {
                     )}
                   </div>
                 )}
+
+                <div className="space-y-3">
+                  {viewing.status === "Open" && (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">Rejection Reason (Optional if Approving)</label>
+                      <Textarea value={rejectionReason} onChange={(e) => setRejectionReason(e.target.value)} placeholder="Required if rejecting..." className="min-h-[80px]" />
+                    </div>
+                  )}
+                  {viewing.status === "In Progress" && (
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-muted-foreground">Resolution Note</label>
+                      <Textarea value={resolution} onChange={(e) => setResolution(e.target.value)} placeholder="How was this resolved?..." className="min-h-[80px]" />
+                    </div>
+                  )}
+                </div>
 
                 <div>
                   <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -626,98 +537,40 @@ function ComplaintsPage() {
                 </div>
               </div>
 
-              <DialogFooter className="p-6 pt-4 border-t border-border/60 flex justify-end shrink-0 bg-card">
+              <DialogFooter className="p-6 pt-4 border-t border-border/60 flex justify-end shrink-0 bg-card gap-2">
                 <Button variant="ghost" onClick={() => setViewing(null)}>
                   Close
                 </Button>
+                {viewing.status === "Open" && (
+                  <>
+                    <Button variant="outline" className="text-[#EF4444] hover:bg-[#EF4444]/10 hover:text-[#EF4444]" onClick={() => submitReject(viewing)}>
+                      Reject
+                    </Button>
+                    <Button className="bg-[#2563EB] text-white hover:bg-[#1D4ED8]" onClick={() => submitApprove(viewing)}>
+                      Approve
+                    </Button>
+                  </>
+                )}
+                {viewing.status === "Approved" && (
+                  <Button className="bg-[#F59E0B] text-white hover:bg-[#D97706]" onClick={() => submitInProgress(viewing)}>
+                    Mark In Progress
+                  </Button>
+                )}
+                {viewing.status === "In Progress" && (
+                  <Button className="bg-[#22C55E] text-white hover:bg-[#16A34A]" onClick={() => submitResolve(viewing)}>
+                    Resolve
+                  </Button>
+                )}
+                {viewing.status === "Resolved" && (
+                  <Button variant="outline" onClick={() => submitClose(viewing)}>
+                    Close Complaint
+                  </Button>
+                )}
               </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
-
-      {
-    /* Assign dialog */
-  }
-      <Dialog open={!!assigning} onOpenChange={(o) => !o && setAssigning(null)}>
-        <DialogContent>
-          {assigning && <>
-              <DialogHeader>
-                <DialogTitle>Assign staff</DialogTitle>
-                <DialogDescription>
-                  {assigning.code} · {assigning.title}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Staff member</label>
-                <select
-    value={assignee}
-    onChange={(e) => setAssignee(e.target.value)}
-    className="h-10 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground"
-  >
-                  <option value="">Select staff…</option>
-                  {staff.map((s) => <option key={s.id} value={s.name}>
-                      {s.name} — {s.role} · {s.block}
-                    </option>)}
-                </select>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setAssigning(null)}>
-                  Cancel
-                </Button>
-                <Button onClick={submitAssign} disabled={!assignee} className="bg-primary/80 hover:bg-primary">
-                  Assign
-                </Button>
-              </DialogFooter>
-            </>}
-        </DialogContent>
-      </Dialog>
-
-      {
-    /* Resolve dialog */
-  }
-      <Dialog open={!!resolving} onOpenChange={(o) => !o && setResolving(null)}>
-        <DialogContent>
-          {resolving && (
-            <>
-              <DialogHeader>
-                <DialogTitle>Resolve complaint</DialogTitle>
-                <DialogDescription>
-                  {resolving.code} · {resolving.title}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  Resolution note <span className="text-[#EF4444]">*</span>
-                </label>
-                <Textarea
-    value={resolution}
-    onChange={(e) => setResolution(e.target.value)}
-    rows={4}
-    placeholder="Describe the action taken to resolve this complaint…"
-  />
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setResolving(null)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={submitResolve}
-                  disabled={!resolution.trim()}
-                  className="bg-[#22C55E] hover:bg-[#16a34a] text-white"
-                >
-                  <Check className="mr-1.5 h-4 w-4" /> Mark Resolved
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
       {/* Create Complaint Dialog */}
       <Dialog open={isCreating} onOpenChange={setIsCreating}>
         <DialogContent className="max-w-lg">
@@ -758,21 +611,6 @@ function ComplaintsPage() {
                       {c}
                     </option>
                   ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
-                  Priority <span className="text-[#EF4444]">*</span>
-                </label>
-                <select
-                  value={newPriority}
-                  onChange={(e) => setNewPriority(e.target.value)}
-                  className="h-11 w-full rounded-xl border border-input bg-transparent px-3 text-sm text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                >
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
                 </select>
               </div>
             </div>

@@ -7,8 +7,6 @@ export const complaintSchema = z.object({
   category: z.string().min(1, "Category is required"),
   priority: z.string().optional().default("medium"),
   status: z.string().optional().default("open"),
-  assigned: z.string().nullable().optional(),
-  resolution: z.string().nullable().optional(),
 });
 
 export const updateComplaintSchema = z.object({
@@ -17,7 +15,12 @@ export const updateComplaintSchema = z.object({
   category: z.string().min(1).optional(),
   priority: z.string().optional(),
   status: z.string().optional(),
-  assigned: z.string().nullable().optional(),
-  resolution: z.string().nullable().optional(),
 });
 
+export const rejectComplaintSchema = z.object({
+  rejectionReason: z.string().min(1, "Rejection reason is required"),
+});
+
+export const resolveComplaintSchema = z.object({
+  resolution: z.string().min(1, "Resolution note is required"),
+});

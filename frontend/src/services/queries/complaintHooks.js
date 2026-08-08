@@ -71,3 +71,72 @@ export const useDeleteComplaint = () => {
   });
 };
 
+export const useApproveComplaint = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      const res = await api.put(`/admin/complaints/${id}/accept`);
+      return res?.data || res;
+    },
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.detail(id) });
+    },
+  });
+};
+
+export const useRejectComplaint = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, rejectionReason }) => {
+      const res = await api.put(`/admin/complaints/${id}/reject`, { rejectionReason });
+      return res?.data || res;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.detail(variables.id) });
+    },
+  });
+};
+
+export const useMarkInProgress = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      const res = await api.put(`/admin/complaints/${id}/in-progress`);
+      return res?.data || res;
+    },
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.detail(id) });
+    },
+  });
+};
+
+export const useResolveComplaint = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, resolution }) => {
+      const res = await api.put(`/admin/complaints/${id}/resolve`, { resolution });
+      return res?.data || res;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.detail(variables.id) });
+    },
+  });
+};
+
+export const useCloseComplaint = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id) => {
+      const res = await api.put(`/admin/complaints/${id}/close`);
+      return res?.data || res;
+    },
+    onSuccess: (data, id) => {
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.lists() });
+      queryClient.invalidateQueries({ queryKey: COMPLAINT_KEYS.detail(id) });
+    },
+  });
+};
