@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   UtensilsCrossed,
   Users,
-  Clock,
   Star,
   Calendar,
   Edit3,
@@ -39,10 +38,7 @@ function MessDashboardPage() {
     dinner: "Veg Biryani, Boondi Raita, Gulab Jamun"
   });
 
-  const [offDays, setOffDays] = useState([
-    { id: 1, studentName: "Rahul Sharma", room: "A-102", startDate: "2026-08-07", endDate: "2026-08-09", totalDays: 3, reason: "Home visit for weekend" },
-    { id: 2, studentName: "Priya Patel", room: "B-204", startDate: "2026-08-07", endDate: "2026-08-08", totalDays: 2, reason: "Family event" }
-  ]);
+
 
   const [editMealModal, setEditMealModal] = useState(null);
   const [editMenuText, setEditMenuText] = useState("");
@@ -58,7 +54,7 @@ function MessDashboardPage() {
       if (res.success && res.data) {
         if (res.data.stats) setStats(prev => ({ ...prev, ...res.data.stats }));
         if (res.data.todaysMenu) setTodaysMenu(res.data.todaysMenu);
-        if (res.data.rebates) setOffDays(res.data.rebates);
+
       }
     } catch (e) {
       console.warn("Using default mess dashboard data");
@@ -88,7 +84,7 @@ function MessDashboardPage() {
             </span>
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-white">Mess Manager Dashboard</h1>
-          <p className="text-xs text-white/80">Manage weekly meal menus, student dining off-day notifications, and meal attendance</p>
+          <p className="text-xs text-white/80">Manage weekly meal menus and meal attendance</p>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -134,20 +130,7 @@ function MessDashboardPage() {
           <p className="text-[10px] text-muted-foreground">Hostel dining subscribers</p>
         </div>
 
-        {/* Stat 3 */}
-        <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Not Coming Today</span>
-            <div className="grid h-8 w-8 place-items-center rounded-lg bg-amber-500/10 text-amber-600">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-amber-700">{offDays.length}</span>
-            <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">Off-Days</span>
-          </div>
-          <p className="text-[10px] text-muted-foreground">Students notified non-attendance</p>
-        </div>
+
 
         {/* Stat 4 */}
         <div className="rounded-xl border border-border bg-card p-4 shadow-sm space-y-2">
@@ -267,61 +250,7 @@ function MessDashboardPage() {
         </div>
       </div>
 
-      {/* Student Off-Days Table */}
-      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-border pb-3">
-          <div>
-            <h3 className="text-base font-semibold text-foreground">Students Not Coming Today</h3>
-            <p className="text-xs text-muted-foreground">Logged off-days notifications for headcount planning</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
-              Total: {offDays.length} Students
-            </span>
-            <Link to="/mess/off-days" className="text-xs font-semibold text-primary hover:underline">
-              View All Logs →
-            </Link>
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="border-b border-border bg-muted/50 text-muted-foreground">
-              <tr>
-                <th className="p-3 font-semibold">Student Name</th>
-                <th className="p-3 font-semibold">Room</th>
-                <th className="p-3 font-semibold">Off-Day Period</th>
-                <th className="p-3 font-semibold">Total Days</th>
-                <th className="p-3 font-semibold">Reason</th>
-                <th className="p-3 font-semibold text-right">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {offDays.map((r) => (
-                <tr key={r.id} className="hover:bg-muted/30">
-                  <td className="p-3 font-medium text-foreground">{r.studentName}</td>
-                  <td className="p-3 text-muted-foreground">{r.room}</td>
-                  <td className="p-3 text-muted-foreground">{r.startDate} → {r.endDate}</td>
-                  <td className="p-3 font-semibold text-foreground">{r.totalDays} Days</td>
-                  <td className="p-3 text-muted-foreground max-w-xs truncate">{r.reason}</td>
-                  <td className="p-3 text-right">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
-                      ● Notified (Not Coming)
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {offDays.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="py-6 text-center text-muted-foreground">
-                    All students are attending mess today!
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
       {/* Edit Meal Modal */}
       {editMealModal && (

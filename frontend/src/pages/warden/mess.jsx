@@ -30,7 +30,7 @@ const Route = createFileRoute("/warden/mess")({
 function WardenMessManagement() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
-  const [activeTab, setActiveTab] = useState("menu"); // "menu", "rebates", "feedback", "inventory"
+  const [activeTab, setActiveTab] = useState("menu"); // "menu", "feedback", "inventory"
 
   // Modals state
   const [editMenuModal, setEditMenuModal] = useState(null); // { day, mealType, text }
@@ -59,15 +59,7 @@ function WardenMessManagement() {
     fetchData();
   }, []);
 
-  const handleUpdateRebateStatus = async (id, status) => {
-    try {
-      await messApi.updateRebateStatus(id, status);
-      toast.success(`Mess rebate request ${status}`);
-      fetchData();
-    } catch (err) {
-      toast.error(err?.message || "Failed to update rebate status");
-    }
-  };
+
 
   const handleSaveMenu = async (e) => {
     e.preventDefault();
@@ -128,13 +120,13 @@ function WardenMessManagement() {
     { label: "Today's Meals", value: String(stats.todayMealsServed), delta: "Breakfast, Lunch, Dinner", trend: "up", icon: UtensilsCrossed, tint: "#2563EB" },
     { label: "Mess Residents", value: String(stats.totalStudentsEnrolled), delta: "Active subscribers", trend: "up", icon: Users, tint: "#7B4CED" },
     { label: "Turnout Rate", value: String(stats.attendanceRate), delta: "Dining attendance", trend: "up", icon: TrendingUp, tint: "#22C55E" },
-    { label: "Pending Off-Days", value: String(stats.pendingRebatesCount), delta: "Requests to review", trend: "down", icon: Clock, tint: "#F97316" },
+
     { label: "Food Rating", value: `${stats.avgRating} / 5.0`, delta: "Student reviews", trend: "up", icon: Star, tint: "#EAB308" },
     { label: "Stock Alerts", value: String(stats.lowStockCount), delta: "Below min threshold", trend: "down", icon: Package, tint: "#EF4444" }
   ];
 
   const weeklyMenu = data?.menu || [];
-  const rebates = data?.rebates || [];
+
 
   const feedback = data?.feedback || [];
   const inventory = data?.inventory || [];
@@ -150,7 +142,7 @@ function WardenMessManagement() {
             <UtensilsCrossed className="h-7 w-7 text-primary" /> Mess & Dining Management
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Monitor weekly meal menus, mess attendance, student rebate applications, ration stock, and food quality ratings.
+            Monitor weekly meal menus, ration stock, and food quality ratings.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -174,7 +166,7 @@ function WardenMessManagement() {
           <div className="flex items-center gap-2 border-b border-border overflow-x-auto pb-1 scrollbar-none">
             {[
               { id: "menu", label: "Weekly Meal Menu", icon: Calendar, badge: null },
-              { id: "rebates", label: "Mess Off-Day Notifications", icon: Clock, badge: `${rebates.length} Not Coming` },
+
 
               { id: "feedback", label: "Food Quality & Ratings", icon: Star, badge: null }
             ].map((tab) => {
@@ -327,61 +319,7 @@ function WardenMessManagement() {
             </div>
           )}
 
-          {/* Tab 2: Mess Off-Day Notifications */}
-          {activeTab === "rebates" && (
-            <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-border pb-3">
-                <div>
-                  <h3 className="text-base font-semibold text-foreground">Student Mess Off-Day Notifications</h3>
-                  <p className="text-xs text-muted-foreground">List of students who notified they will not be attending mess meals</p>
-                </div>
-                <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2 shadow-xs">
-                  <span className="text-xs font-medium text-amber-800">Total Not Coming Today:</span>
-                  <span className="text-sm font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-md">
-                    {rebates.length} Students
-                  </span>
-                </div>
-              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="border-b border-border bg-muted/50 text-muted-foreground">
-                    <tr>
-                      <th className="p-3 font-semibold">Student Name</th>
-                      <th className="p-3 font-semibold">Room</th>
-                      <th className="p-3 font-semibold">Off-Day Period</th>
-                      <th className="p-3 font-semibold">Total Days</th>
-                      <th className="p-3 font-semibold">Reason / Note</th>
-                      <th className="p-3 font-semibold text-right">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {rebates.map((r) => (
-                      <tr key={r.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="p-3 font-medium text-foreground">{r.studentName}</td>
-                        <td className="p-3 text-muted-foreground">{r.room}</td>
-                        <td className="p-3 text-muted-foreground">{r.startDate} → {r.endDate}</td>
-                        <td className="p-3 font-medium text-foreground">{r.totalDays} Days</td>
-                        <td className="p-3 text-muted-foreground max-w-xs truncate">{r.reason}</td>
-                        <td className="p-3 text-right">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
-                            ● Notified (Not Coming)
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {rebates.length === 0 && (
-                      <tr>
-                        <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                          All students are attending mess today (0 off-days logged)
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
 
 
 

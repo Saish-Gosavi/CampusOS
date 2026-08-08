@@ -301,12 +301,7 @@ export const messApi = {
   async updateMenu(day, mealType, menuText) {
     return apiClient.put("/hostel/mess/menu", { day, mealType, menuText });
   },
-  async getRebates() {
-    return apiClient.get("/hostel/mess/rebates");
-  },
-  async updateRebateStatus(id, status) {
-    return apiClient.put(`/hostel/mess/rebates/${id}/status`, { status });
-  },
+
   async getAttendance() {
     return apiClient.get("/hostel/mess/attendance");
   },

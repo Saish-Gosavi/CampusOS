@@ -10,12 +10,7 @@ let weeklyMenu = [
   { day: "Sunday", breakfast: "Masala Dosa, Sambhar, Chutney", lunch: "Special Feast: Veg/Non-Veg Thali, Sweet, Juice", snacks: "Pav Bhaji, Cold Drinks", dinner: "Roti, Rice, Dal Fry, Mix Veg, Fruit Custard" },
 ];
 
-let messRebates = [
-  { id: 1, studentId: 101, studentName: "Rahul Sharma", room: "A-204", startDate: "2026-08-01", endDate: "2026-08-05", totalDays: 5, perDayRate: 120, totalAmount: 600, reason: "Home Visit during Semester Break", status: "pending", createdAt: "2026-07-30" },
-  { id: 2, studentId: 104, studentName: "Ananya Roy", room: "B-108", startDate: "2026-08-03", endDate: "2026-08-07", totalDays: 4, perDayRate: 120, totalAmount: 480, reason: "Medical Leave", status: "pending", createdAt: "2026-08-01" },
-  { id: 3, studentId: 110, studentName: "Vikas Verma", room: "A-312", startDate: "2026-07-25", endDate: "2026-07-28", totalDays: 3, perDayRate: 120, totalAmount: 360, reason: "Educational Conference", status: "approved", createdAt: "2026-07-22" },
-  { id: 4, studentId: 115, studentName: "Sneha Patel", room: "B-302", startDate: "2026-07-20", endDate: "2026-07-22", totalDays: 2, perDayRate: 120, totalAmount: 240, reason: "Family Event", status: "rejected", createdAt: "2026-07-18" },
-];
+
 
 let messAttendance = [
   { id: 101, studentName: "Rahul Sharma", rollNo: "ST2024-001", room: "A-204", mealType: "Breakfast", scanTime: "08:15 AM", status: "Present" },
@@ -47,7 +42,7 @@ export class MessRepository {
     const todayMealsServed = 420;
     const totalStudentsEnrolled = 142;
     const attendanceRate = "94%";
-    const pendingRebatesCount = messRebates.filter(r => r.status === "pending").length;
+
     const lowStockCount = messInventory.filter(i => i.status !== "Optimal").length;
     const avgRating = (messFeedback.reduce((acc, f) => acc + f.rating, 0) / messFeedback.length).toFixed(1);
 
@@ -55,7 +50,7 @@ export class MessRepository {
       todayMealsServed,
       totalStudentsEnrolled,
       attendanceRate,
-      pendingRebatesCount,
+
       lowStockCount,
       avgRating
     };
@@ -73,17 +68,7 @@ export class MessRepository {
     return weeklyMenu;
   }
 
-  static async getRebates() {
-    return messRebates;
-  }
 
-  static async updateRebateStatus(id, status) {
-    const rebate = messRebates.find(r => r.id === Number(id));
-    if (rebate) {
-      rebate.status = status;
-    }
-    return rebate;
-  }
 
   static async getAttendance() {
     return messAttendance;

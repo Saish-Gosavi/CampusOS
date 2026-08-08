@@ -10,8 +10,7 @@ router.use(authenticate);
 router.get("/dashboard", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getDashboard);
 router.get("/menu", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getMenu);
 router.put("/menu", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.updateMenu);
-router.get("/rebates", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getRebates);
-router.put("/rebates/:id/status", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.updateRebateStatus);
+
 router.get("/attendance", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getAttendance);
 router.get("/feedback", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getFeedback);
 router.get("/inventory", authorize("superadmin", "senioradmin", "admin", "warden"), MessController.getInventory);

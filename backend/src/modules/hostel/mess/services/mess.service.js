@@ -4,7 +4,7 @@ export class MessService {
   static async getMessDashboard() {
     const stats = await MessRepository.getStats();
     const menu = await MessRepository.getMenu();
-    const rebates = await MessRepository.getRebates();
+
     const attendance = await MessRepository.getAttendance();
     const feedback = await MessRepository.getFeedback();
     const inventory = await MessRepository.getInventory();
@@ -12,7 +12,7 @@ export class MessService {
     return {
       stats,
       menu,
-      rebates,
+
       attendance,
       feedback,
       inventory
@@ -27,13 +27,7 @@ export class MessService {
     return MessRepository.updateMenu(day, mealType, menuText);
   }
 
-  static async getRebates() {
-    return MessRepository.getRebates();
-  }
 
-  static async updateRebateStatus(id, status) {
-    return MessRepository.updateRebateStatus(id, status);
-  }
 
   static async getAttendance() {
     return MessRepository.getAttendance();

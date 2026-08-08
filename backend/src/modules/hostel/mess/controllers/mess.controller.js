@@ -30,25 +30,7 @@ export class MessController {
     }
   }
 
-  static async getRebates(req, res, next) {
-    try {
-      const rebates = await MessService.getRebates();
-      return apiResponse.success(res, rebates, "Mess rebate requests retrieved");
-    } catch (error) {
-      next(error);
-    }
-  }
 
-  static async updateRebateStatus(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { status } = req.body;
-      const updated = await MessService.updateRebateStatus(id, status);
-      return apiResponse.success(res, updated, `Rebate request marked as ${status}`);
-    } catch (error) {
-      next(error);
-    }
-  }
 
   static async getAttendance(req, res, next) {
     try {
